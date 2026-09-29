@@ -1,0 +1,35 @@
+# Only the game, its runtime assets and its build/deploy configuration are published.
+/*
+!/.gitignore
+!/README.md
+!/index.html
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vite.config.ts
+!/src/
+!/public/
+!/.github/
+
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/deploy.yml
+
+# Local documentation and working files never belong in the published repository.
+docs/
+*.md
+*.mdx
+*.rst
+*.pdf
+!/README.md
+*.log
+*.local
+.env
+.env.*
+.DS_Store
+node_modules/
+dist/
+tmp/
+test-results/
+playwright-report/

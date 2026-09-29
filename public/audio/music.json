@@ -1,0 +1,23 @@
+{
+  "menu": {
+    "file": "music/menu.wav",
+    "loopStart": 1.5,
+    "loopEnd": 74.53349206349206,
+    "gain": 0.18,
+    "revision": "b8dad1bfc4a57c06"
+  },
+  "editor": {
+    "file": "music/editor.wav",
+    "loopStart": 2,
+    "loopEnd": 104.77349206349206,
+    "gain": 0.135,
+    "revision": "6e83fb703f89f252"
+  },
+  "results": {
+    "file": "music/results.wav",
+    "loopStart": 0.5,
+    "loopEnd": 59.57349206349206,
+    "gain": 0.155,
+    "revision": "9ea651f9e664e6b5"
+  }
+}

@@ -1,0 +1,322 @@
+[
+  {
+    "id": "land-0-0",
+    "file": "land-0-0.wav",
+    "loop": false
+  },
+  {
+    "id": "land-0-1",
+    "file": "land-0-1.wav",
+    "loop": false
+  },
+  {
+    "id": "land-0-2",
+    "file": "land-0-2.wav",
+    "loop": false
+  },
+  {
+    "id": "land-1-0",
+    "file": "land-1-0.wav",
+    "loop": false
+  },
+  {
+    "id": "land-1-1",
+    "file": "land-1-1.wav",
+    "loop": false
+  },
+  {
+    "id": "land-1-2",
+    "file": "land-1-2.wav",
+    "loop": false
+  },
+  {
+    "id": "land-2-0",
+    "file": "land-2-0.wav",
+    "loop": false
+  },
+  {
+    "id": "land-2-1",
+    "file": "land-2-1.wav",
+    "loop": false
+  },
+  {
+    "id": "land-2-2",
+    "file": "land-2-2.wav",
+    "loop": false
+  },
+  {
+    "id": "crash-0",
+    "file": "crash-0.wav",
+    "loop": false
+  },
+  {
+    "id": "crash-1",
+    "file": "crash-1.wav",
+    "loop": false
+  },
+  {
+    "id": "crash-2",
+    "file": "crash-2.wav",
+    "loop": false
+  },
+  {
+    "id": "scrape-0",
+    "file": "scrape-0.wav",
+    "loop": false
+  },
+  {
+    "id": "scrape-1",
+    "file": "scrape-1.wav",
+    "loop": false
+  },
+  {
+    "id": "engine-idle",
+    "file": "engine-idle.wav",
+    "loop": true
+  },
+  {
+    "id": "engine-mid",
+    "file": "engine-mid.wav",
+    "loop": true
+  },
+  {
+    "id": "engine-high",
+    "file": "engine-high.wav",
+    "loop": true
+  },
+  {
+    "id": "roll-dirt",
+    "file": "roll-dirt.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-dirt",
+    "file": "touch-dirt.wav",
+    "loop": false
+  },
+  {
+    "id": "roll-mud",
+    "file": "roll-mud.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-mud",
+    "file": "touch-mud.wav",
+    "loop": false
+  },
+  {
+    "id": "roll-grass",
+    "file": "roll-grass.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-grass",
+    "file": "touch-grass.wav",
+    "loop": false
+  },
+  {
+    "id": "roll-wet",
+    "file": "roll-wet.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-wet",
+    "file": "touch-wet.wav",
+    "loop": false
+  },
+  {
+    "id": "roll-snow",
+    "file": "roll-snow.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-snow",
+    "file": "touch-snow.wav",
+    "loop": false
+  },
+  {
+    "id": "bump",
+    "file": "bump.wav",
+    "loop": false
+  },
+  {
+    "id": "jump",
+    "file": "jump.wav",
+    "loop": false
+  },
+  {
+    "id": "wind",
+    "file": "wind.wav",
+    "loop": true
+  },
+  {
+    "id": "air",
+    "file": "air.wav",
+    "loop": true
+  },
+  {
+    "id": "ui-select",
+    "file": "ui-select.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-confirm",
+    "file": "ui-confirm.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-back",
+    "file": "ui-back.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-error",
+    "file": "ui-error.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-open",
+    "file": "ui-open.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-close",
+    "file": "ui-close.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-place",
+    "file": "ui-place.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-move",
+    "file": "ui-move.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-remove",
+    "file": "ui-remove.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-duplicate",
+    "file": "ui-duplicate.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-undo",
+    "file": "ui-undo.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-redo",
+    "file": "ui-redo.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-saved",
+    "file": "ui-saved.wav",
+    "loop": false
+  },
+  {
+    "id": "ui-imported",
+    "file": "ui-imported.wav",
+    "loop": false
+  },
+  {
+    "id": "countdown",
+    "file": "countdown.wav",
+    "loop": false
+  },
+  {
+    "id": "start",
+    "file": "start.wav",
+    "loop": false
+  },
+  {
+    "id": "overheat",
+    "file": "overheat.wav",
+    "loop": false
+  },
+  {
+    "id": "cool",
+    "file": "cool.wav",
+    "loop": false
+  },
+  {
+    "id": "recovered",
+    "file": "recovered.wav",
+    "loop": false
+  },
+  {
+    "id": "recovery",
+    "file": "recovery.wav",
+    "loop": false
+  },
+  {
+    "id": "turbo",
+    "file": "turbo.wav",
+    "loop": false
+  },
+  {
+    "id": "lap",
+    "file": "lap.wav",
+    "loop": false
+  },
+  {
+    "id": "last-lap",
+    "file": "last-lap.wav",
+    "loop": false
+  },
+  {
+    "id": "finish",
+    "file": "finish.wav",
+    "loop": false
+  },
+  {
+    "id": "dnf",
+    "file": "dnf.wav",
+    "loop": false
+  },
+  {
+    "id": "record",
+    "file": "record.wav",
+    "loop": false
+  },
+  {
+    "id": "victory",
+    "file": "victory.wav",
+    "loop": false
+  },
+  {
+    "id": "podium",
+    "file": "podium.wav",
+    "loop": false
+  },
+  {
+    "id": "crowd",
+    "file": "crowd.wav",
+    "loop": true
+  },
+  {
+    "id": "cheer-0",
+    "file": "cheer-0.wav",
+    "loop": false
+  },
+  {
+    "id": "cheer-1",
+    "file": "cheer-1.wav",
+    "loop": false
+  },
+  {
+    "id": "cheer-2",
+    "file": "cheer-2.wav",
+    "loop": false
+  },
+  {
+    "id": "rain",
+    "file": "rain.wav",
+    "loop": true
+  }
+]
