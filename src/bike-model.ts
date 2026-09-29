@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { BIKE, bikePose, type GroundHeight } from './bike-pose';
+import { BIKE, bikePose, crashPose, type GroundHeight } from './bike-pose';
 import rigDefinition from './bike-rig.json';
 
 export type BikeQuality = 'high' | 'low';
@@ -15,6 +15,13 @@ export interface BikeVisualState {
   readonly recovery: boolean;
   readonly ground: GroundHeight;
   readonly reducedMotion?: boolean;
+  readonly laneMotion?: number;
+  readonly lane?: number;
+  readonly crashPhase?: 'none' | 'rolling' | 'down' | 'mounting';
+  readonly crashPhaseAge?: number;
+  readonly crashRollDuration?: number;
+  readonly crashKind?: 'impact' | 'backflip';
+  readonly crashStartTilt?: number;
 }
 
 const requiredNodes = [
@@ -24,6 +31,8 @@ const requiredNodes = [
   'TaillightAnchor',
   'RearWheel',
   'FrontWheel',
+  'Handlebar',
+  'FrontFender',
   'Swingarm',
   'RiderRig',
   'Rider',
@@ -129,6 +138,7 @@ interface BoneBinding {
 export class Bike {
   readonly root = new THREE.Group();
   readonly body = new THREE.Group();
+  readonly riderLayer = new THREE.Group();
   readonly headlight = new THREE.SpotLight('#f5f1df', 0, 10, 0.48, 0.7, 2);
   private readonly lightMount = new THREE.Group();
   readonly variants: Record<BikeQuality, THREE.Group>;
@@ -136,6 +146,7 @@ export class Bike {
   private nodes!: Record<string, THREE.Object3D>;
   private readonly variantBindings: Record<BikeQuality, Record<string, BoneBinding>>;
   private readonly variantNodes: Record<BikeQuality, Record<string, THREE.Object3D>>;
+  private readonly variantRiders: Record<BikeQuality, THREE.Object3D>;
   private readonly ownedMaterials: THREE.Material[] = [];
   quality: BikeQuality;
   wheels: THREE.Object3D[] = [];
@@ -148,6 +159,7 @@ export class Bike {
   private previousSpeed = 0;
   private previousGrounded: boolean | null = null;
   private acceleration = 0;
+  private steering = 0;
   private lastState: BikeVisualState | null = null;
   private appearance = '';
   private ghost = false;
@@ -171,7 +183,7 @@ export class Bike {
       }
       return copy;
     };
-    for (const variant of Object.values(this.variants))
+    for (const variant of [...Object.values(this.variants), ...Object.values(this.variantRiders)])
       variant.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return;
         if (!this.originals.has(object)) this.originals.set(object, object.material);
@@ -192,11 +204,12 @@ export class Bike {
     // Keep the light outside the blinking model so the renderer's light count stays fixed.
     this.lightMount.matrixAutoUpdate = false;
     this.lightMount.add(this.headlight, this.headlight.target);
-    this.root.add(this.body, this.lightMount);
+    this.root.add(this.body, this.riderLayer, this.lightMount);
     this.quality = quality;
     this.variants = {} as Record<BikeQuality, THREE.Group>;
     this.variantBindings = {} as Record<BikeQuality, Record<string, BoneBinding>>;
     this.variantNodes = {} as Record<BikeQuality, Record<string, THREE.Object3D>>;
+    this.variantRiders = {} as Record<BikeQuality, THREE.Object3D>;
     for (const q of ['high', 'low'] as const) {
       const scene = clone(assets[q]) as THREE.Group;
       const colored = new Map<THREE.Material, THREE.Material>();
@@ -237,6 +250,8 @@ export class Bike {
       this.variants[q] = scene;
       this.variantBindings[q] = bindings;
       this.variantNodes[q] = nodes;
+      this.variantRiders[q] = nodes.RiderRig;
+      this.riderLayer.add(nodes.RiderRig);
       this.body.add(scene);
     }
     this.setQuality(quality);
@@ -247,6 +262,8 @@ export class Bike {
     this.quality = quality;
     this.variants.high.visible = quality === 'high';
     this.variants.low.visible = quality === 'low';
+    this.variantRiders.high.visible = quality === 'high';
+    this.variantRiders.low.visible = quality === 'low';
     this.nodes = this.variantNodes[quality];
     this.bindings = this.variantBindings[quality];
     this.wheels = [this.nodes.RearWheel, this.nodes.FrontWheel];
@@ -258,7 +275,14 @@ export class Bike {
 
   reset() {
     this.body.visible = true;
-    this.wheelAngle = this.compression = this.springVelocity = this.elapsed = this.acceleration = 0;
+    this.riderLayer.visible = true;
+    this.wheelAngle =
+      this.compression =
+      this.springVelocity =
+      this.elapsed =
+      this.acceleration =
+      this.steering =
+        0;
     this.previousSpeed = 0;
     this.previousGrounded = null;
     this.lastTime = null;
@@ -308,7 +332,14 @@ export class Bike {
         -0.025,
         0.055,
       );
-      if (!state.recovery) this.wheelAngle -= dt * state.speed * 10.5;
+      if (!state.recovery || state.crashPhase === 'rolling')
+        this.wheelAngle -= dt * state.speed * 10.5;
+      this.steering = THREE.MathUtils.damp(
+        this.steering,
+        state.recovery ? 0 : THREE.MathUtils.clamp(state.laneMotion ?? 0, -1, 1),
+        13,
+        dt,
+      );
     }
     this.previousGrounded = state.grounded;
     this.previousSpeed = state.speed;
@@ -342,13 +373,46 @@ export class Bike {
   }
 
   private applyPose(state: BikeVisualState) {
-    const pose = bikePose(state.tilt, state.grounded, state.ground);
-    this.body.position.set(pose.x, pose.y, 0);
-    this.body.rotation.set(0, 0, state.tilt);
+    const crashed = !!state.crashPhase && state.crashPhase !== 'none';
+    const pose = crashed
+      ? crashPose(
+          {
+            crashPhase: state.crashPhase!,
+            crashPhaseAge: state.crashPhaseAge ?? 0,
+            crashRollDuration: state.crashRollDuration ?? 40,
+            crashKind: state.crashKind ?? 'impact',
+            crashStartTilt: state.crashStartTilt ?? 0,
+            lane: state.lane ?? 1.5,
+          },
+          state.ground,
+          state.reducedMotion,
+        )
+      : null;
+    const riding = crashed ? null : bikePose(state.tilt, state.grounded, state.ground);
+    const lateralRoll = crashed ? 0 : this.steering * Math.min(1, state.speed / 2) * 0.14;
+    this.body.position.set(pose?.x ?? riding!.x, pose?.y ?? riding!.y, pose?.z ?? 0);
+    this.body.rotation.set(pose?.roll ?? lateralRoll, 0, pose?.pitch ?? state.tilt);
+    if (pose) {
+      this.riderLayer.position.set(pose.riderX, pose.riderY, pose.riderZ);
+      this.riderLayer.rotation.set(0, 0, pose.riderPitch);
+    } else {
+      this.riderLayer.position.copy(this.body.position);
+      this.riderLayer.rotation.copy(this.body.rotation);
+    }
     this.wheels.forEach((wheel) => {
       wheel.rotation.set(0, 0, this.wheelAngle);
     });
-    const suspension = this.compression;
+    const suspension = crashed ? 0 : this.compression;
+    const steer = crashed ? 0 : -this.steering * 0.21;
+    const steerPivot = new THREE.Vector3(0.324, 0.89 - suspension, 0);
+    const steered = (point: THREE.Vector3) =>
+      point.sub(steerPivot).applyAxisAngle(Y, steer).add(steerPivot);
+    this.nodes.Handlebar.position.copy(steerPivot);
+    this.nodes.Handlebar.rotation.y = steer;
+    this.nodes.FrontFender.position.copy(steerPivot);
+    this.nodes.FrontFender.rotation.y = steer;
+    this.nodes.FrontWheel.position.copy(steered(new THREE.Vector3(BIKE.frontX, BIKE.axleY, 0)));
+    this.nodes.FrontWheel.rotation.y = steer;
     this.nodes.Chassis.position.y = -suspension;
     // Follow the posed chassis in root coordinates, including while the model is hidden.
     this.nodes.Chassis.updateWorldMatrix(true, false);
@@ -361,12 +425,15 @@ export class Bike {
       [-1, 'R'],
       [1, 'L'],
     ] as const) {
-      const axle = new THREE.Vector3(BIKE.frontX, BIKE.axleY, side * 0.089);
-      const top = new THREE.Vector3(0.324, 0.89 - suspension, side * 0.089);
+      const axle = steered(new THREE.Vector3(BIKE.frontX, BIKE.axleY, side * 0.089));
+      const top = steered(new THREE.Vector3(0.324, 0.89 - suspension, side * 0.089));
       const joint = axle.clone().lerp(top, 0.47);
       this.segment(`ForkLower${suffix}`, axle, joint);
       this.segment(`ForkUpper${suffix}`, joint, top);
-      this.nodes[`ForkGuard${suffix}`].position.copy(axle).add(new THREE.Vector3(-0.011, 0.032, 0));
+      this.nodes[`ForkGuard${suffix}`].position.copy(
+        steered(new THREE.Vector3(BIKE.frontX - 0.011, BIKE.axleY + 0.032, side * 0.089)),
+      );
+      this.nodes[`ForkGuard${suffix}`].rotation.y = steer;
     }
     const pivot = new THREE.Vector3(-0.1, 0.407 - suspension, 0);
     const rear = new THREE.Vector3(BIKE.rearX, BIKE.axleY, 0);
@@ -424,7 +491,7 @@ export class Bike {
       const upper = rest[`UpperArm${suffix}`],
         fore = rest[`Forearm${suffix}`];
       const shoulder = onTorso(upper.head);
-      const hand = fore.tail.clone().add(new THREE.Vector3(0, -suspension, 0));
+      const hand = steered(fore.tail.clone().add(new THREE.Vector3(0, -suspension, 0)));
       const elbow = solveTwoBone(
         shoulder,
         hand,
@@ -463,7 +530,7 @@ export class Bike {
   dispose() {
     this.headlight.dispose();
     this.ownedMaterials.forEach((material) => material.dispose());
-    for (const variant of Object.values(this.variants)) {
+    for (const variant of Object.values(this.variantRiders)) {
       const skeletons = new Set<THREE.Skeleton>();
       variant.traverse((object) => {
         if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton);

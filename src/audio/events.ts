@@ -17,6 +17,7 @@ export class AudioEvents {
     number,
     {
       recovery: number;
+      crashPhase: Race['riders'][number]['crashPhase'];
       turbo: boolean;
       wheelie: number;
       pieceX?: number;
@@ -82,6 +83,15 @@ export class AudioEvents {
       const position =
         p.id === 0 ? { gain: 1, pan: 0 } : relativeSound(p.x, r.riders[0].x, r.track.length);
       if (previous && r.phase === 'racing') {
+        if (p.crashPhase === 'rolling' && p.crashAge > 0 && p.crashAge % 15 === 0)
+          out.push({
+            id: `scrape-${variation(r.frame, p.id, 2) as 0 | 1}`,
+            gain: 0.055 * position.gain,
+            pan: position.pan,
+            priority: 1,
+          });
+        if (previous.crashPhase === 'down' && p.crashPhase === 'mounting')
+          out.push({ id: 'bump', gain: 0.07 * position.gain, pan: position.pan, priority: 1 });
         if (previous.recovery > 0 && p.recovery === 0 && p.id === 0)
           out.push({ id: 'recovery', gain: 0.14, priority: 2 });
         if (!previous.turbo && p.turbo && p.id === 0)
@@ -110,6 +120,7 @@ export class AudioEvents {
       }
       this.riders.set(p.id, {
         recovery: p.recovery,
+        crashPhase: p.crashPhase,
         turbo: p.turbo,
         wheelie: p.wheelie,
         pieceX: s?.x,

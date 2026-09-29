@@ -1,0 +1,39 @@
+{
+  "title": "MOTONETA",
+  "debug": false,
+  "servedUnderSubdirectory": true,
+  "errors": [],
+  "failures": [],
+  "layout": [
+    {
+      "width": 1440,
+      "height": 900,
+      "brand": {
+        "x": 32,
+        "y": 13,
+        "width": 152,
+        "height": 44
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "brand": {
+        "x": 12,
+        "y": 3,
+        "width": 124,
+        "height": 36
+      }
+    },
+    {
+      "width": 640,
+      "height": 360,
+      "brand": {
+        "x": 12,
+        "y": 3,
+        "width": 124,
+        "height": 36
+      }
+    }
+  ]
+}

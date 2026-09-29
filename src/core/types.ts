@@ -68,6 +68,12 @@ export interface Rider {
   crashKind: 'impact' | 'backflip';
   crashAge: number;
   crashStartTilt: number;
+  crashPhase: 'none' | 'rolling' | 'down' | 'mounting';
+  crashPhaseAge: number;
+  crashRollDuration: number;
+  crashDownRemaining: number;
+  crashVelocity: number;
+  crashExitX: number | null;
 }
 export type RacePhase = 'countdown' | 'racing' | 'finished';
 export type GameEvent = {

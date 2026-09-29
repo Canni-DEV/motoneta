@@ -7,7 +7,7 @@ import {
   type Settings,
 } from './core/types';
 import { isWeather } from './core/weather';
-import { SETTINGS_KEY } from './identity';
+import { GAME_ID, SETTINGS_KEY } from './identity';
 const read = (): unknown => {
   try {
     return JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? 'null');
@@ -24,6 +24,12 @@ export function writeSettings(value: Settings) {
   }
 }
 export function settings(): Settings {
+  // Old preferences belong to the ruleset that was intentionally reset.
+  try {
+    localStorage.removeItem(`${GAME_ID}.settings`);
+  } catch {
+    /* Storage can be unavailable in private browsing. */
+  }
   const s = read() as Partial<Settings> | null;
   const out = {
     ...defaultSettings,

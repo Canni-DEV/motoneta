@@ -19,14 +19,24 @@ export function crash(
 ) {
   if (p.recovery || (p.invincible && kind === 'impact')) return;
   const impactSpeed = Math.max(contactSpeed, p.speed);
+  const segment = segmentAt(r.track, p.x, p.lane);
+  const localX = ((p.x % r.track.length) + r.track.length) % r.track.length;
+  const elevated = segment && segment.profile.some((point) => point[1] > 0);
+  const exitX = elevated ? p.x + segment!.x + segment!.length - localX + 11 : null;
   p.crashKind = kind;
   p.crashAge = 0;
   p.crashStartTilt = p.tilt;
+  p.crashPhase = 'rolling';
+  p.crashPhaseAge = 0;
+  p.crashRollDuration =
+    exitX === null ? 40 : clamp(Math.ceil((exitX - p.x) / Math.max(1.8, p.speed)), 40, 84);
+  p.crashDownRemaining = 68;
+  p.crashVelocity = Math.max(0, p.speed);
+  p.crashExitX = exitX;
   p.wheelieVelocity = 0;
   p.turbo = false;
-  p.recovery = 108;
+  p.recovery = p.crashRollDuration + 68 + 22;
   p.crashes++;
-  p.speed = 0;
   p.vy = 0;
   p.grounded = true;
   p.height = heightAt(r.track, p.x, p.lane);
@@ -44,13 +54,42 @@ export function move(r: Race, p: Rider, input: number) {
   p.turbo = b && !p.overheated && !p.recovery;
   if (p.invincible) p.invincible--;
   if (p.recovery) {
-    p.recovery = Math.max(0, p.recovery - 1 - (edgeA ? 7 : 0));
     p.crashAge++;
-    const t = Math.min(1, p.crashAge / 24);
-    const fallenTilt = p.crashKind === 'backflip' ? 2.05 : -1.15;
-    p.tilt = q(p.crashStartTilt + (fallenTilt - p.crashStartTilt) * (1 - (1 - t) ** 2));
+    p.crashPhaseAge++;
     p.heat = Math.max(0, p.heat - 0.28);
-    if (!p.recovery) {
+    if (p.crashPhase === 'rolling') {
+      const remaining = p.crashRollDuration - p.crashPhaseAge + 1;
+      const needed = p.crashExitX === null ? 0 : Math.max(0, (p.crashExitX - p.x) / remaining);
+      p.crashVelocity = q(Math.max(p.crashVelocity * 0.96, needed));
+      p.speed = p.crashVelocity;
+      p.x = q(p.x + p.speed);
+      if (p.crashPhaseAge >= p.crashRollDuration && p.crashExitX !== null)
+        p.x = Math.max(p.x, p.crashExitX);
+      p.height = heightAt(r.track, p.x, p.lane);
+      if (p.crashPhaseAge >= p.crashRollDuration) {
+        p.crashPhase = 'down';
+        p.crashPhaseAge = 0;
+        p.crashVelocity = p.speed = 0;
+        p.tilt = 0;
+      }
+      p.recovery = p.crashRollDuration - p.crashAge + p.crashDownRemaining + 22;
+    } else if (p.crashPhase === 'down') {
+      p.crashDownRemaining = Math.max(
+        0,
+        p.crashDownRemaining - 1 - (p.crashPhaseAge > 16 && edgeA ? 18 : 0),
+      );
+      p.recovery = p.crashDownRemaining + 22;
+      if (!p.crashDownRemaining) {
+        p.crashPhase = 'mounting';
+        p.crashPhaseAge = 0;
+      }
+    } else if (p.crashPhase === 'mounting') {
+      p.recovery = Math.max(0, 22 - p.crashPhaseAge);
+    }
+    if (p.recovery <= 0) {
+      p.crashPhase = 'none';
+      p.crashPhaseAge = 0;
+      p.crashExitX = null;
       p.tilt = 0;
       p.wheelie = 0;
       p.wheelieVelocity = 0;

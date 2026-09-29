@@ -1,4 +1,4 @@
-# Only the game, its runtime assets and its build/deploy configuration are published.
+# Runtime files are tracked by default; development sources may be added explicitly.
 /*
 !/.gitignore
 !/README.md
@@ -16,7 +16,7 @@
 /.github/workflows/*
 !/.github/workflows/deploy.yml
 
-# Local documentation and working files never belong in the published repository.
+# Other local documentation and working files stay outside the repository.
 docs/
 *.md
 *.mdx

@@ -39,12 +39,16 @@ export function updateHud(r: Race, settings: Settings) {
   );
   text(
     'race-message',
-    p.recovery
-      ? `Pulsá ${keyLabel(settings.bindings.A)} repetidamente para levantarte`
-      : p.overheated
-        ? 'Motor caliente: esperá a que enfríe'
-        : p.wheelie > 0.9
-          ? `${keyLabel(settings.bindings.RIGHT)} para bajar la rueda`
-          : '',
+    p.crashPhase === 'rolling'
+      ? 'Caída: la moto sigue rodando'
+      : p.crashPhase === 'down'
+        ? `Pulsá ${keyLabel(settings.bindings.A)} repetidamente para levantarte`
+        : p.crashPhase === 'mounting'
+          ? 'Volviendo a la moto'
+          : p.overheated
+            ? 'Motor caliente: esperá a que enfríe'
+            : p.wheelie > 0.9
+              ? `${keyLabel(settings.bindings.RIGHT)} para bajar la rueda`
+              : '',
   );
 }
