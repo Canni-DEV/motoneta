@@ -27,27 +27,33 @@ test('steering and detached recovery render on desktop and mobile in both qualit
     world.mode = 'race';
     world.beginRace(race);
     (window as any).__animationReview = {
-      show(quality: 'high' | 'low', kind: 'steer' | 'down') {
+      show(quality: 'high' | 'low', kind: 'steer' | 'rolling' | 'down' | 'rise' | 'approach' | 'mount') {
         world.settings.quality = quality;
         world.applySettings();
+        world.zoomTarget = 4;
         if (kind === 'steer') {
           p.crashPhase = 'none'; p.recovery = 0; p.speed = 3;
           world.bikes[0].reset();
           world.previous = [{ x: p.x, lane: p.lane - 0.034, height: p.height, tilt: p.tilt,
             crashPhase: 'none', crashPhaseAge: 0 }];
         } else {
-          p.crashPhase = 'down'; p.crashPhaseAge = 24; p.crashAge = 64;
+          p.crashPhase = kind === 'rolling' ? 'rolling' : kind === 'down' ? 'down' : 'mounting';
+          p.crashPhaseAge = kind === 'rolling' ? 10 : kind === 'down' ? 24 : kind === 'rise' ? 4 : kind === 'approach' ? 12 : 20;
+          p.crashAge = 40 + p.crashPhaseAge;
           p.crashKind = 'impact'; p.crashRollDuration = 40; p.crashStartTilt = 0;
-          p.recovery = 66; p.speed = 0;
+          p.recovery = 66; p.speed = kind === 'rolling' ? 2 : 0;
           world.previous = [{ x: p.x, lane: p.lane, height: p.height, tilt: p.tilt,
-            crashPhase: 'down', crashPhaseAge: 24 }];
+            crashPhase: p.crashPhase, crashPhaseAge: p.crashPhaseAge }];
         }
-        for (let i = 1; i <= 22; i++) world.render(i / 60, race, false, 1);
+        for (let i = 1; i <= (kind === 'steer' ? 22 : 2); i++)
+          world.render(i / 60, race, false, 1);
         const bike = world.bikes[0];
         return {
           steer: bike.variants[quality].getObjectByName('Handlebar')!.rotation.y,
           lean: bike.body.rotation.x,
           separation: bike.riderLayer.position.distanceTo(bike.body.position),
+          riderRoll: bike.riderLayer.rotation.x,
+          riderPitch: bike.riderLayer.rotation.z,
         };
       },
       dispose() { world.dispose(); },
@@ -62,7 +68,14 @@ test('steering and detached recovery render on desktop and mobile in both qualit
       await page.screenshot({ path: `test-results/steer-${mobile ? 'mobile' : 'desktop'}-${quality}.png` });
       const down = await page.evaluate((q) => (window as any).__animationReview.show(q, 'down'), quality);
       expect(down.separation).toBeGreaterThan(0.8);
+      expect(Math.abs(down.riderPitch)).toBeGreaterThan(1.3);
       await page.screenshot({ path: `test-results/crash-${mobile ? 'mobile' : 'desktop'}-${quality}.png` });
+      for (const phase of ['rolling', 'rise', 'approach', 'mount'] as const) {
+        const pose = await page.evaluate(({ q, phase }) =>
+          (window as any).__animationReview.show(q, phase), { q: quality, phase });
+        expect(pose.separation).toBeGreaterThan(phase === 'mount' ? 0 : 0.3);
+        await page.screenshot({ path: `test-results/rider-${phase}-${mobile ? 'mobile' : 'desktop'}-${quality}.png` });
+      }
     }
   }
   await page.evaluate(() => (window as any).__animationReview.dispose());

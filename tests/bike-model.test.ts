@@ -131,6 +131,9 @@ describe('visual animation', () => {
     bike.update(state({ crashPhase: 'rolling', crashPhaseAge: 24, crashRollDuration: 40,
       crashKind: 'backflip', crashStartTilt: 1.4, lane: 0 }));
     expect(bike.riderLayer.position.distanceTo(bike.body.position)).toBeGreaterThan(0.4);
+    const hand = bike.rider.getObjectByName('HandL')!.getWorldPosition(new Vector3());
+    const grip = bike.body.localToWorld(new Vector3(0.35, 0.91, 0.222));
+    expect(hand.distanceTo(grip)).toBeGreaterThan(0.2);
     const rolling = snapshot(bike);
     bike.update(state({ time: 1 / 60, crashPhase: 'down', crashPhaseAge: 12, lane: 0 }));
     expect(snapshot(bike)).not.toEqual(rolling);
@@ -138,6 +141,82 @@ describe('visual animation', () => {
     bike.update(state({ time: 3 / 60 }));
     expect(bike.riderLayer.position.distanceTo(bike.body.position)).toBeLessThan(1e-6);
     bike.dispose();
+  });
+  it.each(['high', 'low'] as const)('%s keeps the fallen rider on flat ground and ramps', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality);
+    const riderMeshes = meshes(bike.rider).filter((mesh): mesh is SkinnedMesh => mesh instanceof SkinnedMesh);
+    const profiles = [
+      () => 0,
+      (x: number) => x * 0.3,
+      (x: number) => x < 0 ? 0 : x < 1 ? x * 0.65 : 0.65,
+    ];
+    for (const ground of profiles) {
+      for (const [crashPhase, crashPhaseAge] of [
+        ['rolling', 10], ['rolling', 24], ['rolling', 40],
+        ['down', 0], ['down', 24], ['mounting', 0],
+        ['mounting', 4], ['mounting', 8], ['mounting', 12],
+      ] as const) {
+        bike.update(state({ recovery: true, crashPhase, crashPhaseAge,
+          crashRollDuration: 40, lane: 2, ground }));
+        bike.root.updateMatrixWorld(true);
+        let lowest = Infinity;
+        for (const rider of riderMeshes) {
+          const vertices = rider.geometry.attributes.position;
+          for (let i = 0; i < vertices.count; i++) {
+            const vertex = rider.applyBoneTransform(i, new Vector3().fromBufferAttribute(vertices, i));
+            rider.localToWorld(vertex);
+            lowest = Math.min(lowest, vertex.y - ground(vertex.x));
+          }
+        }
+        expect(lowest).toBeGreaterThan(-0.02);
+        expect(lowest).toBeLessThan(0.09);
+      }
+    }
+    bike.dispose();
+  });
+  it('joins crash phases without a rider jump and preserves the pose across quality changes', () => {
+    const bike = new Bike(0xc91c32, assets);
+    const crashed = (crashPhase: BikeVisualState['crashPhase'], crashPhaseAge: number) =>
+      state({ recovery: true, crashPhase, crashPhaseAge, crashRollDuration: 40,
+        crashKind: 'impact', lane: 0, ground: (x) => Math.max(0, x) * 0.3 });
+    const head = () => bike.rider.getObjectByName('Head')!.getWorldPosition(new Vector3());
+    bike.update(crashed('rolling', 40));
+    const rollingPosition = bike.riderLayer.position.clone();
+    const rollingHead = head();
+    bike.update(crashed('down', 0));
+    expect(bike.riderLayer.position.distanceTo(rollingPosition)).toBeLessThan(0.001);
+    expect(head().distanceTo(rollingHead)).toBeLessThan(0.001);
+    bike.setQuality('low');
+    expect(bike.riderLayer.position.distanceTo(rollingPosition)).toBeLessThan(0.001);
+    expect(head().distanceTo(rollingHead)).toBeLessThan(0.001);
+    bike.update(crashed('mounting', 21));
+    const seatedPosition = bike.riderLayer.position.clone();
+    const seatedHead = head();
+    bike.update(state({ ground: (x) => Math.max(0, x) * 0.3 }));
+    expect(bike.riderLayer.position.distanceTo(seatedPosition)).toBeLessThan(0.05);
+    expect(head().distanceTo(seatedHead)).toBeLessThan(0.05);
+    bike.dispose();
+  });
+  it('derives the fallen rider pose from the crash frame rather than render history', () => {
+    const first = new Bike(0xc91c32, assets),
+      second = new Bike(0xc91c32, assets);
+    const falling = state({ time: 2, recovery: true, crashPhase: 'down',
+      crashPhaseAge: 24, lane: 3, ground: (x) => Math.max(0, x) * 0.25 });
+    first.update(falling);
+    for (let i = 0; i < 80; i++) second.update(state({ time: i / 60,
+      speed: i % 4, tilt: Math.sin(i / 10), laneMotion: i % 2 ? 1 : -1 }));
+    second.update(falling);
+    first.root.updateMatrixWorld(true);
+    second.root.updateMatrixWorld(true);
+    expect(second.riderLayer.position.distanceTo(first.riderLayer.position)).toBeLessThan(1e-6);
+    expect(second.riderLayer.rotation.toArray()).toEqual(first.riderLayer.rotation.toArray());
+    for (const name of ['Head', 'HandL', 'HandR', 'FootL', 'FootR']) {
+      const a = first.rider.getObjectByName(name)!.getWorldPosition(new Vector3());
+      const b = second.rider.getObjectByName(name)!.getWorldPosition(new Vector3());
+      expect(b.distanceTo(a)).toBeLessThan(1e-6);
+    }
+    first.dispose();
+    second.dispose();
   });
   it('keeps crash timing while reduced motion removes full spins and pause freezes the pose', () => {
     const bike = new Bike(0xc91c32, assets);

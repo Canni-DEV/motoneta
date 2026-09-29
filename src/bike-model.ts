@@ -46,6 +46,23 @@ const requiredNodes = [
   'Spring',
   ...Object.keys(rigDefinition),
 ];
+const RIDER_SUPPORTS = [
+  ['Head', 0.17],
+  ['Spine', 0.12],
+  ['Pelvis', 0.11],
+  ['UpperArmL', 0.09],
+  ['UpperArmR', 0.09],
+  ['ForearmL', 0.06],
+  ['ForearmR', 0.06],
+  ['HandL', 0.055],
+  ['HandR', 0.055],
+  ['ThighL', 0.085],
+  ['ThighR', 0.085],
+  ['ShinL', 0.07],
+  ['ShinR', 0.07],
+  ['FootL', 0.06],
+  ['FootR', 0.06],
+] as const;
 
 export function validateBikeAsset(scene: THREE.Group): THREE.Group {
   for (const name of requiredNodes) {
@@ -148,6 +165,8 @@ export class Bike {
   private readonly variantNodes: Record<BikeQuality, Record<string, THREE.Object3D>>;
   private readonly variantRiders: Record<BikeQuality, THREE.Object3D>;
   private readonly ownedMaterials: THREE.Material[] = [];
+  private readonly contactPoint = new THREE.Vector3();
+  private readonly inverseRoot = new THREE.Matrix4();
   quality: BikeQuality;
   wheels: THREE.Object3D[] = [];
   rider!: THREE.Object3D;
@@ -372,6 +391,20 @@ export class Bike {
     node.quaternion.setFromUnitVectors(Y, direction.normalize());
   }
 
+  /** Lift the posed rig until its helmet, body and limbs clear the local track profile. */
+  private riderSupportY(ground: GroundHeight) {
+    this.riderLayer.position.y = 0;
+    this.riderLayer.updateWorldMatrix(true, true);
+    const toRoot = this.inverseRoot.copy(this.root.matrixWorld).invert();
+    const point = this.contactPoint;
+    let floor = -Infinity;
+    for (const [name, radius] of RIDER_SUPPORTS) {
+      point.setFromMatrixPosition(this.nodes[name].matrixWorld).applyMatrix4(toRoot);
+      floor = Math.max(floor, ground(point.x) + radius - point.y);
+    }
+    return floor + 0.07;
+  }
+
   private applyPose(state: BikeVisualState) {
     const crashed = !!state.crashPhase && state.crashPhase !== 'none';
     const pose = crashed
@@ -392,13 +425,8 @@ export class Bike {
     const lateralRoll = crashed ? 0 : this.steering * Math.min(1, state.speed / 2) * 0.14;
     this.body.position.set(pose?.x ?? riding!.x, pose?.y ?? riding!.y, pose?.z ?? 0);
     this.body.rotation.set(pose?.roll ?? lateralRoll, 0, pose?.pitch ?? state.tilt);
-    if (pose) {
-      this.riderLayer.position.set(pose.riderX, pose.riderY, pose.riderZ);
-      this.riderLayer.rotation.set(0, 0, pose.riderPitch);
-    } else {
-      this.riderLayer.position.copy(this.body.position);
-      this.riderLayer.rotation.copy(this.body.rotation);
-    }
+    if (pose) this.riderLayer.rotation.set(pose.riderRoll, 0, pose.riderPitch);
+    else this.riderLayer.rotation.copy(this.body.rotation);
     this.wheels.forEach((wheel) => {
       wheel.rotation.set(0, 0, this.wheelAngle);
     });
@@ -457,21 +485,39 @@ export class Bike {
     );
 
     const airborne = !state.grounded && !state.recovery;
-    const lean = state.recovery ? 0 : THREE.MathUtils.clamp(state.tilt, -0.7, 1.1);
-    const hip = rest.Pelvis.head
+    const riderAcceleration = pose ? 0 : this.acceleration;
+    const lean =
+      state.recovery && !pose?.riderSeat ? 0 : THREE.MathUtils.clamp(state.tilt, -0.7, 1.1);
+    const rideWeight = pose ? Math.max(0, 1 - pose.riderCurl - pose.riderStand) : 1;
+    const rideHip = rest.Pelvis.head
       .clone()
       .add(
         new THREE.Vector3(
-          -0.025 * lean + this.acceleration * 0.003,
+          -0.025 * lean + riderAcceleration * 0.003,
           -suspension + (airborne ? 0.038 : 0) - Math.max(0, suspension - 0.016) * 0.4,
           0,
         ),
       );
-    const torsoDirection = rest.Spine.tail.clone().sub(rest.Spine.head);
-    torsoDirection.applyAxisAngle(
+    const fallHip = new THREE.Vector3(-0.22, 0.8, 0);
+    const standHip = new THREE.Vector3(-0.19, 0.86 + (pose?.riderStep ?? 0) * 0.018, 0);
+    const hip = rideHip
+      .multiplyScalar(rideWeight)
+      .addScaledVector(fallHip, pose?.riderCurl ?? 0)
+      .addScaledVector(standHip, pose?.riderStand ?? 0);
+    const rideTorso = rest.Spine.tail.clone().sub(rest.Spine.head);
+    rideTorso.applyAxisAngle(
       new THREE.Vector3(0, 0, 1),
-      -lean * 0.09 - (airborne ? 0.1 : 0) - this.acceleration * 0.012,
+      -lean * 0.09 - (airborne ? 0.1 : 0) - riderAcceleration * 0.012,
     );
+    const fallTorso = rest.Spine.tail
+      .clone()
+      .sub(rest.Spine.head)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), -0.48);
+    const standTorso = rest.Spine.tail.clone().sub(rest.Spine.head);
+    const torsoDirection = rideTorso
+      .multiplyScalar(rideWeight)
+      .addScaledVector(fallTorso, pose?.riderCurl ?? 0)
+      .addScaledVector(standTorso, pose?.riderStand ?? 0);
     const chest = hip.clone().add(torsoDirection);
     const spineDelta = new THREE.Quaternion().setFromUnitVectors(
       rest.Spine.tail.clone().sub(rest.Spine.head).normalize(),
@@ -485,13 +531,20 @@ export class Bike {
     const headDirection = rest.Head.tail
       .clone()
       .sub(rest.Head.head)
-      .applyAxisAngle(new THREE.Vector3(0, 0, 1), -lean * 0.18);
+      .applyAxisAngle(
+        new THREE.Vector3(0, 0, 1),
+        -lean * 0.18 * rideWeight - 0.32 * (pose?.riderCurl ?? 0),
+      );
     this.bone('Head', head, head.clone().add(headDirection));
     for (const suffix of ['R', 'L']) {
       const upper = rest[`UpperArm${suffix}`],
         fore = rest[`Forearm${suffix}`];
       const shoulder = onTorso(upper.head);
-      const hand = steered(fore.tail.clone().add(new THREE.Vector3(0, -suspension, 0)));
+      const side = suffix === 'L' ? 1 : -1;
+      const hand = steered(fore.tail.clone().add(new THREE.Vector3(0, -suspension, 0)))
+        .multiplyScalar(rideWeight)
+        .addScaledVector(new THREE.Vector3(0.12, 0.65, side * 0.24), pose?.riderCurl ?? 0)
+        .addScaledVector(new THREE.Vector3(-0.07, 0.67, side * 0.18), pose?.riderStand ?? 0);
       const elbow = solveTwoBone(
         shoulder,
         hand,
@@ -509,7 +562,15 @@ export class Bike {
       const thigh = rest[`Thigh${suffix}`],
         shin = rest[`Shin${suffix}`];
       const thighHead = thigh.head.clone().sub(rest.Pelvis.head).add(hip);
-      const ankle = shin.tail.clone().add(new THREE.Vector3(0, -suspension, 0));
+      const ankle = shin.tail
+        .clone()
+        .add(new THREE.Vector3(0, -suspension, 0))
+        .multiplyScalar(rideWeight)
+        .addScaledVector(new THREE.Vector3(-0.05, 0.42, side * 0.18), pose?.riderCurl ?? 0)
+        .addScaledVector(
+          new THREE.Vector3(-0.21 + side * (pose?.riderStep ?? 0) * 0.11, 0.4, side * 0.17),
+          pose?.riderStand ?? 0,
+        );
       const knee = solveTwoBone(
         thighHead,
         ankle,
@@ -525,6 +586,24 @@ export class Bike {
         ankle.clone().add(rest[`Foot${suffix}`].tail.clone().sub(rest[`Foot${suffix}`].head)),
       );
     }
+    if (pose) {
+      if (pose.riderSeat >= 1) this.riderLayer.position.copy(this.body.position);
+      else {
+        const orientedHip = hip.clone().applyEuler(this.riderLayer.rotation);
+        const groundX = pose.riderHipX - orientedHip.x;
+        const groundZ = pose.riderHipZ - orientedHip.z;
+        this.riderLayer.position.set(
+          THREE.MathUtils.lerp(groundX, this.body.position.x, pose.riderSeat),
+          0,
+          THREE.MathUtils.lerp(groundZ, this.body.position.z, pose.riderSeat),
+        );
+        const support = this.riderSupportY(state.ground);
+        this.riderLayer.position.y = Math.max(
+          support,
+          THREE.MathUtils.lerp(support, this.body.position.y, pose.riderSeat),
+        );
+      }
+    } else this.riderLayer.position.copy(this.body.position);
   }
 
   dispose() {

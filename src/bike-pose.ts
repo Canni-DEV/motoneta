@@ -55,29 +55,37 @@ export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced =
     y = Math.max(y, ground(x) - height + radius);
   }
   y += 0.025 + (rolling && !reduced ? 0.06 * Math.sin(Math.PI * progress) : 0);
-  const riderProgress = rolling
-    ? smooth(Math.min(1, progress * 2))
-    : mounting
-      ? 1 - smooth(progress)
-      : 1;
-  const riderX = -1.15 * riderProgress;
-  const standing = phase === 'down' ? smooth(state.crashPhaseAge / 20) : mounting ? 1 : 0;
-  const riderGroundY = ground(riderX) + 0.2 - standing * 0.55;
-  const ridingY = mounting ? bikePose(0, true, ground).y : 0;
+  // The rider lands early and then slides with the bike. The hip is the anchor:
+  // rotating around the model origin would sweep the helmet across other lanes.
+  const landing = rolling ? smooth(state.crashPhaseAge / 10) : 1;
+  const trailing = rolling ? smooth(state.crashPhaseAge / 12) : 1;
+  const getUp = mounting ? smooth(state.crashPhaseAge / 8) : 0;
+  const approach = mounting ? smooth((state.crashPhaseAge - 8) / 7) : 0;
+  // Age 21 is the last visible mounting frame; age 22 enters normal riding.
+  const seat = mounting ? smooth((state.crashPhaseAge - 15) / 6) : rolling ? 1 - landing : 0;
+  const riderCurl = mounting ? 1 - getUp : landing;
+  const riderStand = mounting ? getUp * (1 - seat) : 0;
+  const riderPitch = mounting ? -1.45 * (1 - getUp) : pitch * (1 - landing) - 1.45 * landing;
+  const riderRoll = mounting
+    ? side * 1.05 * (1 - getUp)
+    : roll * (1 - landing) + side * 1.05 * landing;
   return {
     x: 0,
     y,
     z,
     pitch,
     roll,
-    riderX,
-    riderY: rolling
-      ? ground(riderX) + 0.36
-      : mounting
-        ? riderGroundY + (ridingY - riderGroundY) * smooth(progress)
-        : riderGroundY,
-    riderZ: side * 0.46 * riderProgress,
-    riderPitch: rolling ? -0.8 * riderProgress : mounting ? 0 : -1.15 * (1 - standing),
+    riderHipX: mounting ? -1.18 + 0.99 * approach : -1.18 * trailing,
+    riderHipZ: side * 0.28 * (mounting ? 1 - approach : trailing),
+    riderPitch,
+    riderRoll,
+    riderCurl,
+    riderStand,
+    riderStep:
+      mounting && state.crashPhaseAge >= 8 && state.crashPhaseAge <= 15
+        ? Math.sin(Math.PI * approach)
+        : 0,
+    riderSeat: seat,
   };
 }
 
