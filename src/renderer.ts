@@ -533,8 +533,7 @@ export class World {
         lerp(prev?.height, p.height) * SCALE,
         (lerp(prev?.lane, p.lane) - 1.5) * LANE,
       );
-      b.root.visible =
-        b.root.visible && (!p.invincible || this.reduced || Math.floor(effectTime * 12) % 2 === 0);
+      b.body.visible = !p.invincible || this.reduced || Math.floor(effectTime * 12) % 2 === 0;
       const ground: GroundHeight = (x) =>
         heightAt(track, (b.root.position.x + x) / SCALE, b.root.position.z / LANE + 1.5) * SCALE -
         b.root.position.y;

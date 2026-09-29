@@ -130,6 +130,7 @@ export class Bike {
   readonly root = new THREE.Group();
   readonly body = new THREE.Group();
   readonly headlight = new THREE.SpotLight('#f5f1df', 0, 10, 0.48, 0.7, 2);
+  private readonly lightMount = new THREE.Group();
   readonly variants: Record<BikeQuality, THREE.Group>;
   private bindings!: Record<string, BoneBinding>;
   private nodes!: Record<string, THREE.Object3D>;
@@ -188,7 +189,10 @@ export class Bike {
   }
 
   constructor(color: number, assets: BikeAssets, quality: BikeQuality = 'high') {
-    this.root.add(this.body);
+    // Keep the light outside the blinking model so the renderer's light count stays fixed.
+    this.lightMount.matrixAutoUpdate = false;
+    this.lightMount.add(this.headlight, this.headlight.target);
+    this.root.add(this.body, this.lightMount);
     this.quality = quality;
     this.variants = {} as Record<BikeQuality, THREE.Group>;
     this.variantBindings = {} as Record<BikeQuality, Record<string, BoneBinding>>;
@@ -249,11 +253,11 @@ export class Bike {
     this.rider = this.nodes.RiderRig;
     this.headlight.position.copy(this.nodes.HeadlightAnchor.position);
     this.headlight.target.position.copy(this.nodes.HeadlightTarget.position);
-    this.nodes.Chassis.add(this.headlight, this.headlight.target);
     if (this.lastState) this.applyPose(this.lastState);
   }
 
   reset() {
+    this.body.visible = true;
     this.wheelAngle = this.compression = this.springVelocity = this.elapsed = this.acceleration = 0;
     this.previousSpeed = 0;
     this.previousGrounded = null;
@@ -346,6 +350,13 @@ export class Bike {
     });
     const suspension = this.compression;
     this.nodes.Chassis.position.y = -suspension;
+    // Follow the posed chassis in root coordinates, including while the model is hidden.
+    this.nodes.Chassis.updateWorldMatrix(true, false);
+    this.lightMount.matrix
+      .copy(this.root.matrixWorld)
+      .invert()
+      .multiply(this.nodes.Chassis.matrixWorld);
+    this.lightMount.matrixWorldNeedsUpdate = true;
     for (const [side, suffix] of [
       [-1, 'R'],
       [1, 'L'],
