@@ -8,17 +8,19 @@ Funciona como sitio estático: no necesita backend, cuentas ni servicios externo
 
 ## Jugar
 
-| Control | Acción |
-| --- | --- |
-| Z | Acelerar; pulsar repetidamente para recuperarse de una caída |
-| X | Turbo |
-| ↑ / ↓ | Cambiar de carril |
-| ← / → | Inclinar la moto |
-| Enter | Iniciar, pausar o continuar |
-| Escape | Pausar |
-| Rueda del mouse | Zoom de cámara |
+| Control         | Acción                                                                               |
+| --------------- | ------------------------------------------------------------------------------------ |
+| Z               | Acelerar; pulsar repetidamente después del rodado para levantarse y volver a la moto |
+| X               | Turbo                                                                                |
+| ↑ / ↓           | Cambiar de carril                                                                    |
+| ← / →           | Inclinar la moto                                                                     |
+| Enter           | Iniciar, pausar o continuar                                                          |
+| Escape          | Pausar                                                                               |
+| Rueda del mouse | Zoom de cámara                                                                       |
 
 También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y las zonas claras enfrían el motor.
+
+Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla. Al pasar a las reglas `motoneta-2`, los datos locales de la versión anterior se reinician (perfiles, pistas, marcas, sesiones, repeticiones y ajustes).
 
 ## Ejecutar localmente
 
@@ -64,8 +66,10 @@ La configuración sigue las guías de [Vite para GitHub Pages](https://vite.dev/
 - `public/`: assets que carga el juego, incluida la licencia de las fuentes.
 - `.github/workflows/deploy.yml`: compilación y publicación.
 - Archivos raíz: entrada HTML, configuración, dependencias fijadas, `.gitignore` y este README.
+- `tests/`, `scripts/` y `assets/motocross/`: pruebas, herramientas y fuentes del modelo agregadas explícitamente para revisar la implementación.
+- `docs/24-motoneta.md` y sus evidencias: documentación de trabajo de MotoNeta incluida en esta rama.
 
-La documentación de trabajo, capturas, pruebas, herramientas, archivos Blender y originales de audio se conservan localmente y quedan fuera de Git. `main` tiene un historial de publicación limpio. Las ramas locales anteriores conservan el historial de desarrollo: no usar `git push --all` ni `git push --mirror` para publicar este proyecto.
+El resto de la documentación de trabajo, capturas y originales de audio se conservan localmente y quedan fuera de Git. `main` tiene un historial de publicación limpio. Las ramas locales anteriores conservan el historial de desarrollo: no usar `git push --all` ni `git push --mirror` para publicar este proyecto.
 
 ## Créditos
 

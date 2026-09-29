@@ -139,7 +139,14 @@ export class World {
   zoomTarget = 1;
   reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   disposables: (THREE.BufferGeometry | THREE.Material)[] = [];
-  previous: { x: number; lane: number; height: number; tilt: number }[] = [];
+  previous: {
+    x: number;
+    lane: number;
+    height: number;
+    tilt: number;
+    crashPhase: Race['riders'][number]['crashPhase'];
+    crashPhaseAge: number;
+  }[] = [];
   private readonly onResize = () => this.resize();
   constructor(
     public canvas: HTMLCanvasElement,
@@ -385,7 +392,14 @@ export class World {
     this.bikes.forEach((bike) => bike.reset());
   }
   capture(r: Race) {
-    this.previous = r.riders.map((p) => ({ x: p.x, lane: p.lane, height: p.height, tilt: p.tilt }));
+    this.previous = r.riders.map((p) => ({
+      x: p.x,
+      lane: p.lane,
+      height: p.height,
+      tilt: p.tilt,
+      crashPhase: p.crashPhase,
+      crashPhaseAge: p.crashPhaseAge,
+    }));
   }
   beginRace(race: Race) {
     this.vfx.reset(race.track, race.seed);
@@ -534,6 +548,7 @@ export class World {
         (lerp(prev?.lane, p.lane) - 1.5) * LANE,
       );
       b.body.visible = !p.invincible || this.reduced || Math.floor(effectTime * 12) % 2 === 0;
+      b.riderLayer.visible = b.body.visible;
       const ground: GroundHeight = (x) =>
         heightAt(track, (b.root.position.x + x) / SCALE, b.root.position.z / LANE + 1.5) * SCALE -
         b.root.position.y;
@@ -544,6 +559,16 @@ export class World {
         tilt: lerp(prev?.tilt, p.tilt),
         grounded: p.grounded,
         recovery: p.recovery > 0,
+        lane: p.lane,
+        laneMotion: prev ? (p.lane - prev.lane) / 0.034 : 0,
+        crashPhase: p.crashPhase,
+        crashPhaseAge:
+          prev?.crashPhase === p.crashPhase
+            ? lerp(prev.crashPhaseAge, p.crashPhaseAge)
+            : p.crashPhaseAge,
+        crashRollDuration: p.crashRollDuration,
+        crashKind: p.crashKind,
+        crashStartTilt: p.crashStartTilt,
         ground,
         reducedMotion: this.reduced,
       });

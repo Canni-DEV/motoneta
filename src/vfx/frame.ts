@@ -1,4 +1,4 @@
-import { bikePose, BIKE } from '../bike-pose';
+import { bikePose, crashPose, BIKE } from '../bike-pose';
 import { heightAt, segmentAt } from '../core/tracks';
 import type { Race, Rider, GameEvent, Track, Weather } from '../core/types';
 import { SCALE, LANE } from './config';
@@ -22,6 +22,33 @@ export function effectAnchors(p: Readonly<Rider>, track: Track): EffectAnchors {
     y = p.height * SCALE,
     z = (p.lane - 1.5) * LANE;
   const ground = (dx: number) => heightAt(track, (x + dx) / SCALE, p.lane) * SCALE - y;
+  if (p.crashPhase !== 'none') {
+    const pose = crashPose(p, ground);
+    const c = Math.cos(pose.pitch),
+      s = Math.sin(pose.pitch),
+      cr = Math.cos(pose.roll),
+      sr = Math.sin(pose.roll);
+    const transform = (px: number, py: number, pz = 0): Point => {
+      const pitchedY = s * px + c * py;
+      return {
+        x: x + pose.x + c * px - s * py,
+        y: y + pose.y + cr * pitchedY - sr * pz,
+        z: z + pose.z + sr * pitchedY + cr * pz,
+      };
+    };
+    const rearAxle = transform(BIKE.rearX, BIKE.axleY),
+      frontAxle = transform(BIKE.frontX, BIKE.axleY);
+    const rear = { ...rearAxle, y: rearAxle.y - BIKE.radius };
+    const front = { ...frontAxle, y: frontAxle.y - BIKE.radius };
+    return {
+      rear,
+      front,
+      rearContact: rear.y <= heightAt(track, rear.x / SCALE, p.lane) * SCALE + 0.07,
+      frontContact: front.y <= heightAt(track, front.x / SCALE, p.lane) * SCALE + 0.07,
+      exhaust: transform(...EXHAUST_POINT),
+      engine: transform(...ENGINE_POINT),
+    };
+  }
   const pose = bikePose(p.tilt, p.grounded, ground);
   const c = Math.cos(p.tilt),
     s = Math.sin(p.tilt);

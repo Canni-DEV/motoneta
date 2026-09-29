@@ -1,0 +1,19 @@
+{
+  "generator": "scripts/build-motocross.py",
+  "blender": "5.0.0",
+  "coordinateSystem": "+X forward, +Y up, +Z left in game/glTF",
+  "assets": {
+    "low": {
+      "triangles": 7224,
+      "bytes": 303100,
+      "textures": 0,
+      "bones": 15
+    },
+    "high": {
+      "triangles": 16332,
+      "bytes": 584704,
+      "textures": 0,
+      "bones": 15
+    }
+  }
+}

@@ -447,6 +447,23 @@ export class VfxModel {
               1,
               p.speed,
             );
+        } else if (p.crashPhase === 'rolling' && p.speed > 0.2) {
+          const contact = {
+            x: p.anchors.engine.x,
+            y: heightAt(this.track, p.anchors.engine.x / SCALE, p.lane) * SCALE + 0.035,
+            z: p.anchors.engine.z,
+          };
+          this.emit(
+            contact,
+            material,
+            material === 'wet' ? 'water' : 'dust',
+            (14 * distanceFactor) / HZ,
+            0.65,
+            p.id,
+            116,
+            2,
+            p.speed,
+          );
         }
         if (p.overheated)
           this.emit(p.anchors.engine, material, 'steam', 17 / HZ, 0.7, p.id, 15, 1, p.speed);

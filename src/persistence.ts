@@ -35,11 +35,15 @@ export class GameStore {
   async open() {
     this.db?.close();
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, 1);
-      request.onupgradeneeded = () => {
+      const request = indexedDB.open(DATABASE_NAME, 2);
+      request.onupgradeneeded = (event) => {
         const db = request.result;
         if (!db.objectStoreNames.contains('data')) db.createObjectStore('data');
         if (!db.objectStoreNames.contains('replays')) db.createObjectStore('replays');
+        if (event.oldVersion > 0 && event.oldVersion < 2) {
+          request.transaction!.objectStore('data').clear();
+          request.transaction!.objectStore('replays').clear();
+        }
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);

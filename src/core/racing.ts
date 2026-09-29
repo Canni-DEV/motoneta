@@ -30,6 +30,12 @@ export function createRace(config: RaceConfig): Race {
     crashKind: 'impact',
     crashAge: 0,
     crashStartTilt: 0,
+    crashPhase: 'none',
+    crashPhaseAge: 0,
+    crashRollDuration: 0,
+    crashDownRemaining: 0,
+    crashVelocity: 0,
+    crashExitX: null,
   }));
   const r: Race = {
     config: c,
@@ -57,6 +63,12 @@ function random(r: Race) {
 }
 function ai(r: Race, p: Rider): number {
   const d = r.config.difficulty;
+  if (p.recovery) {
+    const period = d === 'easy' ? 10 : d === 'normal' ? 4 : 2;
+    return p.crashPhase === 'down' && p.crashPhaseAge >= 16 && r.elapsed % period === 0
+      ? Input.A
+      : 0;
+  }
   const period = d === 'easy' ? 45 : d === 'normal' ? 20 : 8;
   const look = d === 'easy' ? 70 : d === 'normal' ? 150 : 230;
   if (r.elapsed % period === p.id % period) {
@@ -93,8 +105,6 @@ function ai(r: Race, p: Rider): number {
     if (p.tilt < slope - tolerance) input |= Input.LEFT;
   }
   if (p.wheelie > 0.2) input |= Input.RIGHT;
-  if (p.recovery && r.elapsed % (d === 'easy' ? 10 : d === 'normal' ? 4 : 2) === 0)
-    input |= Input.A;
   return input;
 }
 const identity = (r: Race, id: number) => [r.config.player, ...r.config.bots][id].id;
@@ -126,14 +136,17 @@ export function stepRace(r: Race, input: number) {
     if (isFinished(r, p.id)) continue;
     move(r, p, p.id === 0 ? input : ai(r, p));
     const lap = clamp(Math.floor((p.x - START_X) / r.track.length), 0, r.track.laps);
-    if (lap > r.riderLaps[p.id].length) {
+    if (!p.recovery && lap > r.riderLaps[p.id].length) {
       r.riderLaps[p.id].push(r.elapsed);
       r.events.push({ type: 'lap', rider: p.id, frame: r.frame });
     }
-    if (p.x >= START_X + r.track.length * r.track.laps || r.elapsed >= r.limitTicks) {
+    if (
+      (!p.recovery && p.x >= START_X + r.track.length * r.track.laps) ||
+      r.elapsed >= r.limitTicks
+    ) {
       r.finishes.push({
         id: identity(r, p.id),
-        ticks: p.x >= START_X + r.track.length * r.track.laps ? r.elapsed : null,
+        ticks: !p.recovery && p.x >= START_X + r.track.length * r.track.laps ? r.elapsed : null,
         laps: [...r.riderLaps[p.id]],
         crashes: p.crashes,
       });

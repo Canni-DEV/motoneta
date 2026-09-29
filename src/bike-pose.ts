@@ -1,6 +1,93 @@
 /** Model-space dimensions shared by the model and the ground-contact solver. */
 export const BIKE = { rearX: -0.53, frontX: 0.57, axleY: 0.29, radius: 0.306 } as const;
 export type GroundHeight = (modelX: number) => number;
+export interface CrashPoseState {
+  crashPhase: 'none' | 'rolling' | 'down' | 'mounting';
+  crashPhaseAge: number;
+  crashRollDuration: number;
+  crashKind: 'impact' | 'backflip';
+  crashStartTilt: number;
+  lane: number;
+}
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+const smooth = (n: number) => {
+  const t = clamp01(n);
+  return t * t * (3 - 2 * t);
+};
+
+/** Shared analytic crash envelope for the rendered model and particle anchors. */
+export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced = false) {
+  const side = state.lane < 1.5 ? -1 : 1;
+  const phase = state.crashPhase;
+  const rolling = phase === 'rolling';
+  const mounting = phase === 'mounting';
+  const progress = rolling
+    ? clamp01(state.crashPhaseAge / Math.max(1, state.crashRollDuration))
+    : mounting
+      ? clamp01(state.crashPhaseAge / 22)
+      : 1;
+  const pitch =
+    rolling && !reduced
+      ? state.crashStartTilt * (1 - progress) +
+        (state.crashKind === 'backflip' ? 1 : -2) * Math.PI * 2 * progress
+      : 0;
+  const roll =
+    side * 1.15 * (rolling ? smooth((progress - 0.5) * 2) : mounting ? 1 - smooth(progress) : 1);
+  const z = side * 0.32 * (rolling ? smooth(progress) : mounting ? 1 - smooth(progress) : 1);
+  // Check the outer motorcycle envelope, not only the tire centers: a full flip
+  // must not bury the tank or fender inside a steep ramp.
+  const c = Math.cos(pitch),
+    s = Math.sin(pitch),
+    cr = Math.cos(roll),
+    sr = Math.sin(roll);
+  const points = [
+    [-0.53, 0.29, 0, 0.306],
+    [0.57, 0.29, 0, 0.306],
+    [-0.76, 0.75, -0.12, 0],
+    [0.81, 0.65, 0.12, 0],
+    [0.06, 0.4, -0.19, 0],
+    [0.32, 0.95, 0.2, 0],
+  ];
+  let y = 0;
+  for (const [px, py, pz, radius] of points) {
+    const x = c * px - s * py;
+    const height = cr * (s * px + c * py) - sr * pz;
+    y = Math.max(y, ground(x) - height + radius);
+  }
+  y += 0.025 + (rolling && !reduced ? 0.06 * Math.sin(Math.PI * progress) : 0);
+  // The rider lands early and then slides with the bike. The hip is the anchor:
+  // rotating around the model origin would sweep the helmet across other lanes.
+  const landing = rolling ? smooth(state.crashPhaseAge / 10) : 1;
+  const trailing = rolling ? smooth(state.crashPhaseAge / 12) : 1;
+  const getUp = mounting ? smooth(state.crashPhaseAge / 8) : 0;
+  const approach = mounting ? smooth((state.crashPhaseAge - 8) / 7) : 0;
+  // Age 21 is the last visible mounting frame; age 22 enters normal riding.
+  const seat = mounting ? smooth((state.crashPhaseAge - 15) / 6) : rolling ? 1 - landing : 0;
+  const riderCurl = mounting ? 1 - getUp : landing;
+  const riderStand = mounting ? getUp * (1 - seat) : 0;
+  const riderPitch = mounting ? -1.45 * (1 - getUp) : pitch * (1 - landing) - 1.45 * landing;
+  const riderRoll = mounting
+    ? side * 1.05 * (1 - getUp)
+    : roll * (1 - landing) + side * 1.05 * landing;
+  return {
+    x: 0,
+    y,
+    z,
+    pitch,
+    roll,
+    riderHipX: mounting ? -1.18 + 0.99 * approach : -1.18 * trailing,
+    riderHipZ: side * 0.28 * (mounting ? 1 - approach : trailing),
+    riderPitch,
+    riderRoll,
+    riderCurl,
+    riderStand,
+    riderStep:
+      mounting && state.crashPhaseAge >= 8 && state.crashPhaseAge <= 15
+        ? Math.sin(Math.PI * approach)
+        : 0,
+    riderSeat: seat,
+  };
+}
 
 function supportAt(x: number, ground: GroundHeight) {
   let y = -Infinity,

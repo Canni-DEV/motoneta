@@ -31,7 +31,8 @@ export const modeNames = {
   editor: 'Editor',
 };
 export function modeEmblem(name: string) {
-  return `<span class="mode-emblem" aria-hidden="true" style="--mode-emblem:url('${import.meta.env.BASE_URL}branding/mode-${name}.svg')"></span>`;
+  const image = new URL(`${import.meta.env.BASE_URL}branding/mode-${name}.svg`, document.baseURI);
+  return `<span class="mode-emblem" aria-hidden="true" style="--mode-emblem:url('${image.href}')"></span>`;
 }
 export function header(active: string, profiles: PlayerProfile[], selected: string) {
   const profile = profiles.find((p) => p.id === selected);
