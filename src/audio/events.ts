@@ -113,7 +113,7 @@ export class AudioEvents {
         p.id === 0 &&
         !p.grounded &&
         !airborneCheer &&
-        p.height - heightAt(r.track, p.x, p.lane) > 16
+        p.height - heightAt(r.track, p.x, p.lane) > 48
       ) {
         airborneCheer = true;
         out.push({ id: 'cheer-0', gain: 0.08, priority: 0 });

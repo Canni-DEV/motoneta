@@ -1,6 +1,13 @@
 import { defaultAudioLevels, type AudioBus, type Settings } from '../core/types';
 import { busFor, type AudioCueId, type SoundRequest } from './catalog';
 import type { AudioBank } from './bank';
+function cheerEnvelope(elapsed: number, duration: number) {
+  if (elapsed <= 0 || elapsed >= duration) return 0;
+  const attack = Math.min(0.4, duration * 0.2);
+  const release = Math.min(1.4, duration * 0.55);
+  const progress = Math.min(1, elapsed / attack, (duration - elapsed) / release);
+  return progress * progress * (3 - 2 * progress);
+}
 export interface Voice {
   source: AudioBufferSourceNode;
   gain: GainNode;
@@ -17,6 +24,7 @@ export class AudioMixer {
   private retiring = new Set<Voice>();
   history: { id: AudioCueId; time: number }[] = [];
   private recent = new Map<string, number>();
+  private cheers = new Map<Voice, { start: number; duration: number }>();
   private compressor: DynamicsCompressorNode;
   private applied = false;
   constructor(
@@ -60,6 +68,7 @@ export class AudioMixer {
     pan = 0,
     priority = 1,
     delay = 0,
+    startAt = this.ctx.currentTime + delay,
   ): Voice | null {
     const buffer = this.bank.buffers.get(id);
     if (!buffer) return null;
@@ -72,9 +81,22 @@ export class AudioMixer {
     const source = this.ctx.createBufferSource(),
       g = this.ctx.createGain(),
       p = this.ctx.createStereoPanner();
+    const cheering = !looping && id.startsWith('cheer-');
     source.buffer = buffer;
     source.loop = looping;
-    g.gain.value = gain;
+    g.gain.value = cheering ? 0 : gain;
+    if (cheering) {
+      // The recordings end during active cheering. Fade into the existing
+      // stadium bed well before the WAV's short anti-click fade is reached.
+      g.gain.setValueAtTime(0, startAt);
+      for (let step = 1; step <= 64; step++) {
+        const elapsed = (buffer.duration * step) / 64;
+        g.gain.linearRampToValueAtTime(
+          gain * cheerEnvelope(elapsed, buffer.duration),
+          startAt + elapsed,
+        );
+      }
+    }
     p.pan.value = pan;
     const bus = busFor(id);
     source.connect(g);
@@ -87,6 +109,7 @@ export class AudioMixer {
       p.disconnect();
       this.voices.delete(voice);
       this.retiring.delete(voice);
+      this.cheers.delete(voice);
     };
     const voice: Voice = {
       source,
@@ -100,26 +123,43 @@ export class AudioMixer {
         stopped = true;
         // Ramp even a scheduled source to zero before stopping it.
         const t = this.ctx.currentTime;
+        const heldGain = g.gain.value;
         g.gain.cancelScheduledValues(t);
-        g.gain.setTargetAtTime(0, t, 0.006);
+        if (cheering && !immediate) {
+          g.gain.setValueAtTime(heldGain, t);
+          g.gain.linearRampToValueAtTime(0, t + 0.25);
+        } else g.gain.setTargetAtTime(0, t, 0.006);
         try {
-          source.stop(immediate ? t : t + 0.035);
+          source.stop(immediate ? t : t + (cheering ? 0.26 : 0.035));
         } catch {
           cleanup();
         }
         this.voices.delete(voice);
+        this.cheers.delete(voice);
         if (immediate) cleanup();
         else this.retiring.add(voice);
       },
     };
     source.onended = cleanup;
     this.voices.add(voice);
-    source.start(this.ctx.currentTime + delay);
+    if (cheering && gain > 0) this.cheers.set(voice, { start: startAt, duration: buffer.duration });
+    source.start(startAt);
     if (!looping) {
-      this.history.push({ id, time: this.ctx.currentTime + delay });
+      this.history.push({ id, time: startAt });
       if (this.history.length > 120) this.history.shift();
     }
     return voice;
+  }
+  crowdBedGain() {
+    let reaction = 0;
+    for (const cheer of this.cheers.values())
+      reaction = Math.max(
+        reaction,
+        cheerEnvelope(this.ctx.currentTime - cheer.start, cheer.duration),
+      );
+    // Keep the same uninterrupted crowd loop underneath the reaction. Make a
+    // little room at its peak, then restore the murmur as the cheer trails off.
+    return 1 - reaction * 0.18;
   }
   play(request: SoundRequest) {
     const now = this.ctx.currentTime;

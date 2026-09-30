@@ -1,0 +1,701 @@
+{
+  "version": 1,
+  "status": "audition-pending",
+  "sampleRate": 24000,
+  "originals": [
+    {
+      "file": "impactGeneric_light_000.ogg",
+      "sha256": "f0e982611e97512fee5f777986b67e8b435434b601f94992ec044f7e89fb5acb"
+    },
+    {
+      "file": "impactMetal_light_001.ogg",
+      "sha256": "fba69c467ddd85da7b1d82e259f936b876d9ba6a3d6f1b24bdd10468e46bfe08"
+    },
+    {
+      "file": "footstep_grass_000.ogg",
+      "sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f"
+    },
+    {
+      "file": "footstep_snow_000.ogg",
+      "sha256": "c05fa4a9dc9a7aabc04996466fb589537e49af76de9998d8f9e6270ec92dcef7"
+    },
+    {
+      "file": "impactSoft_heavy_000.ogg",
+      "sha256": "49e7ca88743fca974bb8676ea138b751cfd8f9033b5e7af8736c2a215d6edbc1"
+    },
+    {
+      "file": "impactSoft_medium_000.ogg",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3"
+    },
+    {
+      "file": "impactSoft_heavy_001.ogg",
+      "sha256": "4d0096364ba9e46119d2ff6df493fdc101bd2e1efae061da5e5f77a53b3fdcb6"
+    },
+    {
+      "file": "impactSoft_medium_001.ogg",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf"
+    },
+    {
+      "file": "impactSoft_heavy_002.ogg",
+      "sha256": "d130ae541951243d3f6ed963d0057450a445ffe117fbf9a084d34eb1635cb563"
+    },
+    {
+      "file": "impactSoft_medium_002.ogg",
+      "sha256": "5069e3571a77d7f7aae9ef71d0364aa245fb7d64a7c8cc9956f221d03088c089"
+    },
+    {
+      "file": "tick_001.ogg",
+      "sha256": "9d057b918024c787bbe6c00beed13a7ef72a3fa0c259add3cef36582792f4230"
+    },
+    {
+      "file": "select_001.ogg",
+      "sha256": "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a"
+    },
+    {
+      "file": "back_001.ogg",
+      "sha256": "07db973f79f6ae0f2edc34561e7592e24d0577455919fb602cb8ecc0da991dcf"
+    },
+    {
+      "file": "error_001.ogg",
+      "sha256": "46e67425d16339772e8d328fb36a49426c9467418686e11beeb71ff84b0f6433"
+    },
+    {
+      "file": "open_001.ogg",
+      "sha256": "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648"
+    },
+    {
+      "file": "close_001.ogg",
+      "sha256": "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4"
+    },
+    {
+      "file": "click_001.ogg",
+      "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9"
+    },
+    {
+      "file": "tick_002.ogg",
+      "sha256": "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b"
+    },
+    {
+      "file": "drop_001.ogg",
+      "sha256": "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af"
+    },
+    {
+      "file": "select_002.ogg",
+      "sha256": "4cc6ac5341b9b2c86fef80c347de028e9ab9f2e037586ac7d9fa59a403a1c012"
+    },
+    {
+      "file": "switch_001.ogg",
+      "sha256": "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa"
+    },
+    {
+      "file": "switch_002.ogg",
+      "sha256": "6fc395be2ad1f99ce318a5d28f98fb76dbeb676d83a0b28239d8c1fb90736180"
+    },
+    {
+      "file": "confirmation_001.ogg",
+      "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a"
+    },
+    {
+      "file": "confirmation_002.ogg",
+      "sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c"
+    },
+    {
+      "file": "Gregor Quendel - Crowd Cheering Sounds - 10 - Ambience.mp3",
+      "sha256": "1eea7277ed831fd38059f5b118c15b77a54ebd305dd3a8e797f9c67289a61ae9"
+    },
+    {
+      "file": "Gregor Quendel - Crowd Cheering Sounds - 05 - Soft cheering - I.mp3",
+      "sha256": "0b662b669767e25161319a44b19976294e98db746a7306965e082f499e22a9a6"
+    },
+    {
+      "file": "Gregor Quendel - Crowd Cheering Sounds - 06 - Soft cheering - II.mp3",
+      "sha256": "a756afcff10998f6640924d850ca333ef9aa2f2af8201b41d6b7632708711e78"
+    },
+    {
+      "file": "Gregor Quendel - Crowd Cheering Sounds - 04 - Strong cheering - II - Short.mp3",
+      "sha256": "10878a490dd3f1af7877a23c33baca143a3f86f91112c5dfb59dcf83cc94e975"
+    },
+    {
+      "file": "rain.mp3",
+      "sha256": "9b53203eb3d0804e6e64a9fefef673f1f899e6112545ff9f7c9a89c279c844b4"
+    }
+  ],
+  "assets": [
+    {
+      "id": "land-0-0",
+      "file": "land-0-0.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.16,
+      "bytes": 7724,
+      "sha256": "4be7bdf561d5ff2ab6bd2f46e58fee2d6ff343418161215766d653d12bebd813"
+    },
+    {
+      "id": "land-0-1",
+      "file": "land-0-1.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.16,
+      "bytes": 7724,
+      "sha256": "62d013506c8a0b2eab4d9aedb7ffcb7d324d18fb903951aff713244b7ca8b62d"
+    },
+    {
+      "id": "land-0-2",
+      "file": "land-0-2.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.16,
+      "bytes": 7724,
+      "sha256": "4ab68ea95d74991ffa1d6aab5b723bfa1ccccc2d0faff569baceb10de2456256"
+    },
+    {
+      "id": "land-1-0",
+      "file": "land-1-0.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.225,
+      "bytes": 10844,
+      "sha256": "a27756f130c56782798ea82b803c77befd5254e53afd6d62cc8a3d3eb308e338"
+    },
+    {
+      "id": "land-1-1",
+      "file": "land-1-1.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.225,
+      "bytes": 10844,
+      "sha256": "71af08cbed5cf3d03f4063fffbf3aa92ad1718bba1527b2fbbd5f21cc693510a"
+    },
+    {
+      "id": "land-1-2",
+      "file": "land-1-2.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.225,
+      "bytes": 10844,
+      "sha256": "7074ccda41f5a7596d9cfd681331faf2951ec8fe7c2e09ddb2ad08959b348fd9"
+    },
+    {
+      "id": "land-2-0",
+      "file": "land-2-0.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.29,
+      "bytes": 13964,
+      "sha256": "232897637382d985e834c022b3f004ca65b98222a97af55c1c13f51201e4dd49"
+    },
+    {
+      "id": "land-2-1",
+      "file": "land-2-1.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.29,
+      "bytes": 13964,
+      "sha256": "158cddd85d63136b00c81e870eb7b6f070b4a8b4ea04ccc6ab5e73a142f7f538"
+    },
+    {
+      "id": "land-2-2",
+      "file": "land-2-2.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.29,
+      "bytes": 13964,
+      "sha256": "15c7ced8aaf548d189dcce0658b4de498f00daee50e2e57743d94202cff8e760"
+    },
+    {
+      "id": "crash-0",
+      "file": "crash-0.wav",
+      "source": "Kenney Impact Sounds + original friction",
+      "loop": false,
+      "duration": 0.9,
+      "bytes": 43244,
+      "sha256": "92c4b2a70f560aa54e5562345272c9c9beef3548575f644d3997bfb655c78e58"
+    },
+    {
+      "id": "crash-1",
+      "file": "crash-1.wav",
+      "source": "Kenney Impact Sounds + original friction",
+      "loop": false,
+      "duration": 0.9,
+      "bytes": 43244,
+      "sha256": "fbfca72d0e06026618e16db6852641ec97ea87a5c4db1f7ade56f11c571bcc33"
+    },
+    {
+      "id": "crash-2",
+      "file": "crash-2.wav",
+      "source": "Kenney Impact Sounds + original friction",
+      "loop": false,
+      "duration": 0.9,
+      "bytes": 43244,
+      "sha256": "b1340139a77e6890d0737e4b1a5086393952ec9944b2a03754ef5b7b75d49a95"
+    },
+    {
+      "id": "scrape-0",
+      "file": "scrape-0.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.85,
+      "bytes": 40844,
+      "sha256": "b97e365c137aa9f3be86ea8f62e4bb339d10ef1683954bbf2fc57a9761af2d53"
+    },
+    {
+      "id": "scrape-1",
+      "file": "scrape-1.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.85,
+      "bytes": 40844,
+      "sha256": "f8b07f2892bc862c0e0c1ea25e9a9ed217750f2b7778e140e947c682e3791563"
+    },
+    {
+      "id": "engine-idle",
+      "file": "engine-idle.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 3.88,
+      "bytes": 186284,
+      "sha256": "8127f90ad0dee8f06a31afb07d6f9f5e35f5fecef2d7da33b2f50a9e612b1dd6"
+    },
+    {
+      "id": "engine-mid",
+      "file": "engine-mid.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.217125,
+      "bytes": 106466,
+      "sha256": "f1c22da50bb425fe4aa8a82b406caf72d0e3c8379f0faaf3d91d8761dd4d408e"
+    },
+    {
+      "id": "engine-high",
+      "file": "engine-high.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 1.4109166666666666,
+      "bytes": 67768,
+      "sha256": "5a720018273e3cd7b95b761f863d531951276874e654b72061f5ff29b76946a0"
+    },
+    {
+      "id": "roll-dirt",
+      "file": "roll-dirt.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "4952278546812da89bd6f0b27c321144643fcef45b337856595dcdf74cd97c43"
+    },
+    {
+      "id": "touch-dirt",
+      "file": "touch-dirt.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.15,
+      "bytes": 7244,
+      "sha256": "9c15d7276321dbb6d6a68d3d8d5892fdb5e03d0277839337828a5da0e7d79b1e"
+    },
+    {
+      "id": "roll-mud",
+      "file": "roll-mud.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "83e3e9fad7fcb92bdede86f080d8fad56291efc2c9080de6ad60abdd42188f99"
+    },
+    {
+      "id": "touch-mud",
+      "file": "touch-mud.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.15,
+      "bytes": 7244,
+      "sha256": "3cf1583d098c44063678fd4bf046e2762e197201218c68f9c42a5c606cc1df14"
+    },
+    {
+      "id": "roll-grass",
+      "file": "roll-grass.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "55b4815e14dafffb077367650f69c84fa5409496bfe0501c4e5635fe88ed1150"
+    },
+    {
+      "id": "touch-grass",
+      "file": "touch-grass.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.15,
+      "bytes": 7244,
+      "sha256": "46019811de09d9d32a4cf556e02931de8e6b7c04bd771e8b205ac98c9d6070a6"
+    },
+    {
+      "id": "roll-wet",
+      "file": "roll-wet.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "d7aaf5a5ab326f0c8127b0c260089aacbd8fe5c4fe0b70dee9a8397b13d289ed"
+    },
+    {
+      "id": "touch-wet",
+      "file": "touch-wet.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.15,
+      "bytes": 7244,
+      "sha256": "1eb9a60d8df9156e89e9ad1fe555801223d32740f95a5adde6c4941a54f8de34"
+    },
+    {
+      "id": "roll-snow",
+      "file": "roll-snow.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "78bb2d10a46e51d866dee0362e0101d6336f8e6435eee9ef203e74d8f4c91f60"
+    },
+    {
+      "id": "touch-snow",
+      "file": "touch-snow.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.15,
+      "bytes": 7244,
+      "sha256": "c87189d1e4c4acca0efb7d11fe48b237b822e615b159e3c15d6b16bddd01537c"
+    },
+    {
+      "id": "bump",
+      "file": "bump.wav",
+      "source": "original + Kenney Impact Sounds",
+      "loop": false,
+      "duration": 0.16,
+      "bytes": 7724,
+      "sha256": "a0b9ce0fe1a4ae43501c3430fa45344b5272ac1c460dfd8ca3828e936288f6a4"
+    },
+    {
+      "id": "jump",
+      "file": "jump.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.16,
+      "bytes": 7724,
+      "sha256": "8bcab7af295aa2b52481e2d398dc25ed7e92d52ec8ab45dea58142596b3af660"
+    },
+    {
+      "id": "wind",
+      "file": "wind.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "13939e77824e5b58140c060e7e283ad16c39d8b7d6f59bb37143dc9e6d2e2140"
+    },
+    {
+      "id": "air",
+      "file": "air.wav",
+      "source": "original",
+      "loop": true,
+      "duration": 2.96,
+      "bytes": 142124,
+      "sha256": "f025016ce095d650acf755719ad97d3d4a97577efc411a80e7d23fe65aa9cfe7"
+    },
+    {
+      "id": "ui-select",
+      "file": "ui-select.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.02175,
+      "bytes": 1088,
+      "sha256": "6bf5c8a01093fd7a4a71178a799af26bfdcc02ca9ba1ec0c9b62b5dfc7490263"
+    },
+    {
+      "id": "ui-confirm",
+      "file": "ui-confirm.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.040375,
+      "bytes": 1982,
+      "sha256": "cc03a57d4fab7b471787c26e48e328ab80b2fdcff0906d6a0ff118151c82db17"
+    },
+    {
+      "id": "ui-back",
+      "file": "ui-back.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.06095833333333334,
+      "bytes": 2970,
+      "sha256": "0943a4a53cf8c52694d0f96fe2aa867268c2b5ac177a206819b2af1881bed005"
+    },
+    {
+      "id": "ui-error",
+      "file": "ui-error.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.161625,
+      "bytes": 7802,
+      "sha256": "e76341dfaf794c9aa523219765d430de99a3483f0c62923b244b4d63066e6725"
+    },
+    {
+      "id": "ui-open",
+      "file": "ui-open.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.14775,
+      "bytes": 7136,
+      "sha256": "39b1d2ca366fd4b77166c3ebd39efe25e92bf61221529ec050e14cea902a7649"
+    },
+    {
+      "id": "ui-close",
+      "file": "ui-close.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.14775,
+      "bytes": 7136,
+      "sha256": "91f51a5be6f50b5c682599ff11e7d24e56deb6d3f189c8b6d7cb1e9e4af4105d"
+    },
+    {
+      "id": "ui-place",
+      "file": "ui-place.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.09708333333333333,
+      "bytes": 4704,
+      "sha256": "2fdeb69c03e6071c2e3fbdbb2baea96b8baec49e8abc9a2f4e4ed930f7e2746c"
+    },
+    {
+      "id": "ui-move",
+      "file": "ui-move.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.020291666666666666,
+      "bytes": 1018,
+      "sha256": "cfbd5fd96269c336a90a1781554aaa2a6a96498b264fa77895e3b9d91079fe1b"
+    },
+    {
+      "id": "ui-remove",
+      "file": "ui-remove.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.10883333333333334,
+      "bytes": 5268,
+      "sha256": "0ad12463feb0a05dc598a22ec496c38cb9acd56fde4cdaea53547d6435128c7b"
+    },
+    {
+      "id": "ui-duplicate",
+      "file": "ui-duplicate.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.040375,
+      "bytes": 1982,
+      "sha256": "e01f35d5dbce9582f7889be63a46799e8db1f2866836004e6d2ff225d38160e2"
+    },
+    {
+      "id": "ui-undo",
+      "file": "ui-undo.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.6,
+      "bytes": 28844,
+      "sha256": "a4e2ae8a294458920538f66d0e6053eb885e7b99af5b1d889572b2d53339e4ff"
+    },
+    {
+      "id": "ui-redo",
+      "file": "ui-redo.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.6,
+      "bytes": 28844,
+      "sha256": "3273c7ce0081ab4255751b04a11a2ef81c7ec1dc3cdba3df37a01ad282a3b77f"
+    },
+    {
+      "id": "ui-saved",
+      "file": "ui-saved.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.28983333333333333,
+      "bytes": 13956,
+      "sha256": "ff56d8eca215c9aedf62fef2dd41373a737637dfc1db36ec4596a18ce5a1c8e3"
+    },
+    {
+      "id": "ui-imported",
+      "file": "ui-imported.wav",
+      "source": "Kenney Interface Sounds",
+      "loop": false,
+      "duration": 0.539,
+      "bytes": 25916,
+      "sha256": "12282de0c948efec8909671d711fef43d8311865dd24333462973b864d753c45"
+    },
+    {
+      "id": "countdown",
+      "file": "countdown.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.255,
+      "bytes": 12284,
+      "sha256": "a13cd96c324e0e9331a2ae479cdd47531ce5e2b855949714812c785493db6b50"
+    },
+    {
+      "id": "start",
+      "file": "start.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "0ca78f72025db12afb560c03656c36916ba5ccf7428625ddd75bd7dabc6868fc"
+    },
+    {
+      "id": "overheat",
+      "file": "overheat.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "93ebc8e8cd60205058fcbf9aed3d8d097a9228599a0a97dbd454eb11d14d8e89"
+    },
+    {
+      "id": "cool",
+      "file": "cool.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "6fd7ecd22abd394ec665fe79746facae53c34e47f7aa3b49235c017318986d65"
+    },
+    {
+      "id": "recovered",
+      "file": "recovered.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "61503dff08b0ce7174041ae50859c3311899242485547acd9b4f2bb4f4ef7167"
+    },
+    {
+      "id": "recovery",
+      "file": "recovery.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "d34453e8849a4e1e2adcd98f82bc71227fa0fca5bfdbf681562a9960dffb7548"
+    },
+    {
+      "id": "turbo",
+      "file": "turbo.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "9ec3ca0f81c8f11f397f855b76d7ddc51a8d84f6d1dc5922054a1b2fe4a92030"
+    },
+    {
+      "id": "lap",
+      "file": "lap.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "78a19fa06b70207354671bfe5fd3460e335c813ac23723acad8d863ea27b3c24"
+    },
+    {
+      "id": "last-lap",
+      "file": "last-lap.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.465,
+      "bytes": 22364,
+      "sha256": "8e45da888cc2ae4c0bdf48c08a0755cb2bc1bcdfa4703d24158e152bafe8ae73"
+    },
+    {
+      "id": "finish",
+      "file": "finish.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.57,
+      "bytes": 27404,
+      "sha256": "77573fba02c510ed7754fd728732ac1c1e5bc3e216e89001a0b9642a2bc21e42"
+    },
+    {
+      "id": "dnf",
+      "file": "dnf.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.36,
+      "bytes": 17324,
+      "sha256": "929b0a93f6a6aa14d046fdd978e939680b6dfad07b2bdc0a740b8745b69728c1"
+    },
+    {
+      "id": "record",
+      "file": "record.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.465,
+      "bytes": 22364,
+      "sha256": "285a262401793838024519d91137a432510974520447a737e9b60c61fd9e23a8"
+    },
+    {
+      "id": "victory",
+      "file": "victory.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.6750416666666667,
+      "bytes": 32446,
+      "sha256": "636c72c3c3f5daace48d24b670a460afc8d5281a9e16ac091d5cfc636ea60605"
+    },
+    {
+      "id": "podium",
+      "file": "podium.wav",
+      "source": "original",
+      "loop": false,
+      "duration": 0.57,
+      "bytes": 27404,
+      "sha256": "2ade35dbcf90c576ea84cbec55de7782c65191bd892359ac86567698941ac18a"
+    },
+    {
+      "id": "crowd",
+      "file": "crowd.wav",
+      "source": "Gregor Quendel CC-BY-4.0",
+      "loop": true,
+      "duration": 11.88,
+      "bytes": 1140524,
+      "sha256": "fb7ee7b6c3805bcf8351954a64fa75f47e61f23d077f57584a2260ec6b03f849"
+    },
+    {
+      "id": "cheer-0",
+      "file": "cheer-0.wav",
+      "source": "Gregor Quendel CC-BY-4.0",
+      "loop": false,
+      "duration": 2.5,
+      "bytes": 240044,
+      "sha256": "b4c3c4e5a9bf46f2a4b61c61b8eaec48b56c27dcd1f72396c929b21a2d027fd3"
+    },
+    {
+      "id": "cheer-1",
+      "file": "cheer-1.wav",
+      "source": "Gregor Quendel CC-BY-4.0",
+      "loop": false,
+      "duration": 2.8,
+      "bytes": 268844,
+      "sha256": "d9ade8a217a9ca2c972df544aad6d08d6a3b3656a344843328d5ee5a4b885188"
+    },
+    {
+      "id": "cheer-2",
+      "file": "cheer-2.wav",
+      "source": "Gregor Quendel CC-BY-4.0",
+      "loop": false,
+      "duration": 3.5,
+      "bytes": 336044,
+      "sha256": "317b2e30059a1a8838c0250fc7a5247a5c7db06828899c6ded83c8615e1d33fe"
+    },
+    {
+      "id": "rain",
+      "file": "rain.wav",
+      "source": "Kresiek The Furry CC0",
+      "loop": true,
+      "duration": 9.88,
+      "bytes": 948524,
+      "sha256": "0fa0bd390253732472d65db35559b0c8a43f6d0ffd0425589469fb3316ee83d7"
+    }
+  ]
+}
