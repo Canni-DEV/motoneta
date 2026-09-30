@@ -4,6 +4,8 @@ export interface MusicTrack {
   loopStart: number;
   loopEnd: number;
   gain: number;
+  beatBpm?: number;
+  beatOffset?: number;
   revision?: string;
 }
 export type MusicScene = 'menu' | 'editor' | 'results';
@@ -12,7 +14,9 @@ export class MusicAudio {
   private manifest: Promise<MusicManifest> | null = null;
   private requested = '';
   private generation = 0;
-  private active: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private active: { source: AudioBufferSourceNode; gain: GainNode; track: MusicTrack; key: string; startedAt: number; offset: number } | null = null;
+  private paused: { key: string; offset: number } | null = null;
+  private buffers = new Map<string, AudioBuffer>();
   private retiring = new Set<AudioBufferSourceNode>();
   private fetchController: AbortController | null = null;
   private pending: Promise<void> = Promise.resolve();
@@ -23,16 +27,26 @@ export class MusicAudio {
     private base = import.meta.env.BASE_URL + 'audio/',
   ) {}
   setScene(scene: AudioScene, previewBoundary = false) {
-    const key = scene === 'menu' || scene === 'editor' || scene === 'results' ? scene : '';
+    const key = scene === 'cinematic' ? 'results' : scene === 'menu' || scene === 'editor' || scene === 'results' ? scene : '';
+    if (scene === 'pause' && this.active?.key === 'results') {
+      this.paused = { key: 'results', offset: this.playhead() };
+      this.requested = '';
+      this.generation++;
+      this.fadeOut();
+      this.status = 'paused';
+      return Promise.resolve();
+    }
     if (key === this.requested && !previewBoundary) return this.pending;
+    const resumeOffset = this.paused?.key === key ? this.paused.offset : null;
+    this.paused = null;
     this.requested = key;
     const generation = ++this.generation;
     this.fetchController?.abort();
     this.fadeOut();
     this.status = key ? 'loading' : 'silent';
-    return (this.pending = key ? this.load(key, generation, previewBoundary) : Promise.resolve());
+    return (this.pending = key ? this.load(key, generation, previewBoundary, resumeOffset) : Promise.resolve());
   }
-  private async load(key: keyof MusicManifest, generation: number, previewBoundary: boolean) {
+  private async load(key: keyof MusicManifest, generation: number, previewBoundary: boolean, resumeOffset: number | null) {
     try {
       this.manifest ??= fetch(this.base + 'music.json', { cache: 'no-cache' }).then((r) => {
         if (!r.ok) throw new Error('manifest');
@@ -46,14 +60,16 @@ export class MusicAudio {
       }
       if (!/^[\w./-]+$/.test(track.file) || track.file.includes('..'))
         throw new Error('invalid path');
-      const controller = new AbortController();
-      this.fetchController = controller;
-      const revision = track.revision ? '?v=' + encodeURIComponent(track.revision) : '';
-      const response = await fetch(this.base + track.file + revision, {
-        signal: controller.signal,
-      });
-      if (!response.ok) throw new Error('missing track');
-      const buffer = await this.ctx.decodeAudioData(await response.arrayBuffer());
+      let buffer = this.buffers.get(key);
+      if (!buffer) {
+        const controller = new AbortController();
+        this.fetchController = controller;
+        const revision = track.revision ? '?v=' + encodeURIComponent(track.revision) : '';
+        const response = await fetch(this.base + track.file + revision, { signal: controller.signal });
+        if (!response.ok) throw new Error('missing track');
+        buffer = await this.ctx.decodeAudioData(await response.arrayBuffer());
+        this.buffers.set(key, buffer);
+      }
       if (generation !== this.generation) return;
       if (
         !Number.isFinite(track.loopStart) ||
@@ -81,9 +97,10 @@ export class MusicAudio {
         source.buffer = null;
         this.retiring.delete(source);
       };
-      source.start(0, previewBoundary ? Math.max(track.loopStart, track.loopEnd - 3) : 0);
+      const offset = resumeOffset ?? (previewBoundary ? Math.max(track.loopStart, track.loopEnd - 3) : 0);
+      source.start(0, offset);
       gain.gain.setTargetAtTime(track.gain, this.ctx.currentTime, 0.25);
-      this.active = { source, gain };
+      this.active = { source, gain, track, key, startedAt: this.ctx.currentTime, offset };
       this.status = 'playing';
     } catch {
       if (generation === this.generation) this.status = 'unavailable';
@@ -104,8 +121,24 @@ export class MusicAudio {
     source.stop(this.ctx.currentTime + 0.45);
     this.retiring.add(source);
   }
+  private playhead() {
+    if (!this.active) return 0;
+    const { track, offset, startedAt } = this.active;
+    const elapsed = offset + Math.max(0, this.ctx.currentTime - startedAt);
+    return elapsed < track.loopEnd
+      ? elapsed
+      : track.loopStart + ((elapsed - track.loopEnd) % (track.loopEnd - track.loopStart));
+  }
+  beatDelay() {
+    const track = this.active?.track;
+    if (!track?.beatBpm || !Number.isFinite(track.beatBpm)) return null;
+    const period = 60 / track.beatBpm;
+    const phase = (((this.playhead() - (track.beatOffset ?? 0)) % period) + period) % period;
+    return Math.min(phase, period - phase);
+  }
   stop(immediate = false) {
     this.requested = '';
+    this.paused = null;
     this.generation++;
     this.fetchController?.abort();
     this.fadeOut();

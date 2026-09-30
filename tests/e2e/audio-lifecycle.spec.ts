@@ -2,6 +2,104 @@ import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { nav } from './ui-helpers';
 
+test('crowd reactions fade into the same stadium bed, including interrupted playback', async ({
+  page,
+}) => {
+  await requireAudio(page);
+  await page.goto('/');
+  const results = await page.evaluate(async () => {
+    const load = (path: string) => import(/* @vite-ignore */ path);
+    const [{ AudioMixer }, { AmbienceAudio }, { defaultSettings }] = await Promise.all([
+      load('/src/audio/mixer.ts'),
+      load('/src/audio/ambience.ts'),
+      load('/src/core/types.ts'),
+    ]);
+    const results = [];
+    for (const stopAt of [null, 3, 1]) {
+      const rate = 24000,
+        ctx = new OfflineAudioContext(2, rate * 7, rate);
+      const buffer = (seconds: number) => {
+        const b = ctx.createBuffer(2, seconds * rate, rate);
+        for (let channel = 0; channel < 2; channel++) b.getChannelData(channel).fill(1);
+        return b;
+      };
+      // Constant recordings expose the envelopes themselves: a hard edit,
+      // restart or loss of the ambient bed cannot hide behind sample variation.
+      const bank = {
+        buffers: new Map([
+          ['crowd', buffer(1)],
+          ['cheer-0', buffer(2.5)],
+        ]),
+      };
+      const mixer = new AudioMixer(ctx, bank),
+        ambience = new AmbienceAudio(mixer);
+      mixer.apply({ ...defaultSettings, volume: 1 });
+      ambience.update('race', 'clear', null);
+      const crowd = [...mixer.voices][0];
+      const cheer = mixer.play({ id: 'cheer-0', gain: 0.08, priority: 0, delay: 2 });
+      let stopped = false,
+        minimumBed = 1,
+        continuousBed = true;
+      const updates = [];
+      for (let step = 1; step < 140; step++) {
+        updates.push(
+          ctx.suspend(step * 0.05).then(() => {
+            if (stopAt !== null && !stopped && step * 0.05 >= stopAt) {
+              cheer.stop();
+              stopped = true;
+            }
+            ambience.update('race', 'clear', null);
+            minimumBed = Math.min(minimumBed, mixer.crowdBedGain());
+            continuousBed &&= mixer.voices.has(crowd);
+            return ctx.resume();
+          }),
+        );
+      }
+      const rendered = await ctx.startRendering();
+      await Promise.all(updates);
+      const pcm = rendered.getChannelData(0);
+      const average = (from: number, to: number) => {
+        let sum = 0;
+        for (let i = Math.floor(from * rate); i < Math.floor(to * rate); i++) sum += pcm[i];
+        return sum / ((to - from) * rate);
+      };
+      results.push({
+        stopAt,
+        continuousBed,
+        minimumBed,
+        restoredBed: mixer.crowdBedGain(),
+        voices: mixer.voices.size,
+        base: average(6, 6.1),
+        attack: average(2.02, 2.08),
+        body: average(2.6, 2.8),
+        afterStop: average(3.04, 3.1),
+        tail: average(4.4, 4.48),
+      });
+      mixer.dispose();
+    }
+    return results;
+  });
+  writeFileSync(
+    test.info().outputPath('crowd-levels.json'),
+    JSON.stringify(results, null, 2) + '\n',
+  );
+  for (const result of results) {
+    expect(result.continuousBed).toBe(true);
+    expect(result.minimumBed).toBeGreaterThanOrEqual(0.82 - 1e-6);
+    expect(result.restoredBed).toBe(1);
+    expect(result.voices).toBe(1);
+    expect(result.attack).toBeLessThan(result.base * 1.1);
+    // The bed's existing 300 ms smoothing may still be settling during the tail.
+    expect(result.tail).toBeGreaterThan(result.base * 0.95);
+    expect(result.tail).toBeLessThan(result.base * 1.1);
+  }
+  expect(results[0].body).toBeGreaterThan(results[0].base * 2);
+  expect(results[1].afterStop).toBeGreaterThan(results[1].base * 1.3);
+  // Cancelling a delayed reaction must not play or duck the ambience later.
+  expect(results[2].minimumBed).toBe(1);
+  expect(results[2].body).toBeCloseTo(results[2].base, 4);
+});
+
 async function requireAudio(page: Page) {
   const supported = await page.evaluate(
     () => typeof AudioContext !== 'undefined' && typeof OfflineAudioContext !== 'undefined',

@@ -24,6 +24,7 @@ export class GameAudio {
   private previewGeneration = 0;
   private previewStage: AudioScene | null = null;
   private demoTimers: ReturnType<typeof setTimeout>[] = [];
+  private slowMotion = false;
   constructor(public settings: Settings) {}
   async unlock(playMusic = true) {
     if (this.disposed || this.hidden) return;
@@ -74,11 +75,19 @@ export class GameAudio {
     this.scene = scene;
     this.epoch++;
     this.stopPreview();
-    if (scene !== 'race' && scene !== 'countdown') this.engines?.stop();
+    if (scene !== 'race' && scene !== 'countdown' && scene !== 'cinematic') this.engines?.stop();
     if (scene === 'pause' || scene === 'menu' || scene === 'editor' || previous === 'results')
       this.mixer?.stopWhere((v) => !v.loop && v.bus !== 'ui');
+    this.mixer?.setPresentation(scene === 'cinematic', this.slowMotion, this.settings);
     if (!this.hidden && this.ready) this.music?.setScene(scene);
   }
+  setSlowMotion(slow: boolean) {
+    if (this.slowMotion === slow) return;
+    this.slowMotion = slow;
+    this.mixer?.setPresentation(this.scene === 'cinematic', slow, this.settings);
+  }
+  beatDelay() { return this.music?.beatDelay() ?? null; }
+  get unlocked() { return this.ready && this.ctx?.state === 'running'; }
   update(r: Race | null, active: boolean) {
     if (!this.ready || this.hidden || this.previewing || this.disposed) return;
     if (active && r) {
@@ -97,7 +106,8 @@ export class GameAudio {
     this.stopPreview();
     this.engines?.stop();
     this.ambience?.stop();
-    this.music?.stop(true);
+    if (hidden && this.scene === 'cinematic') this.music?.setScene('pause');
+    if (this.music?.status !== 'paused') this.music?.stop(true);
     if (hidden) void this.ctx?.suspend().catch(() => {});
     else if (this.ctx)
       void this.ctx

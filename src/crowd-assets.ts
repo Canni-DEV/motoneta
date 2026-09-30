@@ -144,7 +144,7 @@ export function crowdMaterial(
   reduced: { value: number },
 ) {
   const material = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.92 });
-  material.customProgramCacheKey = () => 'stadium-baked-bones-v5-startle';
+  material.customProgramCacheKey = () => 'stadium-baked-bones-v6-perspective';
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, {
       crowdAnimation: { value: assets.animation },
@@ -236,8 +236,10 @@ export function crowdMaterial(
       'void main() {',
       `void main() {
       vec4 anchor = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(0.0,.8,0.0,1.0);
-      vec2 padding = vec2(projectionMatrix[0][0],projectionMatrix[1][1])*1.15;
-      if (abs(anchor.x) > 1.0+padding.x || abs(anchor.y) > 1.0+padding.y) {
+      // Homogeneous clip space: the visible edge is +/-w for a perspective camera.
+      // Two world units include the full standing/animated silhouette at screen edges.
+      vec2 padding = abs(vec2(projectionMatrix[0][0],projectionMatrix[1][1]))*2.0;
+      if (anchor.w > 0.0 && (abs(anchor.x) > anchor.w+padding.x || abs(anchor.y) > anchor.w+padding.y)) {
         gl_Position = vec4(2.0,2.0,2.0,1.0); return;
       }
     `,

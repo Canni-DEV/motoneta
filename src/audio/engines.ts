@@ -8,14 +8,33 @@ interface BikeVoices {
   material: string;
 }
 const engineIds = ['engine-idle', 'engine-mid', 'engine-high'] as const;
-const weightsFor = (rpm: number) => [
-  Math.max(0, 1 - rpm * 2),
-  1 - Math.abs(rpm * 2 - 1),
-  Math.max(0, rpm * 2 - 1),
-];
+const weightsFor = (rpm: number) => {
+  const blend = rpm * rpm * (3 - 2 * rpm);
+  // Broad, smooth overlap; correlated firing pulses need gains that sum to one.
+  return [(1 - blend) ** 2, 2 * blend * (1 - blend), blend ** 2];
+};
+// A single continuous firing rate through the original 32 / 56 / 88 Hz anchors.
+const rateFor = (rpm: number) => ((32 + 40 * rpm + 16 * rpm * rpm) / 32) * (0.85 + rpm * 0.35);
 export class EngineAudio {
   private bikes = new Map<number, BikeVoices>();
   constructor(private mixer: AudioMixer) {}
+  private createLayers(pan: number, rpm: number, detune: number, startAt: number) {
+    if (engineIds.some((id) => !this.mixer.bank.buffers.has(id))) return [];
+    const layers = engineIds.flatMap((id) => {
+      const v = this.mixer.create(id, true, 0, pan, 1, 0, startAt);
+      if (v) v.source.playbackRate.value = this.layerRate(v, rpm, detune);
+      return v ? [v] : [];
+    });
+    if (layers.length === 3) return layers;
+    layers.forEach((v) => v.stop());
+    return [];
+  }
+  private layerRate(voice: Voice, rpm: number, detune = 1) {
+    const reference = this.mixer.bank.buffers.get('engine-idle')!;
+    // Equal loop periods keep both firing irregularities and seams aligned,
+    // including the rounding to whole PCM frames when generating each WAV.
+    return rateFor(rpm) * (voice.source.buffer!.duration / reference.duration) * detune;
+  }
   update(r: Race, weather: Weather) {
     const t = this.mixer.ctx.currentTime;
     for (const p of r.riders.slice(0, 6)) {
@@ -25,22 +44,16 @@ export class EngineAudio {
         this.remove(p.id);
         continue;
       }
+      const throttle = p.turbo ? 1 : p.previousA ? 0.7 : 0;
+      const rpm = clamp((p.speed / 3.25) * 0.8 + throttle * 0.2 + (!p.grounded ? 0.12 : 0), 0, 1);
+      const detune = 1 + p.id * 0.012;
       let bike = this.bikes.get(p.id);
       if (!bike) {
-        if (engineIds.some((id) => !this.mixer.bank.buffers.has(id))) continue;
-        const layers = engineIds.flatMap((id) => {
-          const v = this.mixer.create(id, true, 0, position.pan);
-          return v ? [v] : [];
-        });
-        if (layers.length !== 3) {
-          layers.forEach((v) => v.stop());
-          continue;
-        }
+        const layers = this.createLayers(position.pan, rpm, detune, t + 0.02);
+        if (layers.length !== 3) continue;
         bike = { layers, rolling: null, material: '' };
         this.bikes.set(p.id, bike);
       }
-      const throttle = p.turbo ? 1 : p.previousA ? 0.7 : 0;
-      const rpm = clamp((p.speed / 3.25) * 0.8 + throttle * 0.2 + (!p.grounded ? 0.12 : 0), 0, 1);
       const weights = weightsFor(rpm);
       const recovery = p.recovery ? 0.18 : p.overheated ? 0.35 : 1;
       const race = r;
@@ -51,9 +64,9 @@ export class EngineAudio {
         v.gain.gain.setTargetAtTime(
           stopped ? 0 : (0.12 + throttle * 0.025) * position.gain * weights[i] * recovery,
           t,
-          0.06,
+          0.12,
         );
-        v.source.playbackRate.setTargetAtTime((0.85 + rpm * 0.35) * (1 + p.id * 0.012), t, 0.08);
+        v.source.playbackRate.setTargetAtTime(this.layerRate(v, rpm, detune), t, 0.12);
         v.pan.pan.setTargetAtTime(position.pan, t, 0.07);
       });
       const material = materialFor(segmentAt(r.track, p.x, p.lane)?.surface, weather);
@@ -67,7 +80,7 @@ export class EngineAudio {
       }
       if (bike.rolling) {
         bike.rolling.gain.gain.setTargetAtTime(
-          moving ? 0.045 * position.gain * clamp(p.speed / 3, 0, 1) : 0,
+          moving ? 0.0225 * position.gain * clamp(p.speed / 3, 0, 1) : 0,
           t,
           0.025,
         );
@@ -84,15 +97,13 @@ export class EngineAudio {
     this.bikes.delete(id);
   }
   preview() {
-    const t = this.mixer.ctx.currentTime;
-    engineIds.forEach((id, layer) => {
-      const v = this.mixer.create(id, true, 0);
-      if (!v) return;
+    const t = this.mixer.ctx.currentTime + 0.02;
+    this.createLayers(0, 0, 1, t).forEach((v, layer) => {
       for (let i = 0; i <= 100; i++) {
         const seconds = i / 20,
           rpm = seconds < 3 ? seconds / 3 : 1 - (seconds - 3) / 2;
         v.gain.gain.linearRampToValueAtTime(weightsFor(rpm)[layer] * 0.145, t + seconds);
-        v.source.playbackRate.linearRampToValueAtTime(0.85 + rpm * 0.35, t + seconds);
+        v.source.playbackRate.linearRampToValueAtTime(this.layerRate(v, rpm), t + seconds);
       }
     });
   }

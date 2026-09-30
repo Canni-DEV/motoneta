@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import manifest from '../assets/audio/manifest.json';
 import { landingLevel, materialFor, relativeSound } from '../src/audio/catalog';
 import { AudioEvents } from '../src/audio/events';
+import { EngineAudio } from '../src/audio/engines';
+import type { AudioMixer, Voice } from '../src/audio/mixer';
 import { stepRace } from '../src/core/racing';
 import { fingerprint } from '../src/core/simulation';
 import { getTrack } from '../src/core/tracks';
@@ -148,5 +150,106 @@ describe('distributed sound bank', () => {
             ) / 32768,
           ).toBeLessThan(0.001);
     }
+  });
+});
+
+describe('one continuous engine across RPM layers', () => {
+  const ids = ['engine-idle', 'engine-mid', 'engine-high'];
+  function fixture() {
+    let clock = 10;
+    const buffers = new Map(
+      ids.map((id) => {
+        const data = readFileSync(`public/audio/${id}.wav`);
+        return [id, { duration: (data.length - 44) / 2 / data.readUInt32LE(24) }];
+      }),
+    );
+    const voices: Voice[] = [];
+    const parameter = (value = 0) => ({
+      value,
+      setTargetAtTime: vi.fn(),
+      linearRampToValueAtTime: vi.fn(),
+    });
+    const create = vi.fn((id, _loop, _gain, pan, _priority, _delay, startAt) => {
+      const buffer = buffers.get(id);
+      if (!buffer) return null;
+      const voice = {
+        source: { buffer, playbackRate: parameter(1) },
+        gain: { gain: parameter() },
+        pan: { pan: parameter(pan) },
+        stop: vi.fn(),
+      } as unknown as Voice;
+      voices.push(voice);
+      // Model the audio clock moving while nodes are allocated. Every layer
+      // must still receive exactly the same future start time.
+      clock += 0.003;
+      expect(startAt).toBeGreaterThan(clock);
+      return voice;
+    });
+    const mixer = {
+      ctx: {
+        get currentTime() {
+          return clock;
+        },
+      },
+      bank: { buffers },
+      create,
+    } as unknown as AudioMixer;
+    return { engine: new EngineAudio(mixer), create, voices, buffers };
+  }
+  it('starts together, preserves loop phase while revving, and keeps broad overlap', () => {
+    const { engine, create, voices } = fixture();
+    const race = testRace(flat, 0);
+    race.riders[0].speed = 0;
+    engine.update(race, 'clear');
+    expect(voices).toHaveLength(3);
+    expect(new Set(create.mock.calls.map((call) => call[6])).size).toBe(1);
+    const initialPeriods = voices.map(
+      (v) => v.source.buffer!.duration / v.source.playbackRate.value,
+    );
+    initialPeriods.forEach((period) => expect(period).toBeCloseTo(initialPeriods[0], 12));
+    for (const rpm of [0.25, 0.5, 0.75, 1, 0]) {
+      race.riders[0].speed = (rpm * 3.25) / 0.8;
+      engine.update(race, 'clear');
+      const rates = voices.map(
+        (v) => vi.mocked(v.source.playbackRate.setTargetAtTime).mock.lastCall!,
+      );
+      const periods = rates.map(([rate], i) => voices[i].source.buffer!.duration / rate);
+      periods.forEach((period) => expect(period).toBeCloseTo(periods[0], 12));
+      rates.forEach(([, time, smoothing]) => {
+        expect(time).toBe(rates[0][1]);
+        expect(smoothing).toBe(rates[0][2]);
+      });
+      const gains = voices.map((v) => vi.mocked(v.gain.gain.setTargetAtTime).mock.lastCall![0]);
+      expect(gains.reduce((a, b) => a + b, 0)).toBeCloseTo(0.12, 12);
+      if (rpm === 0.5) gains.forEach((gain) => expect(gain).toBeGreaterThan(0.02));
+      voices.forEach((v) => expect(vi.mocked(v.pan.pan.setTargetAtTime).mock.lastCall![0]).toBe(0));
+    }
+    expect(voices).toHaveLength(3);
+    engine.stop();
+    voices.forEach((v) => expect(v.stop).toHaveBeenCalledOnce());
+  });
+  it('uses the same synchronized pitch curve in the audition', () => {
+    const { engine, create, voices } = fixture();
+    engine.preview();
+    expect(voices).toHaveLength(3);
+    expect(new Set(create.mock.calls.map((call) => call[6])).size).toBe(1);
+    const curves = voices.map(
+      (v) => vi.mocked(v.source.playbackRate.linearRampToValueAtTime).mock.calls,
+    );
+    expect(curves[0]).toHaveLength(101);
+    for (let step = 0; step < curves[0].length; step++) {
+      const period = voices[0].source.buffer!.duration / curves[0][step][0];
+      curves.forEach((curve, i) => {
+        expect(voices[i].source.buffer!.duration / curve[step][0]).toBeCloseTo(period, 12);
+        expect(curve[step][1]).toBe(curves[0][step][1]);
+      });
+    }
+  });
+  it('never starts a partial motor if a layer is missing', () => {
+    const { engine, create, buffers } = fixture();
+    buffers.delete('engine-high');
+    engine.preview();
+    engine.update(testRace(flat, 0), 'clear');
+    expect(create).not.toHaveBeenCalled();
   });
 });

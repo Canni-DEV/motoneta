@@ -76,7 +76,7 @@ export class WeatherEffects {
 
   update(
     dt: number,
-    camera: THREE.OrthographicCamera,
+    camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
     settings: Settings,
     rain: number,
     snow: number,
@@ -92,7 +92,7 @@ export class WeatherEffects {
     this.snow.visible = enabled && snow > 0.001;
     this.rain.material.opacity = rain * 0.48;
     this.snow.material.uniforms.opacity.value = snow * 0.8;
-    this.snow.material.uniforms.size.value = 3 * pixelRatio * camera.zoom;
+    this.snow.material.uniforms.size.value = 3 * pixelRatio * (camera instanceof THREE.OrthographicCamera ? camera.zoom : 1);
     const total = rain + snow;
     const rainCount = total ? Math.round((this.count * rain) / total) : 0;
     const snowCount = total ? this.count - rainCount : 0;

@@ -16,7 +16,14 @@ export class ShadowCoverage {
   private direction = new THREE.Vector3();
   private offset = new THREE.Vector3();
 
-  setView(camera: THREE.OrthographicCamera, top = 10) {
+  setView(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera, top = 10) {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      const reach = Math.min(camera.far, 85);
+      this.receivers.min.set(camera.position.x - reach, GROUND, BACK);
+      this.receivers.max.set(camera.position.x + reach, top, FRONT);
+      this.casters.copy(this.receivers);
+      return;
+    }
     camera.updateMatrixWorld();
     const e = this.view.multiplyMatrices(
       camera.projectionMatrix,

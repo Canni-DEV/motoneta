@@ -138,6 +138,7 @@ export interface Settings {
   bloom: boolean;
   cameraShake: boolean;
   reducedMotion: boolean;
+  attractReplays: boolean;
   bindings: Record<string, string>;
 }
 export type AudioBus = 'engines' | 'effects' | 'ambience' | 'ui' | 'music';
@@ -160,6 +161,7 @@ export const defaultSettings: Settings = {
   bloom: true,
   cameraShake: false,
   reducedMotion: false,
+  attractReplays: true,
   bindings: {
     A: 'KeyZ',
     B: 'KeyX',

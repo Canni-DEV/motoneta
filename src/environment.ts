@@ -301,7 +301,7 @@ export class Environment {
       })),
     };
   }
-  fitShadows(camera: THREE.OrthographicCamera, top: number) {
+  fitShadows(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera, top: number) {
     this.shadowCoverage.setView(camera, top);
     this.updateTrackLights(this.shadowCoverage.receivers);
     if (this.sun.castShadow) this.shadowCoverage.fit(this.sun);

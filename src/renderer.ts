@@ -23,6 +23,7 @@ import { type CrowdAssets } from './crowd-assets';
 import { VfxSystem } from './vfx/system';
 import { vfxSettings } from './vfx/config';
 import { StadiumFlags } from './vfx/flags';
+import { CinematicCamera } from './cinematic-camera';
 
 const SCALE = 0.052,
   LANE = 1.22;
@@ -112,6 +113,9 @@ function soilNoise() {
 export class World {
   scene = new THREE.Scene();
   camera = new THREE.OrthographicCamera();
+  cinematic: CinematicCamera | null = null;
+  beatDelay: number | null = null;
+  private renderPass!: RenderPass;
   renderer: THREE.WebGLRenderer;
   composer: EffectComposer;
   bloom: UnrealBloomPass;
@@ -209,7 +213,8 @@ export class World {
       this.scene.add(b.root);
     }
     this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.renderPass);
     this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.16, 0.5, 1.25);
     this.composer.addPass(this.bloom);
     this.grade = new ShaderPass({
@@ -478,6 +483,23 @@ export class World {
     this.camera.lookAt(lookX, lookY, 0);
     if (this.settings.cameraShake && !this.reduced)
       this.camera.position.y += this.vfx.model.cameraOffset(effectTime);
+    if (this.cinematic && race) {
+      const player = race.riders[0];
+      this.cinematic.update(
+        race,
+        {
+          x: focus,
+          y: lerp(this.previous[0]?.height, player.height) * SCALE,
+          z: (lerp(this.previous[0]?.lane, player.lane) - 1.5) * LANE,
+        },
+        visualDt,
+        aspect,
+        paused,
+        this.beatDelay,
+      );
+    }
+    const activeCamera = this.cinematic && race ? this.cinematic.camera : this.camera;
+    this.renderPass.camera = activeCamera;
     this.environment.update(
       effectsFrozen ? 0 : visualDt,
       focus,
@@ -487,7 +509,7 @@ export class World {
       this.reduced,
     );
     const shadowBounds = this.environment.fitShadows(
-      this.camera,
+      activeCamera,
       Math.max(
         10,
         ...(race?.riders.map((p, i) => lerp(this.previous[i]?.height, p.height) * SCALE + 2) ?? []),
@@ -502,7 +524,7 @@ export class World {
         wrapped + p.bounds.min.x <= shadowBounds.max.x;
     }
     this.stadium.update(
-      this.camera,
+      activeCamera,
       Math.min(0.15, visualDt),
       race,
       this.mode,
@@ -515,7 +537,7 @@ export class World {
     this.surfaces.update(this.environment.rainAmount, this.environment.snowAmount);
     this.weatherEffects.update(
       dt,
-      this.camera,
+      activeCamera,
       this.settings,
       this.environment.rainAmount,
       this.environment.snowAmount,
@@ -526,7 +548,7 @@ export class World {
       this.vfx.model.seed,
     );
     this.flags.update(
-      this.camera,
+      activeCamera,
       effectTime,
       this.vfx.model.seed,
       this.reduced || !vfxSettings(this.settings).ambient,
@@ -548,7 +570,7 @@ export class World {
         (lerp(prev?.lane, p.lane) - 1.5) * LANE,
       );
       b.body.visible = !p.invincible || this.reduced || Math.floor(effectTime * 12) % 2 === 0;
-      b.riderLayer.visible = b.body.visible;
+      b.riderLayer.visible = b.body.visible && !(i === 0 && this.cinematic?.currentShot === 'helmet');
       const ground: GroundHeight = (x) =>
         heightAt(track, (b.root.position.x + x) / SCALE, b.root.position.z / LANE + 1.5) * SCALE -
         b.root.position.y;
@@ -574,7 +596,7 @@ export class World {
       });
     }
     for (const bike of this.bikes) bike.setLighting(this.environment.lampLevel);
-    this.vfx.render(this.camera, race, focus, this.environment.fog, this.environment.timeOfDay);
+    this.vfx.render(activeCamera, race, focus, this.environment.fog, this.environment.timeOfDay);
     this.grade.uniforms.time.value = this.reduced ? 0 : effectTime % 100;
     this.renderer.info.reset();
     // Both profiles use the existing offscreen target and color-output pass. Rendering

@@ -50,7 +50,7 @@ export function settingsView(s: Settings, tab: SettingsTab = 'audio') {
       )
       .join(
         '',
-      )}<p class="muted">La música acompaña menús, editor y resultados. Durante la carrera se oyen las motos y el estadio.</p><div class="actions">${button('audio-preview', 'Probar mezcla')}${button('audio-stop', 'Detener prueba')}${button('audio-credits', 'Créditos de audio')}</div><a href="?audio-review" target="_blank" rel="noopener">Escuchar muestras por separado</a>`,
+      )}<p class="muted">La música acompaña menús, editor, resultados y repeticiones cinematográficas. En carreras normales se oyen las motos y el estadio.</p><div class="actions">${button('audio-preview', 'Probar mezcla')}${button('audio-stop', 'Detener prueba')}${button('audio-credits', 'Créditos de audio')}</div><a href="?audio-review" target="_blank" rel="noopener">Escuchar muestras por separado</a>`,
     image: `<h3>Imagen</h3><div class="form-grid">${select('quality', 'Calidad visual', s.quality, [
       ['high', 'Alta'],
       ['low', 'Rendimiento'],
@@ -64,7 +64,7 @@ export function settingsView(s: Settings, tab: SettingsTab = 'audio') {
       ['balanced', 'Equilibrada'],
       ['strong', 'Intensa'],
     ])}</div><p class="muted">El suelo detallado muestra humedad y nieve compactada. Ligero reduce sus variaciones sin cambiar huellas ni partículas.</p><p class="muted">El ambiente incluye lluvia, nieve, banderas y público. Reducir movimiento mantiene las huellas y detiene las animaciones.</p>`,
-    interface: `<h3>Interfaz</h3><label class="check"><input id="reducedMotion" type="checkbox" ${s.reducedMotion ? 'checked' : ''}>Reducir movimiento</label><p class="muted">También respetamos la preferencia de movimiento reducido del dispositivo.</p>${button('fullscreen', 'Pantalla completa')}<p class="muted">La pantalla completa es opcional. Podés salir con Escape.</p>`,
+    interface: `<h3>Interfaz</h3><label class="check"><input id="reducedMotion" type="checkbox" ${s.reducedMotion ? 'checked' : ''}>Reducir movimiento</label><p class="muted">También respetamos la preferencia de movimiento reducido del dispositivo.</p><label class="check"><input id="attractReplays" type="checkbox" ${s.attractReplays ? 'checked' : ''}>Repeticiones al estar inactivo</label><p class="muted">En Inicio, después de 60 segundos sin actividad, se reproducen tus marcas con cámara cinematográfica. Escape vuelve al menú.</p>${button('fullscreen', 'Pantalla completa')}<p class="muted">La pantalla completa es opcional. Podés salir con Escape.</p>`,
     controls: `<h3>Teclado</h3><div class="bindings">${Object.entries({
       A: 'Acelerar',
       B: 'Turbo',
@@ -97,6 +97,7 @@ export function icon(name: string) {
     editor: '<path d="m4 17 12-12 4 4L8 21H4ZM13 8l4 4M3 6h5M5.5 3.5v5"/>',
     arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
     panel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>',
+    camera: '<path d="M3 8h4l1.5-2h7L17 8h4v11H3z"/><circle cx="12" cy="13.5" r="3.2"/>',
   };
   return `<svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] ?? paths.flag}</svg>`;
 }

@@ -106,7 +106,14 @@ function lampGlowTexture() {
 }
 
 /** Bounds of the full set, including animated arms, lamps and the distant landscape. */
-export function visibleSectorRange(camera: THREE.OrthographicCamera, width: number) {
+export function visibleSectorRange(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera, width: number) {
+  if (camera instanceof THREE.PerspectiveCamera) {
+    const reach = camera.far;
+    return {
+      first: Math.floor((camera.position.x - reach - 14) / width) - 1,
+      last: Math.floor((camera.position.x + reach + 14) / width) + 1,
+    };
+  }
   camera.updateMatrixWorld();
   const e = matrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse).elements;
   let min = Infinity,
@@ -429,7 +436,7 @@ export class Stadium {
     );
   }
   update(
-    camera: THREE.OrthographicCamera,
+    camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
     dt: number,
     race: Race | null,
     mode: string,
@@ -460,10 +467,27 @@ export class Stadium {
       first = Math.min(first, Math.floor(shadowBounds.min.x / this.layout.width));
       last = Math.max(last, Math.floor(shadowBounds.max.x / this.layout.width));
     }
+    camera.updateMatrixWorld();
+    const frustum = new THREE.Frustum().setFromProjectionMatrix(
+      matrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse),
+    );
+    const bounds = new THREE.Box3();
+    const audienceBounds = new THREE.Box3();
+    const needed = new Map<number, boolean>();
+    for (let absolute = first; absolute <= last; absolute++) {
+      const x = absolute * this.layout.width;
+      // Includes the animated audience, structure, lamps and landscape overhang.
+      bounds.min.set(x - 14, -2, -62);
+      bounds.max.set(x + this.layout.width + 14, 16, 5);
+      audienceBounds.min.set(x - 1, -0.3, -15);
+      audienceBounds.max.set(x + this.layout.width + 1, 6.2, -6);
+      if (frustum.intersectsBox(bounds) || (shadowBounds && bounds.intersectsBox(shadowBounds)))
+        needed.set(absolute, frustum.intersectsBox(audienceBounds));
+    }
     const active = new Map<number, Sector>();
     const spare: Sector[] = [];
     for (const sector of this.sectors) {
-      if (sector.absolute >= first && sector.absolute <= last) {
+      if (needed.has(sector.absolute)) {
         sector.root.visible = true;
         active.set(sector.absolute, sector);
       } else {
@@ -471,7 +495,7 @@ export class Stadium {
         spare.push(sector);
       }
     }
-    for (let absolute = first; absolute <= last; absolute++) {
+    for (const [absolute, audienceVisible] of needed) {
       let sector = active.get(absolute);
       if (!sector) {
         sector = spare.pop() ?? this.createSector();
@@ -479,6 +503,7 @@ export class Stadium {
       }
       const reaction = this.motion.reactions.get(sector.logical);
       sector.reaction.value.set(reaction?.time ?? -10, reaction?.strength ?? 0);
+      sector.people.forEach((mesh) => { mesh.visible = audienceVisible; });
     }
   }
   diagnostics() {

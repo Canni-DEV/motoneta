@@ -18,6 +18,8 @@
     "loopStart": 0.5,
     "loopEnd": 59.57349206349206,
     "gain": 0.155,
+    "beatBpm": 112.7,
+    "beatOffset": 0.5,
     "revision": "9ea651f9e664e6b5"
   }
 }

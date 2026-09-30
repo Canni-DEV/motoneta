@@ -16,9 +16,12 @@ Funciona como sitio estático: no necesita backend, cuentas ni servicios externo
 | ← / →           | Inclinar la moto                                                                     |
 | Enter           | Iniciar, pausar o continuar                                                          |
 | Escape          | Pausar                                                                               |
+| C               | Cambiar entre cámara normal y cinematográfica durante una repetición                 |
 | Rueda del mouse | Zoom de cámara                                                                       |
 
 También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y las zonas claras enfrían el motor.
+
+Las repeticiones pueden verse con cámaras cinematográficas y el tema de resultados. En Inicio, tras 60 segundos de inactividad en un equipo no móvil, se reproducen automáticamente las marcas del perfil activo; Escape vuelve al menú. Esta opción se puede desactivar en Ajustes → Interfaz.
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla. Al pasar a las reglas `motoneta-2`, los datos locales de la versión anterior se reinician (perfiles, pistas, marcas, sesiones, repeticiones y ajustes).
 
