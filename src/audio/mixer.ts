@@ -27,6 +27,8 @@ export class AudioMixer {
   private cheers = new Map<Voice, { start: number; duration: number }>();
   private compressor: DynamicsCompressorNode;
   private applied = false;
+  private cinematic = false;
+  private slowMotion = false;
   constructor(
     public ctx: AudioContext,
     public bank: AudioBank,
@@ -50,16 +52,24 @@ export class AudioMixer {
     ) as Record<AudioBus, GainNode>;
   }
   apply(settings: Settings) {
+    const level = (id: AudioBus) => settings.audioLevels[id] *
+      (!this.cinematic ? 1 : id === 'engines' || id === 'effects' ? (this.slowMotion ? 0.16 : 0.4) : id === 'ambience' ? 0.6 : 1);
     if (!this.applied) {
       this.master.gain.value = settings.volume * 0.75;
       for (const id of Object.keys(this.buses) as AudioBus[])
-        this.buses[id].gain.value = settings.audioLevels[id];
+        this.buses[id].gain.value = level(id);
       this.applied = true;
       return;
     }
     this.master.gain.setTargetAtTime(settings.volume * 0.75, this.ctx.currentTime, 0.025);
     for (const id of Object.keys(this.buses) as AudioBus[])
-      this.buses[id].gain.setTargetAtTime(settings.audioLevels[id], this.ctx.currentTime, 0.025);
+      this.buses[id].gain.setTargetAtTime(level(id), this.ctx.currentTime, 0.08);
+  }
+  setPresentation(cinematic: boolean, slowMotion: boolean, settings: Settings) {
+    if (this.cinematic === cinematic && this.slowMotion === slowMotion) return;
+    this.cinematic = cinematic;
+    this.slowMotion = slowMotion;
+    this.apply(settings);
   }
   create(
     id: AudioCueId,

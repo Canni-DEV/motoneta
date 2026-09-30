@@ -3,6 +3,93 @@
   inset: 0;
   pointer-events: none;
 }
+body[data-cinematic='true'] .race-ui {
+  visibility: hidden;
+}
+.cinematic-controls {
+  position: fixed;
+  z-index: 5;
+  right: max(12px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+}
+.cinematic-toggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: #202321d9;
+  color: var(--ivory);
+  border: 1px solid #f5ead67d;
+}
+.cinematic-toggle .icon { width: 23px; height: 23px; }
+.cinematic-toggle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 9px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: min(220px, 55vw);
+  padding: 7px 10px;
+  border-radius: 5px;
+  background: #202321f2;
+  color: var(--ivory);
+  border: 1px solid #f5ead67d;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.cinematic-toggle:hover::after,
+.cinematic-toggle:focus-visible::after,
+.cinematic-toggle.show-help::after {
+  opacity: 1;
+  visibility: visible;
+}
+body[data-cinematic='true'] #app::before,
+body[data-cinematic='true'] #app::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3.2vh;
+  background: #090b0a;
+  z-index: 4;
+  pointer-events: none;
+}
+body[data-cinematic='true'] #app::before { top: 0; }
+body[data-cinematic='true'] #app::after { bottom: 0; }
+.attract-hint {
+  position: fixed;
+  z-index: 5;
+  bottom: max(5vh, env(safe-area-inset-bottom));
+  right: max(20px, env(safe-area-inset-right));
+  padding: 7px 11px;
+  border-radius: 4px;
+  background: #202321a8;
+  color: var(--ivory);
+  font-size: 12px;
+  pointer-events: none;
+}
+#attract-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: #090b0a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+#app.attract-fading #attract-fade { opacity: 1; }
 .race-ui button {
   pointer-events: auto;
 }

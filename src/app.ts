@@ -1,4 +1,6 @@
 import { GameAudio } from './audio';
+import { CinematicCamera } from './cinematic-camera';
+import { analyzeRecording, type CinematicTimeline } from './cinematic-timeline';
 import { audioCreditsView } from './audio/credits';
 import { loadBikeAssets } from './bike-model';
 import { advanceSession, sessionConfig } from './core/competition';
@@ -77,7 +79,7 @@ export async function startApp() {
     audio = new GameAudio(settings),
     store = new GameStore();
   $('#app').innerHTML =
-    `<div id="backdrop-host" data-scene-host><canvas id="world" aria-label="Circuito de motocross en tres dimensiones"></canvas></div><div class="scene-shade"></div><div id="ui"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="modal"></dialog><input id="import-file" type="file" accept=".json,application/json" hidden><div id="model-status" role="status">Cargando pilotos y estadio…</div><div id="size-gate" hidden>${icon('expand')}<h2>Espacio de pantalla insuficiente</h2><p id="size-message"></p>${b('fullscreen', 'Pantalla completa', '', 'class="primary"')}</div>`;
+    `<div id="backdrop-host" data-scene-host><canvas id="world" aria-label="Circuito de motocross en tres dimensiones"></canvas></div><div class="scene-shade"></div><div id="ui"></div><div id="attract-fade"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="modal"></dialog><input id="import-file" type="file" accept=".json,application/json" hidden><div id="model-status" role="status">Cargando pilotos y estadio…</div><div id="size-gate" hidden>${icon('expand')}<h2>Espacio de pantalla insuficiente</h2><p id="size-message"></p>${b('fullscreen', 'Pantalla completa', '', 'class="primary"')}</div>`;
   const ui = $('#ui'),
     modal = $<HTMLDialogElement>('#modal');
   let screen: Screen = 'home';
@@ -90,6 +92,18 @@ export async function startApp() {
     recording: Recording | null = null,
     playback: Playback | null = null,
     lastRecording: Recording | null = null;
+  let replayPresentation: 'none' | 'manual' | 'attract' = 'none';
+  let timeline: CinematicTimeline | null = null;
+  let timelinePending: Promise<CinematicTimeline> | null = null;
+  let replayGeneration = 0;
+  let cinematicHelpTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastCinematicDiagnostic = 0;
+  let attractIds: string[] = [];
+  let attractIndex = 0;
+  let attractStarting = false;
+  let attractSuspended = false;
+  let attractTicket = 0;
+  let idleSince: number | null = null;
   let ghosts: Playback[] = [],
     ghostNames: PlayerProfile[] = [],
     session: CompetitionSession | null = null;
@@ -275,6 +289,10 @@ export async function startApp() {
     } else if (storageReady) warning?.remove();
   }
   function navigate(next: Screen, remember = true) {
+    if (cinematicHelpTimer) clearTimeout(cinematicHelpTimer);
+    attractTicket++;
+    attractStarting = false;
+    attractIds = [];
     if (screen === 'editor' && next !== 'editor') {
       editor.cameraZoom = world?.zoomTarget ?? 1;
       editor.unbind(ui);
@@ -287,7 +305,15 @@ export async function startApp() {
     race = null;
     ghosts = [];
     playback = null;
+    replayPresentation = 'none';
+    timeline = null;
+    timelinePending = null;
+    replayGeneration++;
+    attractSuspended = false;
+    document.body.dataset.cinematic = 'false';
+    document.body.dataset.attract = 'false';
     if (world) {
+      world.cinematic = null;
       world.ghostStart = Infinity;
       if (next === 'editor') world.zoomTarget = editor.cameraZoom;
       else world.resetZoom();
@@ -310,6 +336,7 @@ export async function startApp() {
       }
     }
     screen = next;
+    idleSince = next === 'home' && audio.unlocked ? performance.now() : null;
     render();
     navigation.restoreFocus(ui);
     window.scrollTo(0, 0);
@@ -357,6 +384,8 @@ export async function startApp() {
     config: RaceConfig | null,
     watch: Recording | null = null,
     ghostRecordings: Recording[] = [],
+    presentation: 'manual' | 'attract' = 'manual',
+    preparedTimeline: CinematicTimeline | null = null,
   ) {
     if (!world || models !== 'ready') {
       toast('Esperá a que la vista 3D esté lista.');
@@ -371,6 +400,14 @@ export async function startApp() {
     controls.gamepadActive = true;
     accumulator = 0;
     playback = watch ? new Playback(watch) : null;
+    replayGeneration++;
+    replayPresentation = watch ? presentation : 'none';
+    timeline = preparedTimeline;
+    timelinePending = watch && !preparedTimeline ? analyzeRecording(watch) : null;
+    void timelinePending?.catch(() => {});
+    world.cinematic = preparedTimeline ? new CinematicCamera(preparedTimeline) : null;
+    document.body.dataset.cinematic = String(!!world.cinematic);
+    document.body.dataset.attract = String(presentation === 'attract' && !!watch);
     race = playback?.race ?? createRace(config!);
     recording = watch ? null : newRecording(config!);
     lastRecording = watch;
@@ -388,9 +425,11 @@ export async function startApp() {
     if (screen === 'editor') editor.unbind(ui);
     screen = 'race';
     document.body.dataset.screen = 'race';
-    patch(ui, raceView(race, ghostNames, !!watch));
+    patch(ui, presentation === 'attract' && watch
+      ? '<div class="attract-hint">Escape para volver al menú</div>'
+      : raceView(race, ghostNames, !!watch) + (watch ? `<div class="cinematic-controls">${b('toggle-cinematic', icon('camera'), '', 'class="cinematic-toggle" aria-label="Activar cámara cinematográfica" aria-pressed="false" data-tooltip="Activar cámara cinematográfica · C"')}</div>` : ''));
     viewport.attach($('#backdrop-host'), 'race');
-    $('.race-identity>div').insertAdjacentHTML(
+    document.querySelector('.race-identity>div')?.insertAdjacentHTML(
       'beforeend',
       `<small class="race-time-of-day">${TIME_LABELS[activeTimeOfDay]} · ${WEATHER_LABELS[activeWeather]}</small>`,
     );
@@ -401,9 +440,117 @@ export async function startApp() {
       ? (store.state.records.find((v) => v.key === recordKey(config))?.ticks ?? Infinity)
       : Infinity;
     audio.beginRace();
-    audio.setScene('countdown', activeWeather);
+    audio.setSlowMotion(false);
+    audio.setScene(presentation === 'attract' && watch ? 'cinematic' : 'countdown', activeWeather);
     void audio.unlock();
   }
+  function updateCinematicButton(showHelp = false) {
+    const button = ui.querySelector<HTMLButtonElement>('[data-action="toggle-cinematic"]');
+    if (!button) return;
+    const active = !!world?.cinematic;
+    const label = active ? 'Volver a cámara normal' : 'Activar cámara cinematográfica';
+    button.setAttribute('aria-label', label);
+    button.setAttribute('aria-pressed', String(active));
+    button.dataset.tooltip = `${label} · C`;
+    if (showHelp && matchMedia('(pointer: coarse)').matches) {
+      button.classList.add('show-help');
+      if (cinematicHelpTimer) clearTimeout(cinematicHelpTimer);
+      cinematicHelpTimer = setTimeout(() => button.classList.remove('show-help'), 1800);
+    }
+  }
+  function toggleCinematic(showHelp = false) {
+    if (screen !== 'race' || !playback || replayPresentation !== 'manual' || !world) return;
+    if (world.cinematic) {
+      world.cinematic = null;
+      document.body.dataset.cinematic = 'false';
+      audio.setSlowMotion(false);
+      audio.setScene(race?.phase === 'countdown' ? 'countdown' : 'race', activeWeather);
+    } else {
+      const generation = replayGeneration;
+      const director = new CinematicCamera(timeline ?? { events: [], moments: [], poses: [], lapEnds: [], slowMotion: [], lastFrame: 0 });
+      world.cinematic = director;
+      document.body.dataset.cinematic = 'true';
+      audio.setScene(paused ? 'pause' : 'cinematic', activeWeather);
+      $('#toast').classList.remove('visible');
+      $('#toast').textContent = '';
+      if (!timeline) {
+        void (timelinePending ?? analyzeRecording(playback.recording)).then((prepared) => {
+          if (generation !== replayGeneration || screen !== 'race' || world?.cinematic !== director) return;
+          timeline = prepared;
+          director.timeline = prepared;
+        }).catch((error) => {
+          if (generation !== replayGeneration || world?.cinematic !== director) return;
+          world.cinematic = null;
+          document.body.dataset.cinematic = 'false';
+          audio.setScene(race?.phase === 'countdown' ? 'countdown' : 'race', activeWeather);
+          updateCinematicButton();
+          toast(error instanceof Error ? error.message : 'No se pudo preparar la repetición.', true);
+        });
+      }
+    }
+    updateCinematicButton(showHelp);
+  }
+  function exitAttract() {
+    if (replayPresentation !== 'attract' && !attractStarting) return;
+    attractTicket++;
+    attractStarting = false;
+    attractIds = [];
+    attractSuspended = false;
+    $('#app').classList.remove('attract-fading');
+    audio.setSlowMotion(false);
+    navigate('home', false);
+  }
+  async function playAttractNext() {
+    const ticket = attractTicket;
+    for (let attempts = 0; attempts < attractIds.length; attempts++) {
+      const id = attractIds[attractIndex++ % attractIds.length];
+      try {
+        const next = await store.replay(id);
+        if (!next) continue;
+        const prepared = await analyzeRecording(next);
+        if (ticket !== attractTicket || (screen !== 'home' && replayPresentation !== 'attract')) return;
+        run(null, next, [], 'attract', prepared);
+        $('#app').classList.remove('attract-fading');
+        attractStarting = false;
+        return;
+      } catch {
+        // A missing or incompatible local replay must not interrupt the playlist.
+      }
+    }
+    if (ticket === attractTicket) exitAttract();
+  }
+  function startAttract() {
+    if (attractStarting || screen !== 'home') return;
+    attractIds = store.state.records
+      .filter((record) => record.profileId === store.state.activeProfile)
+      .sort((a, b) => a.ticks - b.ticks)
+      .map((record) => record.replayId);
+    idleSince = performance.now();
+    if (!attractIds.length) return;
+    attractStarting = true;
+    attractIndex = 0;
+    attractTicket++;
+    safely(playAttractNext());
+  }
+  function markHomeActivity() {
+    if (screen !== 'home') return;
+    idleSince = audio.unlocked ? performance.now() : null;
+    if (attractStarting) {
+      attractTicket++;
+      attractStarting = false;
+      attractIds = [];
+    }
+  }
+  document.addEventListener('pointermove', markHomeActivity, { passive: true });
+  document.addEventListener('pointerdown', () => {
+    markHomeActivity();
+    if (!audio.unlocked) void audio.unlock();
+  }, { passive: true });
+  document.addEventListener('wheel', markHomeActivity, { passive: true });
+  document.addEventListener('keydown', () => {
+    markHomeActivity();
+    if (!audio.unlocked) void audio.unlock();
+  });
   function pause() {
     if (screen !== 'race' || activity !== 'running') return;
     paused = true;
@@ -420,7 +567,7 @@ export async function startApp() {
     paused = false;
     controls.clear();
     accumulator = 0;
-    audio.setScene(race?.phase === 'countdown' ? 'countdown' : 'race', activeWeather);
+    audio.setScene(world?.cinematic ? 'cinematic' : race?.phase === 'countdown' ? 'countdown' : 'race', activeWeather);
   }
   async function finishInWorker(r: Race): Promise<Race> {
     return new Promise((resolve, reject) => {
@@ -476,6 +623,12 @@ export async function startApp() {
         lastRecording = playback.recording;
         race.finishes = structuredClone(playback.recording.result.finishes);
         race.phase = 'finished';
+        if (replayPresentation === 'attract') {
+          $('#app').classList.add('attract-fading');
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          if (replayPresentation === 'attract') await playAttractNext();
+          return;
+        }
         showResult();
         return;
       }
@@ -1140,6 +1293,9 @@ export async function startApp() {
           case 'pause':
             pause();
             break;
+          case 'toggle-cinematic':
+            toggleCinematic(true);
+            break;
           case 'resume':
             resume();
             break;
@@ -1326,7 +1482,7 @@ export async function startApp() {
         }
         if (el.id === 'vfx-intensity')
           settings.vfx.intensity = el.value as Settings['vfx']['intensity'];
-        if (['bloom', 'cameraShake', 'reducedMotion'].includes(el.id))
+        if (['bloom', 'cameraShake', 'reducedMotion', 'attractReplays'].includes(el.id))
           (settings as unknown as Record<string, unknown>)[el.id] = el.checked;
         if (
           [
@@ -1339,6 +1495,7 @@ export async function startApp() {
             'vfx-intensity',
             'cameraShake',
             'reducedMotion',
+            'attractReplays',
           ].includes(el.id)
         ) {
           document.body.dataset.reducedMotion = String(settings.reducedMotion);
@@ -1376,6 +1533,10 @@ export async function startApp() {
     ),
   );
   controls.onPause = () => {
+    if (replayPresentation === 'attract') {
+      exitAttract();
+      return;
+    }
     if (screen === 'editor' && editor.cancelGesture) {
       editor.cancelGesture();
       return;
@@ -1399,6 +1560,7 @@ export async function startApp() {
     } else if (screen !== 'home') navigate(navigation.back(), false);
   };
   controls.onStart = () => {
+    if (replayPresentation === 'attract') return;
     if (screen === 'race' && activity === 'running') {
       if (paused) resume();
       else pause();
@@ -1408,12 +1570,29 @@ export async function startApp() {
     event.preventDefault();
     controls.onPause();
   });
+  function updateAttractFocus() {
+    if (replayPresentation !== 'attract') return;
+    const suspend = document.hidden || !document.hasFocus();
+    if (attractSuspended === suspend) return;
+    attractSuspended = suspend;
+    accumulator = 0;
+    audio.setScene(suspend ? 'pause' : 'cinematic', activeWeather);
+  }
   window.addEventListener('blur', () => {
-    if (screen === 'race' && activity === 'running' && !paused) pause();
+    idleSince = null;
+    if (replayPresentation === 'attract') updateAttractFocus();
+    else if (screen === 'race' && activity === 'running' && !paused) pause();
+  });
+  window.addEventListener('focus', () => {
+    idleSince = audio.unlocked ? performance.now() : null;
+    updateAttractFocus();
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && screen === 'race' && activity === 'running' && !paused) pause();
+    if (document.hidden) idleSince = null;
+    if (replayPresentation === 'attract') updateAttractFocus();
+    else if (document.hidden && screen === 'race' && activity === 'running' && !paused) pause();
     audio.setHidden(document.hidden);
+    if (!document.hidden && screen === 'home') idleSince = audio.unlocked ? performance.now() : null;
   });
   window.addEventListener('pagehide', () => audio.setHidden(true));
   window.addEventListener('pageshow', () => audio.setHidden(document.hidden));
@@ -1448,6 +1627,11 @@ export async function startApp() {
     { passive: false },
   );
   document.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyC' && !event.repeat && replayPresentation === 'manual' && screen === 'race' && activity === 'running' && !modal.open && !(event.target as Element)?.closest('input,textarea,select,[contenteditable="true"]')) {
+      event.preventDefault();
+      toggleCinematic();
+      return;
+    }
     const tab = (event.target as Element)?.closest<HTMLElement>('[role="tab"]');
     if (tab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
       const tabs = Array.from(
@@ -1537,9 +1721,11 @@ export async function startApp() {
       screen === 'race'
         ? activity !== 'running'
           ? 'results'
-          : paused
+          : paused || attractSuspended
             ? 'pause'
-            : race?.phase === 'countdown'
+            : world?.cinematic
+              ? 'cinematic'
+              : race?.phase === 'countdown'
               ? 'countdown'
               : 'race'
         : screen === 'editor'
@@ -1549,8 +1735,20 @@ export async function startApp() {
             : 'menu',
       activeWeather,
     );
-    if (screen === 'race' && race && activity === 'running' && !paused) {
-      accumulator += delta;
+    if (screen === 'home') {
+      const gamepadUsed = navigator.getGamepads?.().some((pad) => pad?.connected &&
+        (pad.buttons.some((button) => button.pressed) || pad.axes.some((axis) => Math.abs(axis) > 0.35)));
+      if (gamepadUsed) markHomeActivity();
+      if (!idleSince && audio.unlocked) idleSince = now;
+      if (idleSince && now - idleSince >= 60_000 && settings.attractReplays && !attractStarting &&
+        !modal.open && !document.hidden && document.hasFocus() &&
+        !matchMedia('(pointer: coarse) and (hover: none)').matches &&
+        $('#size-gate').hidden && storageReady && models === 'ready') startAttract();
+    }
+    if (screen === 'race' && race && activity === 'running' && !paused && !attractSuspended) {
+      const slowMotion = !!world?.cinematic && !!timeline?.slowMotion.some((window) => race!.frame >= window.start && race!.frame < window.end);
+      audio.setSlowMotion(slowMotion);
+      accumulator += delta * (slowMotion ? 0.5 : 1);
       let steps = 0;
       while (accumulator >= STEP_MS && steps++ < 10) {
         const input = controls.sample();
@@ -1581,13 +1779,18 @@ export async function startApp() {
       updateHud(race, settings);
       lastHud = now;
     }
+    if (world) world.beatDelay = audio.beatDelay();
     world?.render(
       now / 1000,
       screen === 'race' ? viewRace() : null,
-      paused,
+      paused || attractSuspended,
       accumulator / STEP_MS,
       activity === 'results',
     );
+    if (import.meta.env.DEV && now - lastCinematicDiagnostic >= 500) {
+      $('#app').dataset.cinematicTrace = JSON.stringify(world?.cinematic?.diagnostics() ?? null);
+      lastCinematicDiagnostic = now;
+    }
     requestAnimationFrame(loop);
   }
   render();
@@ -1615,6 +1818,7 @@ export async function startApp() {
         models,
         quality: world?.bikes[0]?.quality,
         camera: world ? { zoom: world.camera.zoom, target: world.zoomTarget } : null,
+        cinematic: world?.cinematic?.diagnostics() ?? null,
         renderer: world?.renderer.info.render,
         memory: world?.renderer.info.memory,
         audio: audio.diagnostics(),

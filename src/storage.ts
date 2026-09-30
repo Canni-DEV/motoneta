@@ -49,7 +49,7 @@ export function settings(): Settings {
     if (typeof s.vfx?.[key] === 'boolean') out.vfx[key] = s.vfx[key];
   if (s.vfx && ['subtle', 'balanced', 'strong'].includes(s.vfx.intensity))
     out.vfx.intensity = s.vfx.intensity;
-  for (const key of ['bloom', 'cameraShake', 'reducedMotion'] as const)
+  for (const key of ['bloom', 'cameraShake', 'reducedMotion', 'attractReplays'] as const)
     if (typeof s[key] === 'boolean') out[key] = s[key];
   for (const key of Object.keys(defaultAudioLevels) as AudioBus[]) {
     const value = s.audioLevels?.[key];

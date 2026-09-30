@@ -5,7 +5,7 @@ export class AmbienceAudio {
   private loops = new Map<AudioCueId, Voice>();
   constructor(private mixer: AudioMixer) {}
   update(scene: AudioScene, weather: Weather, race: Race | null) {
-    const game = scene === 'race' || scene === 'countdown';
+    const game = scene === 'race' || scene === 'countdown' || scene === 'cinematic';
     const level = scene === 'pause' ? 0.13 : game ? 1 : 0.28;
     const player = race?.riders[0];
     const levels: Partial<Record<AudioCueId, number>> = {

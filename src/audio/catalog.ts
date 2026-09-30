@@ -2,7 +2,7 @@ import type { AudioBus } from '../core/types';
 import type { Material } from '../presentation-material';
 export { materialFor, landingLevel } from '../presentation-material';
 export type { Material } from '../presentation-material';
-export type AudioScene = 'menu' | 'editor' | 'countdown' | 'race' | 'pause' | 'results';
+export type AudioScene = 'menu' | 'editor' | 'countdown' | 'race' | 'cinematic' | 'pause' | 'results';
 export type UiCue =
   | 'select'
   | 'confirm'
