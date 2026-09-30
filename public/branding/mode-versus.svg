@@ -1,1 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><title>Dorsales enfrentados</title><g fill="currentColor" fill-rule="evenodd"><path d="M12 16H34L46 28V74L34 88H12L6 82V22ZM66 16H88L94 22V82L88 88H66L54 74V28ZM15 35L24 27H32V72H23V39H15ZM64 30H84V50L73 60H84V70H64V55L75 45V39H64Z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Shared portrait keeps both opponents' proportions and ink weight consistent. -->
+    <g id="rival" stroke="#202321" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Collar and padded jersey sit behind the helmet. -->
+      <path d="m52 105 43 4-3 19 25 12q13 7 18 26l3 13H3l5-25q3-13 17-20l25-12z" fill="currentColor" stroke-width="5"/>
+      <path d="m52 107 38 3-4 22-18 12-22-15z" fill="#202321" stroke-width="4"/>
+      <path d="m38 128 29 23 28-20 9 5-36 27-38-29z" fill="#f5ead6" stroke-width="4"/>
+      <path d="m15 145 11-7 14 13-9 23H7zm97-4 12 9 8 24h-24l-9-22z" fill="#202321" stroke="none"/>
+      <path d="m39 158 24 18H43l-12-9zm57-3-27 21h25l11-13z" fill="var(--accent, #d8332f)" stroke="none"/>
+      <path d="m17 154 10 6m87-7 9 8" stroke="#f5ead6" stroke-width="3"/>
+
+      <!-- Full-face shell, with a distinct peak and projecting chin guard. -->
+      <path d="M22 61c0-29 21-49 50-49 25 0 43 14 49 36l13 13-10 17-2 7 10 6-9 21-29 7-36-8-27-20z" fill="currentColor" stroke-width="5"/>
+      <path d="M33 44q16-28 44-24l20 8-32 1-20 13-9 15z" fill="var(--accent, #d8332f)" stroke="none"/>
+      <path d="m27 63 19-9 38-8 36 3 23 10-29 8-31-6-36 6-18 8z" fill="#202321" stroke-width="3"/>
+      <path d="m54 56 30-6 34 3 11 5-44-3-30 6z" fill="#f5ead6" stroke="none"/>
+
+      <!-- Goggles include a strap, dark lens and a single flat reflection. -->
+      <path d="m30 75 27-8 4 13-28 6z" fill="#202321" stroke="none"/>
+      <path d="m63 65 48 3 9 6-11 16-34-2-15-11z" fill="#f5ead6" stroke-width="3"/>
+      <path d="m70 69 39 3 5 3-8 10-29-2-10-8z" fill="#202321" stroke="none"/>
+      <path d="m80 73 24 2-4 4-18-2z" fill="#f5ead6" stroke="none"/>
+
+      <!-- Cheek protection, pivot and the vented lower jaw. -->
+      <path d="m41 84 13-1 17 16 26 7 27-7-4 9-26 6-33-11-20-12z" fill="#202321" stroke="none"/>
+      <path d="m108 88 14-3 10 6-9 12-25-3z" fill="#f5ead6" stroke-width="3"/>
+      <path d="m114 91-4 5m11-6-4 6m11-4-4 5" stroke-width="2"/>
+      <circle cx="44" cy="83" r="6" fill="var(--accent, #d8332f)" stroke-width="3"/>
+      <path d="m39 96 10 7m5 3 9 4" fill="none" stroke="var(--accent, #d8332f)" stroke-width="3"/>
+    </g>
+  </defs>
+
+  <path d="M0 71 475 0h102L0 137zM0 185 563 0h46L0 218z" fill="#d8332f" opacity=".13"/>
+  <path d="m160 302 520-112m-415 134 458-99m-350 128 444-96" fill="none" stroke="#202321" stroke-width="10" opacity=".14"/>
+  <path d="m491 121 182-42 20 122-170 69-41-78z" fill="#d8332f" opacity=".1"/>
+  <path d="m752 99 153 27 29 103-155 38-43-60z" fill="#202321" opacity=".08"/>
+  <path d="m501 281 409-18-40 23-349 13z" fill="#202321" opacity=".16"/>
+  <path d="m438 204 56-11m-39 31 33-7m431-22 23 5m-23 15 30 6" fill="none" stroke="#d8332f" stroke-width="6"/>
+
+  <!-- Ivory and red rivals look directly toward one another. -->
+  <use href="#rival" transform="translate(507 88)" color="#f5ead6" style="--accent: #d8332f"/>
+  <use href="#rival" transform="translate(916 88) scale(-1 1)" color="#d8332f" style="--accent: #f5ead6"/>
+
+  <!-- A lightning slash and a compact, outlined match badge separate the faces. -->
+  <path d="m720 88-32 64h25l-17 55 46-68h-25l25-51z" fill="#d8332f" stroke="#f5ead6" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m664 178 95-9 13 17-12 50-97 8-12-18z" fill="#202321" stroke="#f5ead6" stroke-width="5" stroke-linejoin="round"/>
+  <g fill="#f5ead6" transform="translate(668 185)">
+    <path d="M0 0h12l2 28L30 0h13L19 42H5z"/>
+    <path d="M50 0h31l-2 10H56l-2 6h16q10 0 7 10l-2 8q-2 8-12 8H35l2-10h25l2-7H49q-10 0-8-9l2-8q2-8 7-8z"/>
+  </g>
+  <path d="m675 233 70-6" fill="none" stroke="#d8332f" stroke-width="4" stroke-linecap="round"/>
+  <path d="m690 111-8-10m55 156 8-10m-63 10 7-9" fill="none" stroke="#d8332f" stroke-width="4" stroke-linecap="round"/>
+</svg>

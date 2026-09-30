@@ -1,1 +1,94 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><title>Perfil de pista editable</title><g fill="currentColor" fill-rule="evenodd"><defs><mask id="track" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><path fill="#fff" d="M6 82H16C22 82 27 60 34 60S47 80 56 76C70 69 71 32 90 28H94V92H6Z"/><path fill="#000" d="M22 51H42V71H22ZM47 66H67V86H47ZM77 19H97V39H77Z"/><path fill="#fff" d="M26 53H38L40 55V67L38 69H26L24 67V55ZM29 58H35V64H29ZM51 68H63L65 70V82L63 84H51L49 82V70ZM54 73H60V79H54ZM81 21H93L95 23V35L93 37H81L79 35V23ZM84 26H90V32H84Z"/></mask></defs><path mask="url(#track)" d="M0 0H100V100H0Z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 220" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="editor-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0v24" fill="none" stroke="#202321" stroke-width="1.5" opacity=".13"/>
+    </pattern>
+  </defs>
+  <path d="M0 40 385 0h131L0 88zM0 119 491 0h62L0 149zM0 169 591 0h28L0 187z" fill="#d8332f" opacity=".12"/>
+  <path d="m172 112 294-57m-220 72 270-53m-190 67 243-49" fill="none" stroke="#202321" stroke-width="5" opacity=".15"/>
+  <path d="m561 104 326-15-34 18-274 9z" fill="#202321" opacity=".13"/>
+
+  <!-- A complete drafting sheet fits the same shallow strip as the records artwork. -->
+  <g transform="translate(561 6) scale(.4)" stroke="#202321" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M29 34h717l53 49v157H29z" fill="#202321" opacity=".12" stroke="none"/>
+    <path d="M18 24h725l46 46v160H18z" fill="#f5ead6" stroke-width="4"/>
+    <path d="M35 43h690v162H35z" fill="url(#editor-grid)" stroke="none"/>
+    <path d="M743 24v46h46" fill="#f5ead6" stroke-width="4"/>
+    <path d="m748 70 30 30V74z" fill="#202321" opacity=".14" stroke="none"/>
+    <path d="M43 47h74m-74 12h44" stroke="#d8332f" stroke-width="5"/>
+    <path d="M721 43h9m-9 10h9" stroke-width="3"/>
+
+    <!-- Dashed construction lines and a width dimension frame the main jump. -->
+    <path d="M149 188v-78m46 30V90m30 50V83m148 105V66m59 21V55m30 32V55m57 133V66" fill="none" stroke-width="2.5" stroke-dasharray="6 7" opacity=".5"/>
+    <path d="M385 63h122m-122-6v12m122-12v12" fill="none" stroke-width="2.5"/>
+    <path d="m397 59-10 4 10 4m98-8 10 4-10 4" fill="none" stroke-width="2.5"/>
+
+    <!-- A motocross profile: two sculpted jumps, a tabletop, and editable nodes. -->
+    <path d="M50 188h99l46-48h30l47 48h101l59-101h30l57 101h209v17H50z" fill="#202321" fill-opacity=".1" stroke="none"/>
+    <path d="m169 186 19-20m1 26 28-29m17 29 10-10m150 10 31-50m-12 50 32-55m-11 55 32-55m-9 55 21-36m1 36 14-18" fill="none" stroke-width="2" opacity=".32"/>
+    <path d="M50 188h99l46-48h30l47 48h101l59-101h30l57 101h209" fill="none" stroke="#f5ead6" stroke-width="19"/>
+    <path d="M50 188h99l46-48h30l47 48h101l59-101h30l57 101h209" fill="none" stroke-width="12"/>
+    <path d="M50 184h97l46-48h34l47 48h97l59-101h34l57 101h207" fill="none" stroke="#d8332f" stroke-width="5"/>
+    <g fill="#f5ead6" stroke-width="3">
+      <path d="M142 181h14v14h-14zm46-48h14v14h-14zm178 48h14v14h-14zm59-101h14v14h-14zm30 0h14v14h-14zm57 101h14v14h-14z"/>
+    </g>
+    <path d="M215 130h20v20h-20z" fill="#d8332f" stroke="#f5ead6" stroke-width="3"/>
+    <path d="M208 129v-6h9m16 0h9v9m0 10v9h-8m-17 0h-9v-8" fill="none" stroke="#d8332f" stroke-width="2.5"/>
+
+    <!-- A finish marker makes the drawing read as a race course. -->
+    <path d="M679 180v-70" fill="none" stroke-width="4"/>
+    <path d="M681 112h47v33h-47z" fill="#202321" stroke-width="3"/>
+    <path d="M683 114h10v10h-10zm20 0h10v10h-10zm-10 10h10v10h-10zm20 0h12v10h-12zm-30 10h10v9h-10zm20 0h10v9h-10z" fill="#f5ead6" stroke="none"/>
+
+    <!-- Scale marks stay subordinate to the course and the drawing tool. -->
+    <path d="M61 216h652v14H61z" fill="#f5ead6" stroke-width="2"/>
+    <g fill="none" stroke-width="2">
+        <path d="M78 216v12"/>
+        <path d="M100 216v6"/>
+        <path d="M122 216v6"/>
+        <path d="M144 216v6"/>
+        <path d="M166 216v6"/>
+        <path d="M188 216v12"/>
+        <path d="M210 216v6"/>
+        <path d="M232 216v6"/>
+        <path d="M254 216v6"/>
+        <path d="M276 216v6"/>
+        <path d="M298 216v12"/>
+        <path d="M320 216v6"/>
+        <path d="M342 216v6"/>
+        <path d="M364 216v6"/>
+        <path d="M386 216v6"/>
+        <path d="M408 216v12"/>
+        <path d="M430 216v6"/>
+        <path d="M452 216v6"/>
+        <path d="M474 216v6"/>
+        <path d="M496 216v6"/>
+        <path d="M518 216v12"/>
+        <path d="M540 216v6"/>
+        <path d="M562 216v6"/>
+        <path d="M584 216v6"/>
+        <path d="M606 216v6"/>
+        <path d="M628 216v12"/>
+        <path d="M650 216v6"/>
+        <path d="M672 216v6"/>
+        <path d="M694 216v6"/>
+    </g>
+    <path d="M737 213h24m-12-8v16" stroke="#d8332f" stroke-width="3"/>
+
+    <!-- Faceted lacquer, exposed wood, graphite, ferrule and rounded eraser. -->
+    <g transform="translate(225 140) rotate(-30)">
+      <path d="m0 0 39-16v32z" fill="#f5ead6" stroke-width="4"/>
+      <path d="m0 0 15-6 3 5-3 7z" fill="#202321" stroke="none"/>
+      <path d="m23-6 12-6m-12 16 12 7" fill="none" stroke="#202321" stroke-width="1.5" opacity=".55"/>
+      <path d="M39-16h137v32H39l5-8-5-8 5-8z" fill="#d8332f" stroke-width="4"/>
+      <path d="M44 6h132v10H39z" fill="#202321" stroke="none"/>
+      <path d="M51-10h116v5H48z" fill="#f5ead6" stroke="none"/>
+      <path d="M59 0h94" stroke="#202321" stroke-width="1.5" opacity=".45"/>
+      <path d="M176-16h16v32h-16z" fill="#f5ead6" stroke-width="4"/>
+      <path d="M181-11v22m6-22v22" stroke-width="1.5"/>
+      <path d="M192-16h11q13 0 13 13v6q0 13-13 13h-11z" fill="#d8332f" stroke-width="4"/>
+      <path d="M199-10h4q7 0 7 7" fill="none" stroke="#f5ead6" stroke-width="3"/>
+    </g>
+  </g>
+  <path d="m524 72 18-4m-10 17 14-3m341-54 10-4m-10 14 15-2" fill="none" stroke="#d8332f" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

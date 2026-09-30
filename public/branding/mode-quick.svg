@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="checks" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M0 0h18v18H0zm18 18h18v18H18z" fill="#f5ead6"/>
+    </pattern>
+  </defs>
+  <path d="M0 72 436 0h150L0 152zM0 185 494 0h70L0 228zM0 267 602 0h34L0 292z" fill="#f5ead6" opacity=".14"/>
+  <path d="M0 332 960 125v111L0 440z" fill="#202321" opacity=".18"/>
+  <path d="m85 319 300-64m-252 84 224-47m-90 54 188-41" fill="none" stroke="#f5ead6" stroke-width="10" opacity=".62"/>
+  <path d="M837 54v206" stroke="#f5ead6" stroke-width="9"/>
+  <path d="M842 61h103v108H842z" fill="#202321"/>
+  <path d="M848 67h91v91h-91z" fill="url(#checks)"/>
+  <path d="m812 73-38 46m25-76-41 51" stroke="#f5ead6" stroke-width="8" opacity=".5"/>
+  <path d="m479 286 317-24-65 24-226 16z" fill="#202321" opacity=".22"/>
+  <path d="m473 231-87 18m111-40-55 11m41 44-61 13" stroke="#f5ead6" stroke-width="7" opacity=".8"/>
+
+  <!-- One continuous silhouette, with the far limbs behind the motorcycle. -->
+  <g stroke="#202321" stroke-linejoin="round" stroke-linecap="round">
+    <path d="m619 107 20 1 28 28 40-12 6 12-51 20-28-24z" fill="#202321" stroke-width="5"/>
+    <path d="m594 157 49 16q14 5 11 17l-19 26 25 3 7 11-49 3-6-18 18-25-42-10z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+
+    <!-- Knobby tires, light rims and restrained spoke detail. -->
+    <g fill="#202321" stroke="#f5ead6" stroke-width="3">
+      <circle cx="552" cy="225" r="43"/>
+      <circle cx="772" cy="211" r="43"/>
+    </g>
+    <g fill="none">
+      <g stroke="#f5ead6" stroke-width="3" stroke-dasharray="3 11" opacity=".6">
+        <circle cx="552" cy="225" r="38"/>
+        <circle cx="772" cy="211" r="38"/>
+      </g>
+      <g stroke="#f5ead6" stroke-width="4">
+        <circle cx="552" cy="225" r="29"/>
+        <circle cx="772" cy="211" r="29"/>
+      </g>
+      <path d="m552 196v58m-29-29h58m-49-20 40 40m-40 0 40-40m200-23v58m-29-29h58m-49-20 40 40m-40 0 40-40" stroke="#f5ead6" stroke-width="2" opacity=".65"/>
+    </g>
+
+    <!-- Swingarm, engine cradle, exhaust and suspension. -->
+    <path d="m552 225 77-28 35 20z" fill="#202321" stroke="#f5ead6" stroke-width="6"/>
+    <path d="m603 166 49 56 33-3 34-67-36 3-33 47-32-41z" fill="#202321" stroke="#f5ead6" stroke-width="5"/>
+    <path d="m602 174-20 35" fill="none" stroke="#202321" stroke-width="12"/>
+    <path d="m599 175-11 1m7 7-11 1m7 7-11 1m7 7-11 1" stroke="#f5ead6" stroke-width="3"/>
+    <path d="m650 184 26-6 16 14-11 23-28-1-13-14z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m657 187 18-3m-20 10 21-3" stroke-width="3"/>
+    <circle cx="667" cy="204" r="9" fill="#202321" stroke="none"/>
+    <path d="M695 176q22 7 15 25t-29 24" fill="none" stroke="#202321" stroke-width="12"/>
+    <path d="M695 176q22 7 15 25t-29 24" fill="none" stroke="#f5ead6" stroke-width="5"/>
+    <path d="m533 172 69 9 7 12-16 4-62-14z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+
+    <!-- Raised fenders, saddle and the front number plate. -->
+    <path d="m509 170 31-15 80 6 48-12 40 2-18 26-74 14-46-12z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m533 157 74 6 56-16 22 2-6 11-70 16-47-6z" fill="#202321" stroke="none"/>
+    <path d="m551 176 34 5 18 10-32-5z" fill="#d8332f" stroke="none"/>
+    <path d="m666 165 34-10-13 24-27 7z" fill="#d8332f" stroke="none"/>
+    <path d="m723 151 47 60m-38-65 49 62" fill="none" stroke-width="10"/>
+    <path d="m724 153 46 58m-36-64 47 61" fill="none" stroke="#f5ead6" stroke-width="4"/>
+    <path d="m720 174 37-10 31 7 14 11-47-6-25 8z" fill="#f5ead6" stroke-width="4"/>
+    <path d="m712 138 31-3 8 25-28 9-15-16z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m723 143 12-2 5 15-8 2-3-10-5 1z" fill="#202321" stroke="none"/>
+    <path d="m726 138-12-15-24 2" fill="none" stroke-width="7"/>
+    <path d="m702 123 21-2" fill="none" stroke="#f5ead6" stroke-width="4"/>
+    <g fill="#f5ead6" stroke-width="4">
+      <circle cx="552" cy="225" r="7"/>
+      <circle cx="772" cy="211" r="7"/>
+    </g>
+
+    <!-- Bent hip, forward knee and a boot planted on the foot peg. -->
+    <path d="m574 147 32 6 38 23q13 8 6 21l-21 24-19-13 15-22-43-12q-18-5-8-27z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+    <path d="m581 156 18 3 32 21-5 8-34-20-14-2z" fill="#d8332f" stroke="none"/>
+    <path d="m634 181 9 5-1 10-11 10-10-7z" fill="#f5ead6" stroke="none"/>
+    <path d="m617 201 19 11-11 18 22 1 10 9-3 7-43-1-11-8 5-15z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m614 215 11 6m-16 3 10 6m-14 8 43 3" fill="none" stroke-width="3"/>
+    <path d="M627 248h27" stroke-width="5"/>
+
+    <!-- Jersey and the near arm: shoulder, elbow, wrist, glove. -->
+    <path d="M623 95q14 1 22 15l-9 22-24 22-10 17-38-13 9-19 26-31q12-13 24-13z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m601 110 9 3-22 30-7 14-10-3 8-17z" fill="#d8332f" stroke="none"/>
+    <path d="m611 136 16-11-12 22-15 15-12-4z" fill="#202321" stroke="none"/>
+    <path d="m608 109 8-7 13 1-5 6z" fill="#202321" stroke="none"/>
+    <path d="M632 106q9-4 15 5l20 29 33-12 8 13-41 19q-7 3-12-3l-30-32q-9-12 7-19z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m639 122 19 24 8 3 19-6" fill="none" stroke="#d8332f" stroke-width="5"/>
+    <path d="m697 128 12-6 14 2 3 8-9 9-13 1z" fill="#202321" stroke="#f5ead6" stroke-width="3"/>
+    <path d="m709 127 8 2" stroke="#f5ead6" stroke-width="2"/>
+
+    <!-- Full-face motocross helmet: peak, goggles and vented chin guard. -->
+    <path d="m628 88 22-10 11 17-22 16-14-7z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+    <path d="M622 64q0-29 29-35 28-6 44 16l8 16-7 18 9 6-14 21-27 2-26-15-13-15z" fill="#f5ead6" stroke-width="5"/>
+    <path d="M632 48q12-18 34-13l14 7-28 1-18 13z" fill="#d8332f" stroke="none"/>
+    <path d="m625 60 23-8 48 2 21 11-23 6-42-6-26 6z" fill="#202321" stroke-width="3"/>
+    <path d="m651 69 38 2-8 16-24-2-10-9z" fill="#202321" stroke="none"/>
+    <path d="m660 72 23 2-4 4-17-1z" fill="#f5ead6" stroke="none"/>
+    <path d="m636 73 8 1 9 15 17 7 20-3-5 8-20 1-21-13z" fill="#202321" stroke="none"/>
+    <path d="m682 85 14-4 4 5-8 8-17-3z" fill="#f5ead6" stroke="none"/>
+    <path d="m688 85-4 4m10-5-4 5" stroke-width="2"/>
+  </g>
+</svg>

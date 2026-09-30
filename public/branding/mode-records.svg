@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 220" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Reprise the quick-race rider as a translucent replay, without external assets. -->
+    <g id="record-rider">
+      <g stroke="#202321" stroke-linejoin="round" stroke-linecap="round">
+        <path d="m619 107 20 1 28 28 40-12 6 12-51 20-28-24z" fill="#202321" stroke-width="5"/>
+        <path d="m594 157 49 16q14 5 11 17l-19 26 25 3 7 11-49 3-6-18 18-25-42-10z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+    
+        <!-- Knobby tires, light rims and restrained spoke detail. -->
+        <g fill="#202321" stroke="#f5ead6" stroke-width="3">
+          <circle cx="552" cy="225" r="43"/>
+          <circle cx="772" cy="211" r="43"/>
+        </g>
+        <g fill="none">
+          <g stroke="#f5ead6" stroke-width="3" stroke-dasharray="3 11" opacity=".6">
+            <circle cx="552" cy="225" r="38"/>
+            <circle cx="772" cy="211" r="38"/>
+          </g>
+          <g stroke="#f5ead6" stroke-width="4">
+            <circle cx="552" cy="225" r="29"/>
+            <circle cx="772" cy="211" r="29"/>
+          </g>
+          <path d="m552 196v58m-29-29h58m-49-20 40 40m-40 0 40-40m200-23v58m-29-29h58m-49-20 40 40m-40 0 40-40" stroke="#f5ead6" stroke-width="2" opacity=".65"/>
+        </g>
+    
+        <!-- Swingarm, engine cradle, exhaust and suspension. -->
+        <path d="m552 225 77-28 35 20z" fill="#202321" stroke="#f5ead6" stroke-width="6"/>
+        <path d="m603 166 49 56 33-3 34-67-36 3-33 47-32-41z" fill="#202321" stroke="#f5ead6" stroke-width="5"/>
+        <path d="m602 174-20 35" fill="none" stroke="#202321" stroke-width="12"/>
+        <path d="m599 175-11 1m7 7-11 1m7 7-11 1m7 7-11 1" stroke="#f5ead6" stroke-width="3"/>
+        <path d="m650 184 26-6 16 14-11 23-28-1-13-14z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m657 187 18-3m-20 10 21-3" stroke-width="3"/>
+        <circle cx="667" cy="204" r="9" fill="#202321" stroke="none"/>
+        <path d="M695 176q22 7 15 25t-29 24" fill="none" stroke="#202321" stroke-width="12"/>
+        <path d="M695 176q22 7 15 25t-29 24" fill="none" stroke="#f5ead6" stroke-width="5"/>
+        <path d="m533 172 69 9 7 12-16 4-62-14z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+    
+        <!-- Raised fenders, saddle and the front number plate. -->
+        <path d="m509 170 31-15 80 6 48-12 40 2-18 26-74 14-46-12z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m533 157 74 6 56-16 22 2-6 11-70 16-47-6z" fill="#202321" stroke="none"/>
+        <path d="m551 176 34 5 18 10-32-5z" fill="#d8332f" stroke="none"/>
+        <path d="m666 165 34-10-13 24-27 7z" fill="#d8332f" stroke="none"/>
+        <path d="m723 151 47 60m-38-65 49 62" fill="none" stroke-width="10"/>
+        <path d="m724 153 46 58m-36-64 47 61" fill="none" stroke="#f5ead6" stroke-width="4"/>
+        <path d="m720 174 37-10 31 7 14 11-47-6-25 8z" fill="#f5ead6" stroke-width="4"/>
+        <path d="m712 138 31-3 8 25-28 9-15-16z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m723 143 12-2 5 15-8 2-3-10-5 1z" fill="#202321" stroke="none"/>
+        <path d="m726 138-12-15-24 2" fill="none" stroke-width="7"/>
+        <path d="m702 123 21-2" fill="none" stroke="#f5ead6" stroke-width="4"/>
+        <g fill="#f5ead6" stroke-width="4">
+          <circle cx="552" cy="225" r="7"/>
+          <circle cx="772" cy="211" r="7"/>
+        </g>
+    
+        <!-- Bent hip, forward knee and a boot planted on the foot peg. -->
+        <path d="m574 147 32 6 38 23q13 8 6 21l-21 24-19-13 15-22-43-12q-18-5-8-27z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+        <path d="m581 156 18 3 32 21-5 8-34-20-14-2z" fill="#d8332f" stroke="none"/>
+        <path d="m634 181 9 5-1 10-11 10-10-7z" fill="#f5ead6" stroke="none"/>
+        <path d="m617 201 19 11-11 18 22 1 10 9-3 7-43-1-11-8 5-15z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m614 215 11 6m-16 3 10 6m-14 8 43 3" fill="none" stroke-width="3"/>
+        <path d="M627 248h27" stroke-width="5"/>
+    
+        <!-- Jersey and the near arm: shoulder, elbow, wrist, glove. -->
+        <path d="M623 95q14 1 22 15l-9 22-24 22-10 17-38-13 9-19 26-31q12-13 24-13z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m601 110 9 3-22 30-7 14-10-3 8-17z" fill="#d8332f" stroke="none"/>
+        <path d="m611 136 16-11-12 22-15 15-12-4z" fill="#202321" stroke="none"/>
+        <path d="m608 109 8-7 13 1-5 6z" fill="#202321" stroke="none"/>
+        <path d="M632 106q9-4 15 5l20 29 33-12 8 13-41 19q-7 3-12-3l-30-32q-9-12 7-19z" fill="#f5ead6" stroke-width="5"/>
+        <path d="m639 122 19 24 8 3 19-6" fill="none" stroke="#d8332f" stroke-width="5"/>
+        <path d="m697 128 12-6 14 2 3 8-9 9-13 1z" fill="#202321" stroke="#f5ead6" stroke-width="3"/>
+        <path d="m709 127 8 2" stroke="#f5ead6" stroke-width="2"/>
+    
+        <!-- Full-face motocross helmet: peak, goggles and vented chin guard. -->
+        <path d="m628 88 22-10 11 17-22 16-14-7z" fill="#202321" stroke="#f5ead6" stroke-width="4"/>
+        <path d="M622 64q0-29 29-35 28-6 44 16l8 16-7 18 9 6-14 21-27 2-26-15-13-15z" fill="#f5ead6" stroke-width="5"/>
+        <path d="M632 48q12-18 34-13l14 7-28 1-18 13z" fill="#d8332f" stroke="none"/>
+        <path d="m625 60 23-8 48 2 21 11-23 6-42-6-26 6z" fill="#202321" stroke-width="3"/>
+        <path d="m651 69 38 2-8 16-24-2-10-9z" fill="#202321" stroke="none"/>
+        <path d="m660 72 23 2-4 4-17-1z" fill="#f5ead6" stroke="none"/>
+        <path d="m636 73 8 1 9 15 17 7 20-3-5 8-20 1-21-13z" fill="#202321" stroke="none"/>
+        <path d="m682 85 14-4 4 5-8 8-17-3z" fill="#f5ead6" stroke="none"/>
+        <path d="m688 85-4 4m10-5-4 5" stroke-width="2"/>
+      </g>
+    </g>
+  </defs>
+  <path d="M0 40 385 0h131L0 88zM0 119 491 0h62L0 149zM0 169 591 0h28L0 187z" fill="#d8332f" opacity=".12"/>
+  <path d="m172 112 294-57m-220 72 270-53m-190 67 243-49" fill="none" stroke="#202321" stroke-width="5" opacity=".15"/>
+  <path d="m503 112 368-17-47 17-278 11z" fill="#202321" opacity=".12"/>
+
+  <!-- Fading copies and track streaks identify the personal-best ghost. -->
+  <path d="m493 45 59-12m-43 29 59-12m-46 29 45-9m-38 26 40-8" fill="none" stroke="#d8332f" stroke-width="4" opacity=".32"/>
+  <use href="#record-rider" transform="translate(372 2) scale(.36)" opacity=".14"/>
+  <use href="#record-rider" transform="translate(416 2) scale(.36)" opacity=".65"/>
+  <path d="m708 95 20-4m-6-19 17-3" fill="none" stroke="#d8332f" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- A complete stopwatch stays inside the shallow illustration strip. -->
+  <g transform="translate(751 9) scale(.38)" stroke="#202321" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Machined crown, neck and angled start/stop pusher. -->
+    <path d="M116 18h28v28h-28z" fill="#f5ead6" stroke-width="5"/>
+    <path d="M100 5h60v19h-60z" fill="#d8332f" stroke-width="5"/>
+    <path d="M109 10v9m10-9v9m11-9v9m11-9v9m10-9v9" stroke="#f5ead6" stroke-width="2"/>
+    <path d="m201 52 17-20 18 16-16 20z" fill="#f5ead6" stroke-width="5"/>
+    <path d="m214 28 10-11 30 26-10 12z" fill="#d8332f" stroke-width="5"/>
+    <path d="m226 26 18 16" stroke="#f5ead6" stroke-width="3"/>
+
+    <!-- The case has a dark side wall, cream bevel and inset dial. -->
+    <circle cx="130" cy="140" r="103" fill="#202321" stroke-width="5"/>
+    <circle cx="128" cy="137" r="97" fill="#f5ead6" stroke-width="4"/>
+    <path d="M51 91a88 88 0 0 1 77-43" fill="none" stroke="#d8332f" stroke-width="4"/>
+    <path d="M213 111a88 88 0 0 1-77 113" fill="none" stroke="#202321" stroke-width="4"/>
+    <circle cx="130" cy="140" r="84" fill="#f5ead6" stroke-width="5"/>
+    <path d="M130 140V61a79 79 0 0 1 68 39z" fill="#d8332f" fill-opacity=".14" stroke="none"/>
+    <path d="M130 61a79 79 0 0 1 68 39" fill="none" stroke="#d8332f" stroke-width="4"/>
+
+    <!-- Sixty divisions, with heavier five-second indices. -->
+    <g fill="none">
+        <path d="M130 65v11" transform="rotate(0 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(6 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(12 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(18 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(24 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(30 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(36 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(42 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(48 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(54 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(60 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(66 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(72 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(78 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(84 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(90 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(96 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(102 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(108 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(114 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(120 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(126 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(132 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(138 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(144 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(150 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(156 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(162 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(168 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(174 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(180 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(186 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(192 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(198 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(204 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(210 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(216 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(222 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(228 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(234 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(240 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(246 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(252 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(258 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(264 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(270 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(276 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(282 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(288 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(294 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(300 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(306 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(312 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(318 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(324 130 140)" stroke-width="1.5"/>
+        <path d="M130 65v11" transform="rotate(330 130 140)" stroke-width="4"/>
+        <path d="M130 67v4" transform="rotate(336 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(342 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(348 130 140)" stroke-width="1.5"/>
+        <path d="M130 67v4" transform="rotate(354 130 140)" stroke-width="1.5"/>
+    </g>
+    <path d="M130 68v9m63 63h9" stroke="#d8332f" stroke-width="4"/>
+
+    <!-- Small elapsed-time register and contrasting hands. -->
+    <circle cx="130" cy="183" r="19" fill="#f5ead6" stroke-width="2"/>
+    <path d="M130 167v4m12 12h4m-16 12v4m-16-16h4" stroke-width="2"/>
+    <path d="m130 183 7-10" stroke="#d8332f" stroke-width="3"/>
+    <circle cx="130" cy="183" r="3" fill="#202321" stroke="none"/>
+    <path d="m123 144-25-45 8-4 30 43z" fill="#202321" stroke-width="2"/>
+    <path d="m119 151 61-60" fill="none" stroke="#d8332f" stroke-width="3"/>
+    <path d="m174 92 10-6-5 11z" fill="#d8332f" stroke="none"/>
+    <circle cx="130" cy="140" r="9" fill="#202321" stroke="#f5ead6" stroke-width="3"/>
+    <circle cx="130" cy="140" r="3" fill="#d8332f" stroke="none"/>
+  </g>
+
+  <!-- A small best-time pennant echoes the numbered plates on the motorcycles. -->
+  <g stroke="#202321" stroke-linejoin="round">
+    <path d="m870 62 33-5 7 31-13-5-9 9-15-19z" fill="#d8332f" stroke-width="2"/>
+    <path d="m870 40 26-4 14 18-6 22-25 5-15-17z" fill="#f5ead6" stroke-width="2.5"/>
+    <path d="m873 46 19-3 11 13-5 15-17 4-10-13z" fill="#202321" stroke="none"/>
+    <path d="m883 48 9-2 4 20-6 1-3-15-4 2z" fill="#f5ead6" stroke="none"/>
+  </g>
+  <path d="m856 23 6-8m51 20 8-2m-58 66 7 4" fill="none" stroke="#d8332f" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

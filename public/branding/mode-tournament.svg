@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" preserveAspectRatio="xMidYMid slice">
+  <path d="M0 67 460 0h89L0 126zM0 177 593 0h45L0 205z" fill="#d8332f" opacity=".12"/>
+  <path d="m73 327 500-95m-435 125 504-95m-363 128 377-72" fill="none" stroke="#202321" stroke-width="12" opacity=".16"/>
+  <path d="m529 104 249-67 111 131-85 78-219-41z" fill="#d8332f" opacity=".1"/>
+  <path d="m600 270 238-11-42 21-205 7z" fill="#202321" opacity=".16"/>
+  <path d="m494 256 71-15m-51 32 48-10m-17-37 29-6" fill="none" stroke="#d8332f" stroke-width="7" opacity=".8"/>
+
+  <!-- Swept handles have open centers and meet the bowl at both ends. -->
+  <g stroke="#202321" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M647 68h-29c-29 0-31 30-19 53 12 24 35 37 66 27l-8-17c-20 6-33-2-41-17-9-17-7-28 6-28h25z" fill="#f5ead6"/>
+    <path d="M793 68h29c29 0 31 30 19 53-12 24-35 37-66 27l8-17c20 6 33-2 41-17 9-17 7-28-6-28h-25z" fill="#f5ead6"/>
+    <path d="M602 87c-5 22 16 53 43 53m193-53c5 22-16 53-43 53" fill="none" stroke="#d8332f" stroke-width="3"/>
+
+    <!-- Award ribbons tie to the handles, behind the cup. -->
+    <path d="m608 98-8 33-18 35 15-4 8 12 16-35 5-34z" fill="#d8332f" stroke-width="4"/>
+    <path d="m832 98 8 33 18 35-15-4-8 12-16-35-5-34z" fill="#d8332f" stroke-width="4"/>
+    <path d="m616 111-8 27-10 20m226-47 8 27 10 20" fill="none" stroke="#f5ead6" stroke-width="3"/>
+    <path d="m606 95 21 6-3 12-21-6zm228 0-21 6 3 12 21-6z" fill="#202321" stroke-width="3"/>
+
+    <!-- Stem and layered plinth make a continuous, stable silhouette. -->
+    <path d="M702 169h36l-9 21v13l26 15h-70l26-15v-13z" fill="#f5ead6"/>
+    <path d="M720 179h10l-6 13v14l19 10h-23z" fill="#202321" stroke="none"/>
+    <path d="M703 179h34m-33 23h31" fill="none" stroke-width="4"/>
+    <path d="m685 216-14 10v10h98v-10l-14-10z" fill="#d8332f"/>
+    <path d="M682 225h73" fill="none" stroke="#f5ead6" stroke-width="3"/>
+    <path d="M659 235h122v29H659z" fill="#202321"/>
+    <path d="M665 238h110" stroke="#f5ead6" stroke-width="3"/>
+    <path d="M696 246h48v12h-48z" fill="#f5ead6" stroke="none"/>
+    <path d="M706 252h28" fill="none" stroke-width="2"/>
+
+    <!-- Curved bowl with flat highlights, matching the rider's inked style. -->
+    <path d="M638 56h164l-10 58c-6 32-22 57-54 64h-36c-32-7-48-32-54-64z" fill="#d8332f"/>
+    <path d="m650 72 17 3 9 43c4 18 11 31 23 42-22-10-32-26-36-47z" fill="#f5ead6" stroke="none"/>
+    <path d="m780 74 12-3-8 41c-6 30-19 49-48 59h-15c31-18 48-51 59-97z" fill="#202321" stroke="none"/>
+    <path d="M698 165q20 9 43 0" fill="none" stroke="#f5ead6" stroke-width="3"/>
+
+    <!-- Elliptical lip shows the cup opening without a gradient. -->
+    <path d="M635 48q85-19 170 0l-4 17q-81 16-162 0z" fill="#f5ead6"/>
+    <path d="M648 50q72-12 144 0-72 16-144 0z" fill="#202321" stroke="none"/>
+    <path d="M649 62q42 7 81 5" fill="none" stroke="#d8332f" stroke-width="3"/>
+
+    <!-- Champion's medallion, large enough to read on a small card. -->
+    <circle cx="720" cy="119" r="27" fill="#f5ead6" stroke-width="4"/>
+    <circle cx="720" cy="119" r="21" fill="none" stroke="#d8332f" stroke-width="2"/>
+    <path d="m720 102 5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="#202321" stroke="none"/>
+  </g>
+
+  <!-- Laurel sprigs frame the base without obscuring the handles. -->
+  <g fill="#202321">
+    <path d="M655 252c-39-10-57-31-58-63m188 63c39-10 57-31 58-63" fill="none" stroke="#202321" stroke-width="3" stroke-linecap="round"/>
+    <path d="M603 217q-26-3-27-23 23 3 27 23zm12 17q-25 3-32-15 22-2 32 15zm18 12q-22 10-34-5 22-8 34 5zM605 218q-10-19 3-31 12 18-3 31zm14 17q-6-20 9-28 7 20-9 28zm18 11q0-18 16-24 1 19-16 24z"/>
+    <path d="M837 217q26-3 27-23-23 3-27 23zm-12 17q25 3 32-15-22-2-32 15zm-18 12q22 10 34-5-22-8-34 5zm28-28q10-19-3-31-12 18 3 31zm-14 17q6-20-9-28-7 20 9 28zm-18 11q0-18-16-24-1 19 16 24z"/>
+    <path d="M597 202q-18-13-11-32 19 14 11 32zm246 0q18-13 11-32-19 14-11 32z" fill="#d8332f"/>
+  </g>
+  <path d="m564 65-10-12m5 36-17-3m325-21 10-12m-5 36 17-3" fill="none" stroke="#d8332f" stroke-width="5" stroke-linecap="round"/>
+</svg>

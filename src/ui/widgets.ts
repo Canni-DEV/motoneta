@@ -30,9 +30,9 @@ export const modeNames = {
   records: 'Tus marcas',
   editor: 'Editor',
 };
-export function modeEmblem(name: string) {
+export function modeScene(name: string) {
   const image = new URL(`${import.meta.env.BASE_URL}branding/mode-${name}.svg`, document.baseURI);
-  return `<span class="mode-emblem" aria-hidden="true" style="--mode-emblem:url('${image.href}')"></span>`;
+  return `<img class="mode-scene" src="${image.href}" alt="" aria-hidden="true" draggable="false">`;
 }
 export function header(active: string, profiles: PlayerProfile[], selected: string) {
   const profile = profiles.find((p) => p.id === selected);

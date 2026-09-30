@@ -6,7 +6,7 @@ import {
   environmentFields,
   modeNames,
   icon,
-  modeEmblem,
+  modeScene,
 } from './widgets';
 import { trackSvg } from '../core/tracks';
 import { formatTime } from '../core/simulation';
@@ -46,7 +46,7 @@ export function homeView(s: SaveState) {
   const descriptions = [
     'Una carrera, con o sin rivales.',
     'Puntos acumulados en varias pistas.',
-    'De 2 a 6 jugadores, por turnos.',
+    '2 a 6 jugadores · una carrera por turno.',
     'Tiempos, repeticiones y fantasmas.',
     'Creá y editá tus propias pistas.',
   ];
@@ -56,9 +56,9 @@ export function homeView(s: SaveState) {
     .map(([id, name], i) =>
       b(
         'navigate',
-        `<span class="mode-number">0${i + 1}</span><div class="mode-art">${modeEmblem(['flag', 'trophy', 'versus', 'clock', 'editor'][i])}</div><div class="mode-copy"><strong>${name}</strong><span>${descriptions[i]}</span></div>${icon('arrow')}`,
+        `<span class="mode-art">${modeScene(id)}</span><span class="mode-number">0${i + 1}</span>${id === 'versus' ? '<span class="mode-tag">POR TURNOS</span>' : ''}<span class="mode-copy"><strong>${name}</strong><span>${descriptions[i]}</span></span>${icon('arrow')}`,
         id,
-        `class="mode-card mode-${id}" aria-label="${name}"`,
+        `class="mode-card mode-${id}" aria-label="${esc(name)}: ${esc(descriptions[i])}"`,
       ),
     )
     .join(
