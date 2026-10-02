@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { BIKE, bikePose, crashPose, type GroundHeight } from './bike-pose';
 import rigDefinition from './bike-rig.json';
+import { appearanceKey, defaultAppearance, SLOTS, VARIANTS, type Appearance, type SlotId } from './appearance';
 
 export type BikeQuality = 'high' | 'low';
 export type BikeAssets = Record<BikeQuality, THREE.Group>;
@@ -68,6 +69,11 @@ export function validateBikeAsset(scene: THREE.Group): THREE.Group {
   for (const name of requiredNodes) {
     if (!scene.getObjectByName(name)) throw new Error(`Modelo incompleto: ${name}`);
   }
+  for (const slot of SLOTS) for (const variant of VARIANTS)
+    if (!scene.getObjectByName(`Slot_${slot}_${variant}`) &&
+        !scene.getObjectByName(`Slot_${slot}_${variant}_Front`) &&
+        !scene.getObjectByName(`Slot_${slot}_${variant}_FrontWheel`))
+      throw new Error(`Modelo incompleto: ${slot}/${variant}`);
   return scene;
 }
 
@@ -165,6 +171,8 @@ export class Bike {
   private readonly variantNodes: Record<BikeQuality, Record<string, THREE.Object3D>>;
   private readonly variantRiders: Record<BikeQuality, THREE.Object3D>;
   private readonly ownedMaterials: THREE.Material[] = [];
+  private readonly ownedGeometries: THREE.BufferGeometry[] = [];
+  private readonly painted: { slot: SlotId; attribute: THREE.BufferAttribute; base: Float32Array }[] = [];
   private readonly contactPoint = new THREE.Vector3();
   private readonly inverseRoot = new THREE.Matrix4();
   quality: BikeQuality;
@@ -185,11 +193,28 @@ export class Bike {
   private originals = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
   private ghostMaterials = new Map<THREE.Material, THREE.Material>();
 
-  setAppearance(color: number, ghost = false) {
-    const key = `${color}:${ghost}`;
+  setAppearance(value: Appearance | number, ghost = false) {
+    const appearance = typeof value === 'number'
+      ? defaultAppearance(`#${value.toString(16).padStart(6, '0')}`)
+      : value;
+    const key = `${appearanceKey(appearance)}:${ghost}`;
     if (key === this.appearance) return;
     this.appearance = key;
     this.ghost = ghost;
+    for (const part of this.painted) {
+      const colors = part.attribute.array as Float32Array;
+      const primary = new THREE.Color(appearance.paints[part.slot].primary);
+      const accent = new THREE.Color(appearance.paints[part.slot].accent);
+      for (let i = 0; i < part.base.length; i += 4) {
+        const role = part.base[i + 3];
+        const source = role < 0.25 ? primary : role < 0.75 ? accent : null;
+        colors[i] = source ? source.r : part.base[i];
+        colors[i + 1] = source ? source.g : part.base[i + 1];
+        colors[i + 2] = source ? source.b : part.base[i + 2];
+        colors[i + 3] = 1;
+      }
+      part.attribute.needsUpdate = true;
+    }
     const faded = (material: THREE.Material) => {
       let copy = this.ghostMaterials.get(material);
       if (!copy) {
@@ -204,6 +229,8 @@ export class Bike {
     };
     for (const variant of [...Object.values(this.variants), ...Object.values(this.variantRiders)])
       variant.traverse((object) => {
+        const match = /^Slot_([^_]+)_(core|sprint|trail)(?:_(?:Front|Rear|FrontWheel|RearWheel))?$/.exec(object.name);
+        if (match) object.visible = appearance.parts[match[1] as SlotId] === match[2];
         if (!(object instanceof THREE.Mesh)) return;
         if (!this.originals.has(object)) this.originals.set(object, object.material);
         const original = this.originals.get(object)!;
@@ -214,9 +241,14 @@ export class Bike {
           : original;
         object.castShadow = !ghost;
       });
-    for (const material of this.ownedMaterials)
-      if (material.name.startsWith('Team'))
-        (material as THREE.MeshStandardMaterial).color.setHex(color);
+    for (const material of this.ownedMaterials) {
+      const paint = material.userData.paint as { slot: SlotId | 'frame'; role: 'primary' | 'accent' } | undefined;
+      if (!paint) continue;
+      const color = paint.slot === 'frame'
+        ? appearance.paints.fairing.primary
+        : appearance.paints[paint.slot][paint.role];
+      (material as THREE.MeshStandardMaterial).color.set(color);
+    }
   }
 
   constructor(color: number, assets: BikeAssets, quality: BikeQuality = 'high') {
@@ -231,7 +263,7 @@ export class Bike {
     this.variantRiders = {} as Record<BikeQuality, THREE.Object3D>;
     for (const q of ['high', 'low'] as const) {
       const scene = clone(assets[q]) as THREE.Group;
-      const colored = new Map<THREE.Material, THREE.Material>();
+      const colored = new Map<string, THREE.Material>();
       const nodes: Record<string, THREE.Object3D> = {};
       scene.traverse((object) => {
         nodes[object.name] = object;
@@ -240,16 +272,43 @@ export class Bike {
         object.receiveShadow = true;
         // Rig motion can exceed the static bind-pose bounding sphere.
         if (object instanceof THREE.SkinnedMesh) object.frustumCulled = false;
+        const slot = /^Slot_([^_]+)_/.exec(object.name)?.[1] as SlotId | undefined;
+        if (slot) {
+          object.geometry = object.geometry.clone();
+          this.ownedGeometries.push(object.geometry);
+          const exported = object.geometry.getAttribute('color');
+          if (!exported || exported.itemSize !== 4)
+            throw new Error(`La pieza ${object.name} no tiene paleta RGBA.`);
+          const base = new Float32Array(exported.count * 4);
+          for (let i = 0; i < exported.count; i++) {
+            base[i * 4] = exported.getX(i);
+            base[i * 4 + 1] = exported.getY(i);
+            base[i * 4 + 2] = exported.getZ(i);
+            base[i * 4 + 3] = exported.getW(i);
+          }
+          const attribute = new THREE.Float32BufferAttribute(base.slice(), 4);
+          object.geometry.setAttribute('color', attribute);
+          this.painted.push({ slot, attribute, base });
+        }
         const tint = (material: THREE.Material) => {
-          if (!/^(Team(Paint|Cloth)|Lamp(Front|Rear))/.test(material.name)) return material;
-          if (!colored.has(material)) {
+          const primary = /^(TeamPaint|TeamCloth)$/.test(material.name) ||
+            (slot === 'seat' && material.name === 'Seat') ||
+            (slot === 'exhaust' && material.name === 'Exhaust') ||
+            (slot === 'boots' && material.name === 'Boot');
+          const accent = material.name === 'TeamAccent' ||
+            (slot === 'torso' && material.name === 'Ceramic');
+          if (!primary && !accent && !/^Lamp(Front|Rear)$/.test(material.name)) return material;
+          const key = `${material.uuid}:${slot ?? 'frame'}:${primary ? 'primary' : accent ? 'accent' : 'lamp'}`;
+          if (!colored.has(key)) {
             const instance = material.clone() as THREE.MeshStandardMaterial;
-            if (material.name.startsWith('Team')) instance.color.setHex(color);
-            else instance.emissive.set(material.name === 'LampFront' ? '#fff4d8' : '#ff1935');
-            colored.set(material, instance);
+            if (primary || accent) {
+              instance.userData.paint = { slot: slot ?? 'frame', role: primary ? 'primary' : 'accent' };
+              instance.color.setHex(color);
+            } else instance.emissive.set(material.name === 'LampFront' ? '#fff4d8' : '#ff1935');
+            colored.set(key, instance);
             this.ownedMaterials.push(instance);
           }
-          return colored.get(material)!;
+          return colored.get(key)!;
         };
         object.material = Array.isArray(object.material)
           ? object.material.map(tint)
@@ -275,6 +334,7 @@ export class Bike {
     }
     this.setQuality(quality);
     this.reset();
+    this.setAppearance(color);
   }
 
   setQuality(quality: BikeQuality) {
@@ -609,6 +669,7 @@ export class Bike {
   dispose() {
     this.headlight.dispose();
     this.ownedMaterials.forEach((material) => material.dispose());
+    this.ownedGeometries.forEach((geometry) => geometry.dispose());
     for (const variant of Object.values(this.variantRiders)) {
       const skeletons = new Set<THREE.Skeleton>();
       variant.traverse((object) => {

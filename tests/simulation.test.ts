@@ -264,7 +264,7 @@ describe('circuits', () => {
   });
   it.each([
     { game: 'another-game' },
-    { version: 2 },
+    { version: 1 },
     { laps: 0 },
     { length: Infinity },
     { items: Array(2501).fill(placedPiece('A', 400)) },

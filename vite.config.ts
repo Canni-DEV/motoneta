@@ -8,7 +8,7 @@ export default defineConfig({
     },
   ],
   base: './',
-  server: { watch: { ignored: ['**/tmp/**', '**/test-results/**', '**/docs/media/**'] } },
+  server: { watch: { ignored: ['**/tmp/**', '**/test-results/**', '**/docs/media/**', '**/.blender-mcp-venv/**'] } },
   build: {
     chunkSizeWarningLimit: 600,
     rollupOptions: {

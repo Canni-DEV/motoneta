@@ -8,6 +8,7 @@ test('first launch of ruleset 2 clears old local game data and settings', async 
   await page.goto('/');
   await page.evaluate(async () => {
     localStorage.setItem('motoneta.settings', JSON.stringify({ quality: 'low', volume: 0 }));
+    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 }));
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('motoneta-game', 1);
       request.onupgradeneeded = () => {
@@ -30,7 +31,7 @@ test('first launch of ruleset 2 clears old local game data and settings', async 
   await page.reload();
   await expect(page.locator('#model-status')).toBeHidden();
   const fresh = await page.evaluate(async () => {
-    const request = indexedDB.open('motoneta-game', 2);
+    const request = indexedDB.open('motoneta-game', 3);
     const db = await new Promise<IDBDatabase>((resolve) => (request.onsuccess = () => resolve(request.result)));
     const state = await new Promise<any>((resolve) => {
       const get = db.transaction('data').objectStore('data').get('state');
@@ -41,14 +42,17 @@ test('first launch of ruleset 2 clears old local game data and settings', async 
       get.onsuccess = () => resolve(get.result);
     });
     db.close();
+    const currentSettings = (await import('/src/storage.ts')).settings();
     return { state, count, oldSettings: localStorage.getItem('motoneta.settings'),
-      settings: (await import('/src/storage.ts')).settings() };
+      oldSettingsV2: localStorage.getItem('motoneta.settings.v2'),
+      settings: currentSettings };
   });
   expect(fresh.state.profiles[0].name).toBe('Jugador 1');
   expect(fresh.state.maps).toEqual([]);
   expect(fresh.state.records).toEqual([]);
   expect(fresh.count).toBe(0);
   expect(fresh.oldSettings).toBeNull();
+  expect(fresh.oldSettingsV2).toBeNull();
   expect(fresh.settings.quality).toBe('high');
 });
 
@@ -63,8 +67,8 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
     databases: (await indexedDB.databases()).map((d) => ({ name: d.name, version: d.version })),
     foreign: localStorage.getItem('retired-game.settings'),
   }));
-  expect(initial.keys.sort()).toEqual(['motoneta.settings.v2', 'retired-game.settings']);
-  expect(initial.databases).toEqual([{ name: 'motoneta-game', version: 2 }]);
+  expect(initial.keys.sort()).toEqual(['motoneta.settings.v3', 'retired-game.settings']);
+  expect(initial.databases).toEqual([{ name: 'motoneta-game', version: 3 }]);
   expect(initial.foreign).toBe('{"volume":0.73}');
   await nav(page, 'editor');
   await editorTab(page, 'track');
@@ -76,7 +80,7 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
   const map = await mapDownload;
   expect(map.suggestedFilename()).toBe('motoneta-mapa-ruta-nandu-rio.json');
   const payload = JSON.parse(await readFile((await map.path())!, 'utf8'));
-  expect(payload).toMatchObject({ game: 'motoneta', version: 1, name: 'Ruta Ñandú / Río' });
+  expect(payload).toMatchObject({ game: 'motoneta', version: 2, name: 'Ruta Ñandú / Río' });
   await nav(page, 'records');
   await expect(page.getByRole('button', { name: 'Anteriores', exact: true })).toHaveCount(0);
   const backupDownload = page.waitForEvent('download');
@@ -86,8 +90,8 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
   const data = JSON.parse(await readFile((await backup.path())!, 'utf8'));
   expect(data).toMatchObject({
     game: 'motoneta',
-    version: 1,
-    state: { game: 'motoneta', version: 1 },
+    version: 2,
+    state: { game: 'motoneta', version: 2 },
   });
   expect(data.state).not.toHaveProperty('legacy');
   await page.reload();
@@ -122,7 +126,7 @@ test('current replay imports and exports; mismatched contracts leave the UI inta
     return value;
   });
   await nav(page, 'records');
-  for (const change of [{ game: undefined }, { version: 2 }, { ruleset: 'motoneta-1' }]) {
+  for (const change of [{ game: undefined }, { version: 1 }, { ruleset: 'motoneta-1' }]) {
     await page.getByRole('button', { name: 'Abrir repetición', exact: true }).click();
     await page.locator('#import-file').setInputFiles({
       name: 'invalid.json',
@@ -148,7 +152,7 @@ test('current replay imports and exports; mismatched contracts leave the UI inta
   const exported = JSON.parse(await readFile((await replay.path())!, 'utf8'));
   expect(exported).toMatchObject({
     game: 'motoneta',
-    version: 1,
+    version: 2,
     ruleset: 'motoneta-2',
     inputs: recording.inputs,
   });

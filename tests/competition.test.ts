@@ -30,6 +30,7 @@ import {
 import { appendInput, newRecording, Playback, validateRecording } from '../src/core/recording';
 import { heightAt } from '../src/core/tracks';
 import { Input } from '../src/core/types';
+import { defaultAppearance } from '../src/appearance';
 
 const config = (bots = 0): RaceConfig => {
   const d = emptyDesign();
@@ -39,7 +40,7 @@ const config = (bots = 0): RaceConfig => {
   return {
     ...mapCourse(validateMap(d)),
     mode: 'quick',
-    player: { id: 'p1', name: 'Jugador 1', color: '#e05a3b' },
+    player: { id: 'p1', name: 'Jugador 1', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') },
     bots: makeBots(bots),
     difficulty: 'normal',
     seed: 1984,
@@ -122,13 +123,34 @@ describe('real competition', () => {
   });
   it('validates complete recordings, rejects extra frames and untrusted geometry', () => {
     const { replay } = drive(config());
-    expect(validateRecording(replay).version).toBe(1);
+    expect(validateRecording(replay).version).toBe(2);
     const bad = structuredClone(replay);
     bad.inputs[0][1]++;
     expect(() => validateRecording(bad)).toThrow();
     const broken = structuredClone(replay);
     broken.config.track.laps = 99;
     expect(() => validateRecording(broken)).toThrow();
+  });
+  it('freezes paint and part choices in a replay without affecting the physical trace', () => {
+    const plain = config(2);
+    const customized = structuredClone(plain);
+    customized.player.appearance.parts.helmet = 'trail';
+    customized.player.appearance.paints.helmet.primary = '#123abc';
+    customized.bots[0].appearance.parts.fairing = 'sprint';
+    const a = drive(plain);
+    const b = drive(customized);
+    expect(b.replay.inputs).toEqual(a.replay.inputs);
+    expect(b.replay.result.finishes).toEqual(a.replay.result.finishes);
+    expect(b.r.riders).toEqual(a.r.riders);
+    const frozen = newRecording(customized);
+    customized.player.appearance.parts.helmet = 'core';
+    customized.player.appearance.paints.helmet.primary = '#ffffff';
+    expect(frozen.config.player.appearance.parts.helmet).toBe('trail');
+    expect(frozen.config.player.appearance.paints.helmet.primary).toBe('#123abc');
+    expect(frozen.config.bots[0].appearance.parts.fairing).toBe('sprint');
+    const invalid = structuredClone(b.replay);
+    delete (invalid.config.player.appearance.parts as any).visor;
+    expect(() => validateRecording(invalid)).toThrow();
   });
   it('uses comparable record keys across modes and visuals, but separates geometry and bots', () => {
     const c = config();
@@ -165,7 +187,7 @@ describe('competition sessions', () => {
     replay.termination = 'abandoned';
     replay.result = raceResult(completeRace(r));
     const imported = validateRecording(replay);
-    expect(imported.version).toBe(1);
+    expect(imported.version).toBe(2);
     expect(imported.result.finishes).toHaveLength(3);
     expect(imported.result.finishes.find((f) => f.id === 'p1')!.ticks).toBeNull();
     const ghost = new Playback(imported);
@@ -175,7 +197,7 @@ describe('competition sessions', () => {
   const session = (): CompetitionSession => ({
     id: 'session',
     mode: 'versus',
-    players: [config().player, { id: 'p2', name: 'Segundo', color: '#358aad' }],
+    players: [config().player, { id: 'p2', name: 'Segundo', color: '#358aad', appearance: defaultAppearance('#358aad') }],
     bots: [],
     difficulty: 'normal',
     courses: [

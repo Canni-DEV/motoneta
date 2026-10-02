@@ -1,0 +1,48 @@
+body[data-screen='garage'] .scene-shade { display: none; }
+.garage-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, .8fr);
+  flex: 1;
+  min-height: 0;
+  gap: 14px;
+  padding: 14px;
+  background: #172025;
+}
+.garage-stage { position: relative; min-width: 0; min-height: 0; touch-action: none; }
+.garage-stage .scene-viewport { border: 1px solid #778b92; border-radius: 12px; }
+.garage-camera {
+  position: absolute; bottom: 12px; left: 12px; right: 12px;
+  display: flex; align-items: center; gap: 7px; justify-content: center;
+  color: #fff; text-shadow: 0 1px 3px #000;
+}
+.garage-camera button { min-width: 42px; padding: 8px; background: #24343bde; color: #fff; }
+.garage-camera span { font-size: 12px; text-align: center; }
+.garage-panel {
+  background: #f5ead6; color: #202321; padding: 18px;
+  border-radius: 12px; overflow: auto; min-height: 0;
+  color-scheme: light;
+  --ink: #202321; --panel-raised: #e9ddc7; --field: #fff9ed;
+  --line: #b6aa94; --muted: #625d52; --selected: #fff3e4;
+  --hover: #fff6e7; --edge: #ad9f86; --press-shadow: 0 3px 0 var(--edge);
+}
+.garage-panel h1 { font: 800 clamp(27px, 3vw, 42px) 'Barlow Condensed', sans-serif; margin: 0 0 4px; }
+.garage-panel h2 { font: 800 19px 'Barlow Condensed', sans-serif; margin: 14px 0 7px; }
+.garage-panel p { margin: 5px 0; }
+.garage-panel .eyebrow { letter-spacing: .14em; text-transform: uppercase; font-size: 11px; font-weight: 800; color: #9b332c; }
+.garage-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.garage-slots button { padding: 7px 5px; min-height: 39px; font-size: 12px; }
+.garage-panel button[aria-pressed='true'] { background: #bb3932; color: #fff; border-color: #852920; }
+.garage-panel fieldset { border: 1px solid #b7ab96; border-radius: 8px; margin: 16px 0; padding: 12px; }
+.garage-panel legend { font-weight: 800; padding: 0 7px; }
+.garage-variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.garage-variants button { padding: 7px 4px; min-height: 40px; }
+.garage-paints { display: flex; gap: 20px; margin: 14px 0; }
+.garage-paints label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.garage-paints input { width: 48px; height: 36px; padding: 2px; }
+.garage-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+@media (max-width: 850px) {
+  .garage-shell { grid-template-columns: minmax(0, 1.1fr) minmax(265px, .9fr); gap: 7px; padding: 7px; }
+  .garage-panel { padding: 10px; }
+  .garage-camera span { display: none; }
+  .garage-slots button { font-size: 11px; }
+}

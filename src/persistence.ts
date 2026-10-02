@@ -8,10 +8,11 @@ import {
 } from './core/game';
 import { emptyDesign, type MapDesign } from './core/maps';
 import { DATABASE_NAME, FILE_HEADER } from './identity';
+import { defaultAppearance } from './appearance';
 
 export interface SaveState {
   game: string;
-  version: 1;
+  version: 2;
   profiles: PlayerProfile[];
   activeProfile: string;
   maps: MapDesign[];
@@ -21,7 +22,7 @@ export interface SaveState {
 }
 const initial = (): SaveState => ({
   ...FILE_HEADER,
-  profiles: [{ id: 'player-1', name: 'Jugador 1', color: '#e05a3b' }],
+  profiles: [{ id: 'player-1', name: 'Jugador 1', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') }],
   activeProfile: 'player-1',
   maps: [],
   records: [],
@@ -35,12 +36,12 @@ export class GameStore {
   async open() {
     this.db?.close();
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, 2);
+      const request = indexedDB.open(DATABASE_NAME, 3);
       request.onupgradeneeded = (event) => {
         const db = request.result;
         if (!db.objectStoreNames.contains('data')) db.createObjectStore('data');
         if (!db.objectStoreNames.contains('replays')) db.createObjectStore('replays');
-        if (event.oldVersion > 0 && event.oldVersion < 2) {
+        if (event.oldVersion > 0 && event.oldVersion < 3) {
           request.transaction!.objectStore('data').clear();
           request.transaction!.objectStore('replays').clear();
         }

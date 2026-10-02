@@ -1,4 +1,5 @@
 import { FILE_HEADER, FORMAT_VERSION, GAME_ID, RULESET } from '../identity';
+import { isAppearance } from '../appearance';
 import type { Race, RaceConfig, Recording } from './game';
 import { designFromTrack, mapTrack, validateMap } from './maps';
 import {
@@ -101,7 +102,8 @@ export function validateRecording(value: unknown): Recording {
       typeof p.name !== 'string' ||
       !p.name.trim() ||
       p.name.length > 40 ||
-      !/^#[0-9a-f]{6}$/i.test(p.color)
+      !/^#[0-9a-f]{6}$/i.test(p.color) ||
+      !isAppearance(p.appearance)
     )
       fail();
     ids.add(p.id);

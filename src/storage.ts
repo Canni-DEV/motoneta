@@ -27,6 +27,7 @@ export function settings(): Settings {
   // Old preferences belong to the ruleset that was intentionally reset.
   try {
     localStorage.removeItem(`${GAME_ID}.settings`);
+    localStorage.removeItem(`${GAME_ID}.settings.v2`);
   } catch {
     /* Storage can be unavailable in private browsing. */
   }

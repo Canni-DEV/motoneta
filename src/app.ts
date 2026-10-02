@@ -1,4 +1,5 @@
 import { GameAudio } from './audio';
+import { defaultAppearance, type Appearance, type SlotId, type VariantId } from './appearance';
 import { CinematicCamera } from './cinematic-camera';
 import { analyzeRecording, type CinematicTimeline } from './cinematic-timeline';
 import { audioCreditsView } from './audio/credits';
@@ -50,6 +51,7 @@ import { Dialogs } from './ui/dialogs';
 import { patch } from './ui/dom';
 import { Editor } from './ui/editor';
 import { FocusedField } from './ui/focused-field';
+import { garageView } from './ui/garage';
 import {
   Navigation,
   setupPresentation,
@@ -148,6 +150,7 @@ export async function startApp() {
   const setupCache: Partial<Record<Setup['mode'], Setup>> = {};
   let settingsTab: SettingsTab = 'audio';
   let selectedProfile = store.state.activeProfile;
+  let garage: { profileId: string; draft: Appearance; selected: SlotId } | null = null;
   let recordSelection = '';
   let generatorOrigin: Screen = 'quick';
   const libraryState: LibraryPresentation = {
@@ -244,7 +247,10 @@ export async function startApp() {
     const heading = header(screen, store.state.profiles, store.state.activeProfile);
     let content = '';
     let course = BUILTINS[0];
-    if (screen === 'home') content = homeView(store.state);
+    if (screen === 'garage' && garage) {
+      const owner = store.state.profiles.find((p) => p.id === garage!.profileId);
+      content = garageView(owner?.name ?? 'Jugador', garage.draft, garage.selected);
+    } else if (screen === 'home') content = homeView(store.state);
     else if (screen === 'editor') {
       content = editor.html();
       course = mapCourse(editor.design);
@@ -272,6 +278,28 @@ export async function startApp() {
     const host = ui.querySelector<HTMLElement>('[data-scene-host]') ?? $('#backdrop-host');
     viewport.attach(host, screen === 'editor' ? 'editor' : 'menu');
     preview(course, screen === 'editor');
+    if (screen === 'garage' && garage) {
+      world?.setGarage(garage.draft);
+      const stage = ui.querySelector<HTMLElement>('#garage-stage');
+      let lastX: number | null = null;
+      stage?.addEventListener('pointerdown', (event) => {
+        if ((event.target as Element).closest('button')) return;
+        lastX = event.clientX;
+        stage.setPointerCapture(event.pointerId);
+      });
+      stage?.addEventListener('pointermove', (event) => {
+        if (lastX === null || !world) return;
+        world.garageYaw += (event.clientX - lastX) * 0.009;
+        lastX = event.clientX;
+      });
+      stage?.addEventListener('pointerup', () => { lastX = null; });
+      stage?.addEventListener('pointercancel', () => { lastX = null; });
+      stage?.addEventListener('wheel', (event) => {
+        if (!world) return;
+        event.preventDefault();
+        world.garageZoom = Math.max(2.3, Math.min(6, world.garageZoom + event.deltaY * 0.004));
+      }, { passive: false });
+    }
     if (screen === 'editor') {
       editor.bind(ui);
       if (world) world.preview = editor.cursor / editor.design.length;
@@ -296,6 +324,10 @@ export async function startApp() {
     if (screen === 'editor' && next !== 'editor') {
       editor.cameraZoom = world?.zoomTarget ?? 1;
       editor.unbind(ui);
+    }
+    if (screen === 'garage' && next !== 'garage') {
+      world?.setGarage(null);
+      garage = null;
     }
     if (remember) navigation.enter(next);
     setupCache[setup.mode] = setup;
@@ -338,6 +370,7 @@ export async function startApp() {
     screen = next;
     idleSince = next === 'home' && audio.unlocked ? performance.now() : null;
     render();
+    checkSize();
     navigation.restoreFocus(ui);
     window.scrollTo(0, 0);
   }
@@ -413,7 +446,11 @@ export async function startApp() {
     lastRecording = watch;
     ghosts = ghostRecordings.map((r) => new Playback(r));
     ghostNames = ghostRecordings.map((r) => r.config.player);
+    const appearanceConfig = watch ? watch.config : config!;
+    world.appearances = [appearanceConfig.player, ...appearanceConfig.bots, ...ghostRecordings.map((r) => r.config.player)]
+      .map((p) => structuredClone(p.appearance));
     world.ghostStart = race.riders.length;
+    world.ensureBikes(race.riders.length + ghosts.length);
     world.setTrack(race.track);
     world.beginRace(race);
     world.mode = 'race';
@@ -731,7 +768,10 @@ export async function startApp() {
           if (replay) recordings.push(replay);
         }
       returnScreen = 'session';
-      run(sessionConfig(session), null, recordings);
+      const config = sessionConfig(session);
+      const current = store.state.profiles.find((p) => p.id === config.player.id);
+      if (current) config.player.appearance = structuredClone(current.appearance);
+      run(config, null, recordings);
     } finally {
       startBusy = false;
     }
@@ -776,11 +816,25 @@ export async function startApp() {
           p.id,
           store.state.profiles.length === 1 ? 'disabled' : 'class="danger"',
         ) +
+        b('garage-open', 'Personalizar moto y piloto', p.id, 'class="primary"') +
         '</div></div></div><div class="actions">' +
         b('add-profile', 'Añadir perfil') +
         b('close-modal', 'Listo', '', 'class="primary"') +
         '</div><p class="muted">Los perfiles y sus marcas se guardan en este navegador.</p>',
     );
+  }
+  async function leaveGarage(save: boolean) {
+    if (!garage) return;
+    if (save) {
+      const { profileId, draft } = garage;
+      await store.update((state) => {
+        const owner = state.profiles.find((p) => p.id === profileId);
+        if (owner) owner.appearance = structuredClone(draft);
+      });
+    }
+    garage = null;
+    navigate(navigation.back(), false);
+    profilesView();
   }
   function library() {
     if (screen !== 'library') navigate('library');
@@ -1190,12 +1244,56 @@ export async function startApp() {
           case 'profiles':
             profilesView();
             break;
+          case 'garage-open': {
+            const owner = store.state.profiles.find((p) => p.id === value);
+            if (!owner) break;
+            selectedProfile = owner.id;
+            garage = { profileId: owner.id, draft: structuredClone(owner.appearance), selected: 'fairing' };
+            navigate('garage');
+            break;
+          }
+          case 'garage-slot':
+            if (garage) { garage.selected = value as SlotId; render(); }
+            break;
+          case 'garage-variant':
+            if (garage) { garage.draft.parts[garage.selected] = value as VariantId; render(); }
+            break;
+          case 'garage-left':
+          case 'garage-right':
+            if (world) world.garageYaw += action === 'garage-left' ? -0.35 : 0.35;
+            break;
+          case 'garage-zoom-in':
+          case 'garage-zoom-out':
+            if (world) world.garageZoom = Math.max(2.3, Math.min(6, world.garageZoom + (action === 'garage-zoom-in' ? -0.35 : 0.35)));
+            break;
+          case 'garage-reset-slot':
+            if (garage) {
+              const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
+              garage.draft.parts[garage.selected] = 'core';
+              garage.draft.paints[garage.selected] = defaultAppearance(owner.color).paints[garage.selected];
+              render();
+            }
+            break;
+          case 'garage-reset-all':
+            if (garage) {
+              const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
+              garage.draft = defaultAppearance(owner.color);
+              render();
+            }
+            break;
+          case 'garage-save':
+            await leaveGarage(true);
+            break;
+          case 'garage-cancel':
+            await leaveGarage(false);
+            break;
           case 'add-profile':
             await store.update((s) => {
               s.profiles.push({
                 id: crypto.randomUUID(),
                 name: `Jugador ${s.profiles.length + 1}`,
                 color: COLORS[s.profiles.length % COLORS.length],
+                appearance: defaultAppearance(COLORS[s.profiles.length % COLORS.length]),
               });
             });
             selectedProfile = store.state.profiles.at(-1)!.id;
@@ -1375,6 +1473,11 @@ export async function startApp() {
   document.addEventListener('input', (event) => {
     const el = event.target as HTMLInputElement;
     if (focusedField.owns(el)) return;
+    if (el.dataset.garageColor && garage) {
+      garage.draft.paints[garage.selected][el.dataset.garageColor as 'primary' | 'accent'] = el.value;
+      world?.setGarage(garage.draft);
+      return;
+    }
     if (el.id === 'map-search') {
       setupViews[setup.mode].search = el.value;
       render();
@@ -1687,7 +1790,8 @@ export async function startApp() {
       innerWidth - parseFloat(safe.paddingLeft) - parseFloat(safe.paddingRight);
     const availableHeight =
       innerHeight - parseFloat(safe.paddingTop) - parseFloat(safe.paddingBottom);
-    const blocked = portrait || availableWidth < 640 || availableHeight < 360;
+    const blocked = screen !== 'home' && screen !== 'garage' &&
+      (portrait || availableWidth < 640 || availableHeight < 360);
     $('#size-gate').hidden = !blocked;
     ui.inert = blocked;
     if (blocked) {

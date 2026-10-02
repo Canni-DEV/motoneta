@@ -21,7 +21,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
       const source = (p: string) => import(/* @vite-ignore */ p);
       const [
         { World },
-        { loadBikeAssets },
+        { Bike, loadBikeAssets },
         { loadCrowdAssets },
         { defaultSettings },
         { createRace },
@@ -36,6 +36,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
         source('/src/core/game.ts'),
         source('/src/core/maps.ts'),
       ]);
+      const bikeAssets = await loadBikeAssets();
       const world =
         (window as any).benchmarkWorld ??
         new World(
@@ -45,7 +46,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
             quality: 'low',
             vfx: { race: false, tracks: false, ambient: false, intensity: 'balanced' },
           },
-          await loadBikeAssets(),
+          bikeAssets,
           await loadCrowdAssets(),
         );
       (window as any).benchmarkWorld = world;
@@ -101,6 +102,39 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
             drawCalls: world.renderer.info.render.calls,
           });
         }
+      // The production build allocates these lazily. The reference build has
+      // seven fixed bikes, so extend it with the same Bike type for this stress case.
+      if (typeof (world as any).ensureBikes === 'function') (world as any).ensureBikes(11);
+      else while (world.bikes.length < 11) {
+        const bike = new Bike(0xaabbcc, bikeAssets, world.settings.quality);
+        world.bikes.push(bike);
+        world.scene.add(bike.root);
+      }
+      const ghosts = r.riders.slice(1, 6).map((rider: any, i: number) => ({
+        ...structuredClone(rider), id: `ghost-${i}`,
+      }));
+      r.riders.push(...ghosts);
+      world.ghostStart = 6;
+      for (const q of ['low', 'high']) {
+        world.settings.quality = q;
+        world.applySettings();
+        render();
+        const times = [];
+        for (let n = 0; n < 20; n++) {
+          await new Promise(requestAnimationFrame);
+          const start = performance.now();
+          render();
+          times.push(performance.now() - start);
+        }
+        times.sort((a, b) => a - b);
+        values.push({
+          quality: q,
+          scenario: 'six-riders-five-ghosts',
+          medianMs: times[10],
+          p95Ms: times[18],
+          drawCalls: world.renderer.info.render.calls,
+        });
+      }
       const allocations = [];
       for (let i = 0; i < 20; i++) {
         world.setTrack(structuredClone(r.track));

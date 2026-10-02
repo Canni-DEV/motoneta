@@ -1,0 +1,64 @@
+{
+  "baselineCommit": "29690223eaf801fdcebe654ce4e96ae5255d01ec",
+  "candidateBranch": "codex/motoneta-customization",
+  "renderer": "WebKit WebGL",
+  "highLimitPercent": 20,
+  "benchmark": "tests/e2e/performance.spec.ts",
+  "samples": [
+    {
+      "candidateP95Ms": 9.3,
+      "candidateDrawCalls": 588,
+      "baselineP95Ms": 10.0,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scenario": "six-riders-five-ghosts",
+      "changePercent": -7.0,
+      "quality": "low",
+      "baselineDrawCalls": 700
+    },
+    {
+      "candidateP95Ms": 11.3,
+      "candidateDrawCalls": 861,
+      "baselineP95Ms": 11.1,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scenario": "six-riders-five-ghosts",
+      "changePercent": 1.8,
+      "quality": "high",
+      "baselineDrawCalls": 1015
+    },
+    {
+      "candidateP95Ms": 9.6,
+      "candidateDrawCalls": 551,
+      "baselineP95Ms": 10.4,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scenario": "six-riders-five-ghosts",
+      "changePercent": -7.7,
+      "quality": "low",
+      "baselineDrawCalls": 663
+    },
+    {
+      "candidateP95Ms": 11.5,
+      "candidateDrawCalls": 809,
+      "baselineP95Ms": 13.3,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scenario": "six-riders-five-ghosts",
+      "changePercent": -13.5,
+      "quality": "high",
+      "baselineDrawCalls": 963
+    }
+  ],
+  "method": "20 warmed render samples with gl.finish in the same Playwright/SwiftShader environment; six riders plus five synthetic ghosts; 95th percentile",
+  "lowLimitPercent": 10,
+  "stableResources": true
+}

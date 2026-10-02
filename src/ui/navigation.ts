@@ -8,7 +8,8 @@ export type Screen =
   | 'session'
   | 'race'
   | 'library'
-  | 'generator';
+  | 'generator'
+  | 'garage';
 export type SetupStep = 'players' | 'courses' | 'review';
 export interface SetupPresentation {
   step: SetupStep;

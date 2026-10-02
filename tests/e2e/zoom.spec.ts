@@ -6,7 +6,7 @@ const camera = (page: Page) => page.evaluate(() => (window as any).__motoneta.ca
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
-      'motoneta.settings.v2',
+      'motoneta.settings.v3',
       JSON.stringify({ quality: 'low', volume: 0, cameraShake: false }),
     );
   });

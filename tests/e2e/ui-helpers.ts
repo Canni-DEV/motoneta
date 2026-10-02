@@ -18,7 +18,7 @@ export async function nav(page: Page, mode: string) {
 export async function ready(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem(
-      'motoneta.settings.v2',
+      'motoneta.settings.v3',
       JSON.stringify({
         quality: 'low',
         volume: 0,

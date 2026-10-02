@@ -1,4 +1,5 @@
 import { GAME_ID, RULESET } from '../identity';
+import { botAppearance, type Appearance } from '../appearance';
 import type { TimeOfDay, Track, Weather } from './types';
 export type { Race } from './types';
 
@@ -8,6 +9,7 @@ export interface PlayerProfile {
   id: string;
   name: string;
   color: string;
+  appearance: Appearance;
 }
 export interface TrackRef {
   id: string;
@@ -40,7 +42,7 @@ export interface RaceResult {
 }
 export interface Recording {
   game: typeof GAME_ID;
-  version: 1;
+  version: 2;
   ruleset: typeof RULESET;
   config: RaceConfig;
   inputs: [number, number][];
@@ -84,6 +86,7 @@ export const makeBots = (n: number): PlayerProfile[] =>
     id: `bot-${i + 1}`,
     name: `Bot ${i + 1}`,
     color: COLORS[(i + 1) % COLORS.length],
+    appearance: botAppearance(i, COLORS[(i + 1) % COLORS.length]),
   }));
 export function recordKey(c: RaceConfig) {
   return [

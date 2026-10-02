@@ -225,9 +225,9 @@ test('group settings persist, disabled groups stay quiet and reduced motion has 
   page,
 }) => {
   await page.addInitScript(() => {
-    if (!localStorage.getItem('motoneta.settings.v2'))
+    if (!localStorage.getItem('motoneta.settings.v3'))
       localStorage.setItem(
-        'motoneta.settings.v2',
+        'motoneta.settings.v3',
         JSON.stringify({
           vfx: { race: false, tracks: false, ambient: false, intensity: 'balanced' },
           quality: 'low',
@@ -247,7 +247,7 @@ test('group settings persist, disabled groups stay quiet and reduced motion has 
   await page.reload();
   await expect(page.locator('#model-status')).toBeHidden();
   expect(
-    await page.evaluate(() => JSON.parse(localStorage.getItem('motoneta.settings.v2')!).vfx),
+    await page.evaluate(() => JSON.parse(localStorage.getItem('motoneta.settings.v3')!).vfx),
   ).toEqual({ race: true, tracks: true, ambient: true, intensity: 'strong' });
   await nav(page, 'quick');
   await page.locator('[data-action="weather"][data-value="rain"]').click();

@@ -115,7 +115,7 @@ test('unavailable audio is reported and never prevents starting a race', async (
   page.on('pageerror', (e) => errors.push(e.message));
   await page.addInitScript(() => {
     Object.defineProperty(window, 'AudioContext', { configurable: true, value: undefined });
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low' }));
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low' }));
   });
   await page.goto('/?audio-review');
   await page.getByRole('button', { name: 'Escuchar motor', exact: true }).click();

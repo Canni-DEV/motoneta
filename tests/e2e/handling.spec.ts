@@ -5,10 +5,10 @@ test('turbo and rear-wheel balance can be felt and corrected during a race', asy
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.addInitScript(() =>
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 })),
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0 })),
   );
   await page.goto('/');
-  await page.getByRole('button', { name: 'Editor', exact: true }).click();
+  await page.locator('.home-modes [data-value="editor"]').click();
   await editorTab(page, 'track');
   await page.getByRole('button', { name: 'Vaciar circuito', exact: true }).click();
   await page.locator('#design-laps').selectOption('9');
