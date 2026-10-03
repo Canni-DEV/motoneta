@@ -1,0 +1,111 @@
+{
+  "reviewStage": "volumen-pelvis",
+  "baselineCommit": null,
+  "baselineReference": "ergonomics-v3-snapshot",
+  "method": "Same Playwright Chromium/SwiftShader configuration; baseline GLBs and visual runtime routed from the preserved snapshot when MODEL_BENCHMARK_RUNTIME is set; three sequential runs per model, 20 warmed gl.finish render samples per scenario, median of run p95 values. Mobile viewport is emulated.",
+  "lowLimitPercent": 10,
+  "highLimitPercent": 20,
+  "stableResources": true,
+  "samples": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "quality": "low",
+      "scenario": "six-riders-five-ghosts",
+      "baselineP95Ms": 10.200000002980232,
+      "candidateP95Ms": 9.699999999254942,
+      "baselineRunsP95Ms": [
+        9.400000002235174,
+        11.400000002235174,
+        10.200000002980232
+      ],
+      "candidateRunsP95Ms": [
+        9.899999998509884,
+        9,
+        9.699999999254942
+      ],
+      "changePercent": -4.9,
+      "limitPercent": 10,
+      "passes": true,
+      "baselineDrawCalls": 588,
+      "candidateDrawCalls": 588
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "quality": "high",
+      "scenario": "six-riders-five-ghosts",
+      "baselineP95Ms": 12.699999999254942,
+      "candidateP95Ms": 10.800000000745058,
+      "baselineRunsP95Ms": [
+        12.699999999254942,
+        12.100000001490116,
+        14.400000002235174
+      ],
+      "candidateRunsP95Ms": [
+        12.799999997019768,
+        10.399999998509884,
+        10.800000000745058
+      ],
+      "changePercent": -15,
+      "limitPercent": 20,
+      "passes": true,
+      "baselineDrawCalls": 861,
+      "candidateDrawCalls": 861
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "quality": "low",
+      "scenario": "six-riders-five-ghosts",
+      "baselineP95Ms": 12.100000001490116,
+      "candidateP95Ms": 9.400000002235174,
+      "baselineRunsP95Ms": [
+        12.100000001490116,
+        9.800000000745058,
+        14.100000001490116
+      ],
+      "candidateRunsP95Ms": [
+        10.5,
+        8.799999997019768,
+        9.400000002235174
+      ],
+      "changePercent": -22.3,
+      "limitPercent": 10,
+      "passes": true,
+      "baselineDrawCalls": 551,
+      "candidateDrawCalls": 551
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "quality": "high",
+      "scenario": "six-riders-five-ghosts",
+      "baselineP95Ms": 15.400000002235174,
+      "candidateP95Ms": 11.399999998509884,
+      "baselineRunsP95Ms": [
+        16.600000001490116,
+        14.099999997764826,
+        15.400000002235174
+      ],
+      "candidateRunsP95Ms": [
+        13.699999999254942,
+        11.399999998509884,
+        10.300000000745058
+      ],
+      "changePercent": -26,
+      "limitPercent": 20,
+      "passes": true,
+      "baselineDrawCalls": 809,
+      "candidateDrawCalls": 809
+    }
+  ]
+}

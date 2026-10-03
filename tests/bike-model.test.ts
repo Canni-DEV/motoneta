@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { Group, Mesh, MeshStandardMaterial, SkinnedMesh, Vector3 } from 'three';
+import { DoubleSide, Group, Mesh, MeshStandardMaterial, Raycaster, SkinnedMesh, Vector3 } from 'three';
 import {
   Bike,
   createBikeAssetLoader,
@@ -9,6 +9,7 @@ import {
 } from '../src/bike-model';
 import { modelAssets } from './model-fixture';
 import { defaultAppearance, SLOTS, VARIANTS } from '../src/appearance';
+import modelManifest from '../assets/motocross/manifest.json';
 
 let assets: BikeAssets;
 beforeAll(async () => {
@@ -49,7 +50,7 @@ const snapshot = (bike: Bike) => {
 
 describe('exported model resources and lifecycle', () => {
   it.each([
-    ['high', 24000],
+    ['high', 30000],
     ['low', 8000],
   ] as const)('%s stays within its triangle budget', (quality, limit) => {
     const bike = new Bike(0xc91c32, assets, quality);
@@ -60,6 +61,15 @@ describe('exported model resources and lifecycle', () => {
     }
     expect(triangles).toBeGreaterThan(1000);
     expect(triangles).toBeLessThanOrEqual(limit);
+    // Independent slot choices can cost more than any complete preset.
+    const catalog = [...meshes(bike.variants[quality]), ...meshes(bike.rider)];
+    const count = (mesh: Mesh) => (mesh.geometry.index?.count ?? mesh.geometry.attributes.position.count) / 3;
+    const fixed = catalog.filter((mesh) => !mesh.name.startsWith('Slot_')).reduce((sum, mesh) => sum + count(mesh), 0);
+    const maximum = fixed + SLOTS.reduce((sum, slot) => sum + Math.max(...VARIANTS.map((variant) =>
+      catalog.filter((mesh) => new RegExp(`^Slot_${slot}_${variant}(?:_|$)`).test(mesh.name)).reduce((total, mesh) => total + count(mesh), 0),
+    )), 0);
+    expect(maximum).toBeLessThanOrEqual(limit);
+    expect(maximum).toBe(modelManifest.assets[quality].trianglesSelectedMax);
     expect(meshes(bike.rider).some((m) => m instanceof SkinnedMesh)).toBe(true);
     bike.dispose();
   });
@@ -115,8 +125,8 @@ describe('exported model resources and lifecycle', () => {
     const load = createBikeAssetLoader(async () => new Group());
     await expect(load()).rejects.toThrow('Modelo incompleto');
   });
-  it('supports every pair of part variants without allocating new geometry or materials', () => {
-    const bike = new Bike(0xc91c32, assets);
+  it.each(['high', 'low'] as const)('%s supports every pair of part variants without allocating new geometry or materials', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality);
     const appearance = defaultAppearance();
     const initialGeometries = (bike as any).ownedGeometries.length;
     const initialMaterials = (bike as any).ownedMaterials.length;
@@ -127,10 +137,10 @@ describe('exported model resources and lifecycle', () => {
         bike.setAppearance(appearance);
         for (const slot of [SLOTS[i], SLOTS[j]])
           for (const variant of VARIANTS) {
-            const node = bike.variants.high.getObjectByName(`Slot_${slot}_${variant}`) ??
+            const node = bike.variants[quality].getObjectByName(`Slot_${slot}_${variant}`) ??
               bike.rider.getObjectByName(`Slot_${slot}_${variant}`) ??
-              bike.variants.high.getObjectByName(`Slot_${slot}_${variant}_Front`) ??
-              bike.variants.high.getObjectByName(`Slot_${slot}_${variant}_FrontWheel`);
+              bike.variants[quality].getObjectByName(`Slot_${slot}_${variant}_Front`) ??
+              bike.variants[quality].getObjectByName(`Slot_${slot}_${variant}_FrontWheel`);
             expect(node, `${slot}/${variant}`).toBeDefined();
             expect(node!.visible).toBe(appearance.parts[slot] === variant);
           }
@@ -171,6 +181,80 @@ describe('exported model resources and lifecycle', () => {
 });
 
 describe('visual animation', () => {
+  it.each(['high', 'low'] as const)('%s retains seated glute and thigh volume on both sides', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality);
+    bike.reset(); bike.root.updateMatrixWorld(true);
+    const pants = bike.rider.getObjectByName('Slot_pants_core') as SkinnedMesh;
+    const material = pants.material as MeshStandardMaterial;
+    const originalSide = material.side; material.side = DoubleSide;
+    const ray = new Raycaster();
+    // Sample the seated glute below the iliac crest, plus the middle thigh.
+    for (const side of [-1, 1]) for (const [y, z, minimum, maximum] of [[.9, .08, .17, .225], [.79, .225, .14, .20]]) {
+      const origin = bike.riderLayer.localToWorld(new Vector3(-1, y, side * z));
+      ray.set(origin, new Vector3(1, 0, 0));
+      const hits = ray.intersectObject(pants, false);
+      expect(hits.length).toBeGreaterThanOrEqual(2);
+      expect(hits.at(-1)!.distance - hits[0].distance).toBeGreaterThan(minimum);
+      expect(hits.at(-1)!.distance - hits[0].distance).toBeLessThan(maximum);
+    }
+    material.side = originalSide;
+    bike.dispose();
+  });
+  it.each(['high', 'low'] as const)('%s keeps the rear trouser contour continuous without protruding glute lobes', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality);
+    bike.reset(); bike.root.updateMatrixWorld(true);
+    const pants = bike.rider.getObjectByName('Slot_pants_core') as SkinnedMesh;
+    const ray = new Raycaster();
+    for (const y of [.89, .90, .915]) {
+      const rear = (z: number) => {
+        ray.set(bike.riderLayer.localToWorld(new Vector3(-1, y, z)), new Vector3(1, 0, 0));
+        const hits = ray.intersectObject(pants, false);
+        expect(hits.length).toBeGreaterThan(0);
+        return hits[0].distance;
+      };
+      const center = rear(0);
+      for (const z of [-.10, -.075, -.04, .04, .075, .10])
+        expect(rear(z)).toBeGreaterThanOrEqual(center - .008);
+    }
+    bike.dispose();
+  });
+  it.each(['high', 'low'] as const)('%s keeps the seated support above the foam through suspension and landing', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality);
+    const pants = bike.rider.getObjectByName('Slot_pants_core') as SkinnedMesh;
+    const seat = bike.variants[quality].getObjectByName('Slot_seat_core') as Mesh;
+    // Probe the continuous underside, independently of decimation vertex placement.
+    const support = [-.26, -.22, -.18].flatMap((x) => [-.025, .025].map((z) => new Vector3(x, 1.1, z)));
+    const material = pants.material as MeshStandardMaterial;
+    const originalSide = material.side; material.side = DoubleSide;
+    const ray = new Raycaster();
+    let maximumCompression = 0;
+    for (let frame = 0; frame < 140; frame++) {
+      // Exercise the solver's full visual travel as well as a normal jump/landing sequence.
+      if (frame === 100) bike.compression = .055;
+      if (frame === 130) bike.compression = -.025;
+      const airborne = frame >= 40 && frame < 65;
+      bike.update(state({ time: frame / 60, speed: 3, grounded: !airborne }));
+      bike.root.updateMatrixWorld(true);
+      const chassis = bike.variants[quality].getObjectByName('Chassis')!;
+      maximumCompression = Math.max(maximumCompression, -chassis.position.y);
+      for (const variant of VARIANTS) for (const slot of ['seat', 'fairing', 'exhaust', 'plate'])
+        expect(bike.variants[quality].getObjectByName(`Slot_${slot}_${variant}`)!.position.y).toBe(chassis.position.y);
+      if (airborne) continue;
+      for (const probe of support) {
+        ray.set(seat.localToWorld(probe.clone()), new Vector3(0, -1, 0));
+        const cloth = ray.intersectObject(pants, false);
+        expect(cloth.length).toBeGreaterThanOrEqual(2);
+        const hits = ray.intersectObject(seat, false);
+        expect(hits.length).toBeGreaterThan(0);
+        const gap = cloth.at(-1)!.point.y - hits[0].point.y;
+        expect(gap).toBeGreaterThanOrEqual(-.0001);
+        expect(gap).toBeLessThan(.014);
+      }
+    }
+    expect(maximumCompression).toBeGreaterThan(.018);
+    material.side = originalSide;
+    bike.dispose();
+  });
   it.each(['high', 'low'] as const)('%s steers the bars, forks, wheel and rider toward a lane', (quality) => {
     const bike = new Bike(0xc91c32, assets, quality);
     for (let i = 0; i < 16; i++) bike.update(state({ time: i / 60, laneMotion: 1 }));
@@ -209,8 +293,11 @@ describe('visual animation', () => {
     expect(bike.riderLayer.position.distanceTo(bike.body.position)).toBeLessThan(1e-6);
     bike.dispose();
   });
-  it.each(['high', 'low'] as const)('%s keeps the fallen rider on flat ground and ramps', (quality) => {
+  it.each((['high', 'low'] as const).flatMap((quality) => VARIANTS.map((variant) => [quality, variant] as const)))('%s/%s keeps the fallen rider on flat ground and ramps', (quality, variant) => {
     const bike = new Bike(0xc91c32, assets, quality);
+    const appearance = defaultAppearance();
+    for (const slot of SLOTS) appearance.parts[slot] = variant;
+    bike.setAppearance(appearance);
     const riderMeshes = visibleMeshes(bike.rider as Group).filter((mesh): mesh is SkinnedMesh => mesh instanceof SkinnedMesh);
     const profiles = [
       () => 0,

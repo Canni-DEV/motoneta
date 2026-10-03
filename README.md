@@ -45,6 +45,42 @@ npm run preview
 
 Abrir la dirección de preview, normalmente `http://127.0.0.1:4173/`. El resultado está en `dist/`; debe servirse por HTTP, no abrirse como archivo.
 
+## Modelos 3D
+
+La fuente reproducible es `scripts/build-motocross.py`, para Blender 5.2.2 LTS. Reconstruye el archivo editable, ambos GLB y el manifiesto; las ediciones manuales del `.blend` deben trasladarse al generador antes de regenerarlo.
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python-exit-code 1 --python scripts/build-motocross.py
+# Añadir -- --render --render-all para las vistas de estudio de las tres familias y ambas calidades.
+npm run models:validate
+```
+
+El rediseño incluye **Esencial**, **Competición** y **Travesía**, con uniones comunes y diferencias locales de volumen, protección y pintura. Incorpora la devolución sobre Esencial: visera más corta, casco más compacto y mayor volumen corporal. Con Vite activo, abrir `/assets/motocross/review/index.html` para comparar los modelos, sus calidades, poses y combinaciones. `node scripts/review-model-quality.mjs catalogo --families --mixed` regenera las capturas del juego. Las evidencias nuevas se guardan en `assets/motocross/review/catalogo/`, preservando la primera revisión y las históricas.
+
+`scripts/check-motocross-topology.py` comprueba las superficies conectadas, los pesos y el rig desde Blender. La comparación de rendimiento conserva tres ejecuciones por modelo; `node scripts/compare-model-performance.mjs <commit-original> catalogo` calcula la mediana de los p95 guardados en `review/catalogo/performance/` y actualiza `performance-comparison.json`.
+
+La revisión de ergonomía está en `/assets/motocross/review/ergonomia/index.html`: compara Esencial neutro con la versión 2 preservada, incluyendo asiento sin piloto, contacto de pelvis y transparencias. La nueva base recalibra las posiciones del rig visual, conservando los 15 nombres, jerarquía y contactos de manos/pies. El generador escribe la misma definición en `assets/motocross/rig.json` y `src/bike-rig.json`. Asiento y plásticos siguen la suspensión; la recuperación eleva y desplaza la pierna por fuera del cuerpo de la moto. El acabado final de las familias queda pendiente de esta revisión visual.
+
+```powershell
+node scripts/review-model-quality.mjs volumen-pelvis --neutral --poses-json --sweep --clearance-families
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background assets/motocross/motocross.blend --python-exit-code 1 --python scripts/check-motocross-topology.py -- --stage=volumen-pelvis
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python-exit-code 1 --python scripts/check-rider-clearance.py -- --stage=volumen-pelvis
+```
+
+El barrido comprueba cruces de triángulos, vértices contenidos y distancia de apoyo entre pantalón/torso/botas y asiento/carenado. Incluye todas sus parejas de variantes en High y Low y cada fotograma entero del rodado y montaje, además de conducción, giro, vuelo y aterrizaje. No sustituye la revisión visual ni constituye una prueba de colisión contra todas las piezas mecánicas. El JSON comprimido de geometría se regenera y queda fuera de Git; `clearance.json` conserva los resultados.
+
+Para comparar el rendimiento con la versión 2, `MODEL_BENCHMARK_MODELS=assets/motocross/review/ergonomia/baseline` y `MODEL_BENCHMARK_RUNTIME=/assets/motocross/review/ergonomia/baseline/benchmark-bike-model.ts` seleccionan sus GLB, código visual y rig preservados. Ejecutar `tests/e2e/performance.spec.ts --repeat-each=3` por separado para referencia y candidato, guardando cada grupo con `MODEL_BENCHMARK_OUTPUT` en `review/ergonomia/performance/baseline` o `candidate`; quitar ambos overrides para el candidato. `node scripts/compare-model-performance.mjs connected-families-v2-snapshot ergonomia` compara sus medianas. El adaptador `benchmark-bike-model.ts` solo cambia las rutas de importación del archivo preservado; no altera sus cálculos.
+
+La corrección posterior de glúteos y muslos se revisa en `/assets/motocross/review/volumen-pelvis/index.html`, con comparación en color y neutro centrada en la vista posterior. Conserva el asiento y altura aprobados y cambia solo el pantalón: secciones posteriores redondeadas, muslos con espesor y una transición interna que apoya sobre la espuma. `approved-parts.json` verifica que las otras 100 mallas, el rig y el runtime son idénticos a la referencia. Las pruebas incluyen el espesor sagital de ambos glúteos y muslos y el contacto durante todo el recorrido de suspensión. Para este benchmark, basta `MODEL_BENCHMARK_MODELS=assets/motocross/review/volumen-pelvis/baseline` en la referencia; el código visual coincide con el candidato. Las tres ejecuciones de cada versión y sus medianas quedan en `review/volumen-pelvis/performance/`.
+
+La revisión de anatomía se encuentra en `/assets/motocross/review/anatomia/index.html`. Sustituye la unión plana de pelvis y muslos por una superficie fusionada y suavizada en Blender, con cortes comunes en cintura y botas y una cavidad medial de apoyo. Mantiene el asiento y altura aprobados; reduce ligeramente la apertura de rodillas y redistribuye la elevación de cadera y pierna durante la recuperación. Low reserva más geometría para el pantalón y simplifica el relieve fino de las ruedas.
+
+`node scripts/review-model-quality.mjs anatomia --poses-json --sweep --clearance-families` captura esta revisión. Ambos comprobadores de Blender admiten `-- --stage=anatomia`. El control de poses detecta también auto-intersecciones del pantalón; las pruebas de apoyo muestrean seis puntos de la superficie independientemente de los vértices de cada LOD. El benchmark usa los modelos de `review/anatomia/baseline` y su `benchmark-bike-model.ts`, porque esta revisión ajusta el rig visual. La galería conserva la revisión anterior y permite comparar color, volumen neutro y tres cuartos posterior.
+
+La corrección de los bultos posteriores se revisa en `/assets/motocross/review/cadera-natural/index.html`. Una única envolvente de cadera sustituye los dos volúmenes glúteos; el muslo se afina gradualmente hacia la rodilla. Las pruebas acotan el grosor de glúteos y muslos y comprueban que no aparezcan lóbulos salientes en el contorno posterior. Se conserva el rig, el runtime y las otras 100 mallas. Los pesos de la cara interna del muslo distribuyen la flexión sin fijarla excesivamente a la pelvis; los cortes de pintura de la rodilla atraviesan las caras adyacentes para evitar uniones que se abran al deformarse. La galería y los comprobadores usan `cadera-natural` como etiqueta; el benchmark requiere sólo los GLB de su carpeta `baseline` porque el código visual coincide.
+
+Los límites se aplican a la combinación de piezas más costosa: Low hasta 8.000 triángulos; High con objetivo de 24.000 y máximo de 30.000 sujeto a la comparación de rendimiento. El manifiesto conserva el conteo del conjunto Esencial y añade `trianglesSelectedMax`. Se mantienen los IDs de piezas, los nombres del rig y los formatos de datos.
+
 ## Publicar en GitHub Pages
 
 1. Crear un repositorio vacío en GitHub, sin README, licencia ni `.gitignore` iniciales. Pages debe estar disponible para su visibilidad y plan.

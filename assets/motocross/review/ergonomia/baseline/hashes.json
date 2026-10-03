@@ -1,0 +1,30 @@
+[
+  {
+    "Hash": "B71D13F7EA0C81438F4F0F14B72096CE6F309D4BE06A37EA1D4B7987B1F235F7",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\bike-model.ts"
+  },
+  {
+    "Hash": "5AE947CFAC04206B4BB6E7964C2C804C8160F2044CFC7954C00C14D05D95974A",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\bike-rig.json"
+  },
+  {
+    "Hash": "AF85381D0E8BD7DB7066A4C56916663B2C00B8100D05AE9F035D0850635F8F87",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\build-motocross.py"
+  },
+  {
+    "Hash": "88E2EE6A0C19A31577FA2696A4F1EC1238A495FAA783A32AAF839228599FAA29",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\manifest.json"
+  },
+  {
+    "Hash": "0A01E4B3B18050FAC7C82B24AA9982861AFB46FF5A6FF0506DCCBCC667607BB8",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\motocross-high.glb"
+  },
+  {
+    "Hash": "72A3D6449412DAD39CE79C2090B42FCD1B2D5FA15DD897EB2E41B5B02A1331BB",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\motocross-low.glb"
+  },
+  {
+    "Hash": "C4B4D001C8270B51D9F2CC6FA09760ED5F51B2D52DF0A6FD5B204E2D047F8B16",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\ergonomia\\baseline\\motocross.blend"
+  }
+]

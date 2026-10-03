@@ -1,0 +1,284 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "values": [
+      {
+        "quality": "low",
+        "scenario": "six-riders",
+        "medianMs": 2,
+        "p95Ms": 2.5,
+        "drawCalls": 268
+      },
+      {
+        "quality": "low",
+        "scenario": "one-rider-five-ghosts",
+        "medianMs": 6.399999998509884,
+        "p95Ms": 8.300000000745058,
+        "drawCalls": 428
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders",
+        "medianMs": 3.100000001490116,
+        "p95Ms": 7.199999999254942,
+        "drawCalls": 541
+      },
+      {
+        "quality": "high",
+        "scenario": "one-rider-five-ghosts",
+        "medianMs": 8.300000000745058,
+        "p95Ms": 11.100000001490116,
+        "drawCalls": 541
+      },
+      {
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "medianMs": 6.600000001490116,
+        "p95Ms": 9,
+        "drawCalls": 588
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "medianMs": 8.100000001490116,
+        "p95Ms": 10.399999998509884,
+        "drawCalls": 861
+      }
+    ],
+    "allocations": [
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      },
+      {
+        "geometries": 406,
+        "textures": 153
+      }
+    ],
+    "baseline": {
+      "geometries": 406,
+      "textures": 153
+    },
+    "after": {
+      "geometries": 406,
+      "textures": 153
+    },
+    "renderer": "WebKit WebGL"
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "values": [
+      {
+        "quality": "low",
+        "scenario": "six-riders",
+        "medianMs": 1.9000000022351742,
+        "p95Ms": 3.199999999254942,
+        "drawCalls": 231
+      },
+      {
+        "quality": "low",
+        "scenario": "one-rider-five-ghosts",
+        "medianMs": 6.299999997019768,
+        "p95Ms": 7.699999999254942,
+        "drawCalls": 391
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders",
+        "medianMs": 2.5,
+        "p95Ms": 4.199999999254942,
+        "drawCalls": 489
+      },
+      {
+        "quality": "high",
+        "scenario": "one-rider-five-ghosts",
+        "medianMs": 7.100000001490116,
+        "p95Ms": 9.700000002980232,
+        "drawCalls": 489
+      },
+      {
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "medianMs": 7.300000000745058,
+        "p95Ms": 8.799999997019768,
+        "drawCalls": 551
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "medianMs": 9,
+        "p95Ms": 11.399999998509884,
+        "drawCalls": 809
+      }
+    ],
+    "allocations": [
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      },
+      {
+        "geometries": 404,
+        "textures": 153
+      }
+    ],
+    "baseline": {
+      "geometries": 404,
+      "textures": 153
+    },
+    "after": {
+      "geometries": 404,
+      "textures": 153
+    },
+    "renderer": "WebKit WebGL"
+  }
+]

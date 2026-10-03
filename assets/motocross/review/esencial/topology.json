@@ -1,0 +1,27 @@
+{
+  "rigUnchanged": true,
+  "normalizedWeights": true,
+  "parts": {
+    "torso": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362
+    },
+    "pants": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 169
+    },
+    "helmet": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 466
+    }
+  }
+}

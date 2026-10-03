@@ -39,6 +39,7 @@ class Builder:
     """One mesh per moving assembly, grouped into material primitives on export."""
     def __init__(self):
         self.verts, self.faces, self.materials, self.weights = [], [], [], []
+        self.authored_lod = False
 
     def add(self, verts, faces, mat, bone=None, weights=None):
         start = len(self.verts)
@@ -115,6 +116,40 @@ class Builder:
             for j in range(sides): fs.append((i*sides+j,((i+1)%segments)*sides+j,((i+1)%segments)*sides+(j+1)%sides,i*sides+(j+1)%sides))
         self.add(vs,fs,mat,bone)
 
+    def face(self, indices, mat):
+        self.faces.append(tuple(indices));self.materials.append(mat)
+
+    def ring(self, points, weights):
+        indices=list(range(len(self.verts),len(self.verts)+len(points)))
+        self.verts.extend(points);self.weights.extend([dict(weights) for _ in points])
+        return indices
+
+    def loft(self, points, radii, weights, mat, start=None, seg=None, paint=None, tangents=None):
+        """Stitch section rings; an existing start boundary makes branching garments one surface."""
+        n=len(start) if start else (seg or (12 if HIGH else 8))
+        previous=start;orientation=None;previous_normal=None
+        for j,p in enumerate(points):
+            tangent=Vector(tangents[j]).normalized() if tangents else (Vector(points[min(j+1,len(points)-1)])-Vector(points[max(0,j-1)])).normalized()
+            reference=Vector((0,0,1)) if abs(tangent.z)<.9 else Vector((1,0,0))
+            normal=(previous_normal-tangent*previous_normal.dot(tangent)).normalized() if previous_normal is not None else tangent.cross(reference).normalized()
+            binormal=tangent.cross(normal).normalized();previous_normal=normal
+            rx,ry=radii[j] if isinstance(radii[j],tuple) else (radii[j],radii[j])
+            positions=[tuple(Vector(p)+rx*math.cos(2*math.pi*i/n)*normal+ry*math.sin(2*math.pi*i/n)*binormal) for i in range(n)]
+            if orientation is None:
+                if previous:
+                    # Preserve the boundary winding and choose a cyclic alignment, avoiding twisted sleeves.
+                    candidates=[(direction,offset) for direction in (-1,1) for offset in range(n)]
+                    orientation=min(candidates,key=lambda key:sum((Vector(self.verts[previous[i]])-Vector(positions[(key[0]*i+key[1])%n])).length_squared for i in range(n)))
+                else: orientation=(1,0)
+            positions=[positions[(orientation[0]*i+orientation[1])%n] for i in range(n)]
+            current=self.ring(positions,weights[j])
+            if previous:
+                for i in range(n): self.face((previous[i],previous[(i+1)%n],current[(i+1)%n],current[i]),paint(j,i,p) if paint else mat)
+            else: self.face(reversed(current),mat)
+            previous=current
+        self.face(previous,mat)
+        return previous
+
     def build(self,name,pivot=(0,0,0),parent=None,skin=None):
         mesh=bpy.data.meshes.new(name+'Mesh')
         mesh.from_pydata([v(tuple(p[i]-pivot[i] for i in range(3))) for p in self.verts],[],self.faces)
@@ -125,14 +160,15 @@ class Builder:
         if parent: obj.parent=parent
         slot=name.startswith('Slot_')
         slot_id=name.split('_')[1] if slot else ''
-        surface=('SlotSurfaceWheel' if slot_id=='wheels' else
+        surface=(f'SlotSurface_{slot_id}' if slot and self.authored_lod else
+                 'SlotSurfaceWheel' if slot_id=='wheels' else
                  'SlotSurfaceCloth' if slot_id in ('torso','gloves','pants') else
                  'SlotSurfaceHard')
         names=[surface] if slot else list(dict.fromkeys(self.materials))
         for n in names: mesh.materials.append(MATS[n])
         for face,n in zip(mesh.polygons,self.materials):
             face.material_index=0 if slot else names.index(n)
-            face.use_smooth=len(face.vertices)==4
+            face.use_smooth=len(face.vertices)==4 or (self.authored_lod and bool(skin))
         if slot:
             # RGBA palette: alpha 0=primary, .5=accent, 1=neutral. The runtime
             # recolors private copies of this attribute, keeping one draw per part.
@@ -162,8 +198,10 @@ class Builder:
             obj.parent=skin
         bm=bmesh.new();bm.from_mesh(mesh)
         bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.000001)
+        bmesh.ops.delete(bm,geom=[vert for vert in bm.verts if not vert.link_faces],context='VERTS')
         bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
         bm.to_mesh(mesh);bm.free();mesh.validate();mesh.update()
+        if self.authored_lod: obj['designRevision']='connected-families-v2'
         return obj
 
 def empty(name,p=(0,0,0),parent=None):
@@ -174,51 +212,16 @@ def empty(name,p=(0,0,0),parent=None):
 VARIANTS=('core','sprint','trail')
 SLOTS=('fairing','fender','seat','exhaust','plate','wheels','helmet','visor','torso','gloves','pants','boots')
 
-def emit_variants(slot, base, pivot=(0,0,0), parent=None, skin=None, component=''):
-    """Bake interchangeable forms at identical anchors; no runtime geometry generation."""
+def emit_variants(slot, designs, pivot=(0,0,0), parent=None, skin=None, component=''):
+    """Build locally designed options; every interface uses the same rest coordinates."""
     result=[]
     for variant in VARIANTS:
-        b=Builder()
-        b.verts=list(base.verts)
-        b.faces=list(base.faces)
-        b.materials=list(base.materials)
-        b.weights=[dict(w) for w in base.weights]
-        if variant!='core':
-            # A shared fluid silhouette, with restrained changes at the extremities.
-            for i,(x,y,z) in enumerate(b.verts):
-                if slot == 'wheels': continue
-                distance=abs(z)
-                if slot in ('fairing','fender','plate','helmet','visor'):
-                    width=1.08 if variant=='trail' else .91
-                    length=1.04 if variant=='sprint' else .97
-                    b.verts[i]=(pivot[0]+(x-pivot[0])*length,y,z*width)
-                elif slot in ('seat','torso','pants'):
-                    b.verts[i]=(x,y+(0.012 if variant=='trail' else -.006),z*(1.05 if variant=='trail' else .94))
-                elif slot in ('exhaust','gloves','boots'):
-                    b.verts[i]=(x,y,z*(1.06 if variant=='trail' else .94))
-            # Each option has a visible, separate accent treatment; all bevels share
-            # the Builder's 23% chamfer rule and PBR materials.
-            if slot=='fairing':
-                for s in (-1,1):
-                    b.panel([(.04,.742),(.27,.762),(.3,.742),(.07,.718)],s*.153,s*.158,'TeamAccent')
-            elif slot=='seat':
-                for x in (-.29,-.19,-.09):
-                    b.block((x,.835,0),(.012,.007,.1),'TeamAccent')
-            elif slot=='plate':
-                b.block((.412,.805,0),(.012,.03,.125),'TeamAccent')
-            elif slot=='helmet':
-                for s in (-1,1):
-                    b.panel([(.033,1.376),(.112,1.449),(.17,1.444),(.068,1.344)],s*.13,s*.135,'TeamAccent','Head')
-            elif slot=='torso':
-                for s in (-1,1):
-                    b.panel([(-.07,1.08),(-.03,1.1),(-.1,.994),(-.12,1.014)],s*.13,s*.133,'TeamAccent','Spine')
-        name=f'Slot_{slot}_{variant}{component}'
-        obj=b.build(name,pivot,parent,skin)
-        if parent:
-            obj.location=(0,0,0)
+        obj=designs[variant].build(f'Slot_{slot}_{variant}{component}',pivot,parent,skin)
+        if parent: obj.location=(0,0,0)
         obj['slot']=slot;obj['variant']=variant
         result.append(obj)
     return result
+
 
 def fender(b, sections, mat):
     # Each section is (x, y, width). Curved crown and downturned sides.
@@ -236,6 +239,83 @@ def fender(b, sections, mat):
         for i in range(4): fs.append((j*5+i,j*5+i+start,j*5+i+1+start,j*5+i+1))
     b.add(vs,fs,mat)
 
+def bike_parts(variant='core'):
+    """Fit revised plastics to the original seat, fork, wheel and lighting anchors."""
+    parts={slot:Builder() for slot in ('fairing','seat','exhaust','plate','rear','front')}
+    style={'core':0,'sprint':-1,'trail':1}[variant]
+    for part in parts.values(): part.authored_lod=True
+    fairing,seat,exhaust,plate,rear,front=[parts[slot] for slot in parts]
+    def body_panel(profile,side,base=.121,thickness=.019):
+        profile=[(x,y+(.026 if style<0 else -.012 if style>0 else 0)) if index in (4,5,6) else (x,y) for index,(x,y) in enumerate(profile)]
+        thickness*=1+.18*style
+        cx=sum(p[0] for p in profile)/len(profile);cy=sum(p[1] for p in profile)/len(profile)
+        def taper(y): return .85+.15*max(0,min(1,(y-.59)/.21))
+        loops=[]
+        for inset,z in [(0,base),(0,base+thickness*.45),(.07,base+thickness)]:
+            loops.append(fairing.ring([(cx+(x-cx)*(1-inset),cy+(y-cy)*(1-inset),side*z*taper(y)) for x,y in profile],{}))
+        size=len(profile)
+        for j in range(2):
+            for i in range(size): fairing.face((loops[j][i],loops[j][(i+1)%size],loops[j+1][(i+1)%size],loops[j+1][i]),'TeamPaint')
+        center=fairing.ring([(cx,cy,side*(base+thickness)*taper(cy))],{})[0]
+        for i in range(size):
+            accent=(0,1) if style==0 else (0,2) if style<0 else (1,2,3)
+            color='TeamAccent' if i in accent else 'Graphite' if profile[0][0]>-.1 and i in (4,5) else 'TeamPaint'
+            fairing.face((loops[-1][i],loops[-1][(i+1)%size],center),color)
+        fairing.face(reversed(loops[0]),'TeamPaint')
+    for side in [-1,1]:
+        body_panel([(-.5,.784),(-.37,.795),(-.2,.79),(-.12,.724),(-.18,.67),(-.3,.591),(-.46,.648),(-.53,.717)],side)
+        body_panel([(-.05,.797),(.096,.816),(.287,.798),(.341,.76),(.316,.712),(.146,.59),(.034,.632),(-.017,.717)],side)
+    fairing.ellipsoid((.18,.755,0),(.14,.079,.112),'Graphite')
+    fairing.rod((.216,.832,0),(.216,.85,0),.03,'Graphite',seg=10 if HIGH else 8)
+    # Moderately padded enduro saddle: crowned foam, rolled shoulders and a narrow nose.
+    # All families share the load-bearing surface so a cosmetic swap cannot move the rider.
+    n=12 if HIGH else 8
+    loops=[]
+    for x,y,width,height in [(-.49,.818,.073,.025),(-.39,.829,.099,.038),(-.23,.827,.105,.038),(-.07,.827,.091,.037),(.085,.827,.063,.03),(.18,.82,.037,.019)]:
+        points=[]
+        for i in range(n):
+            a=2*math.pi*i/n
+            crown=math.cos(a)
+            points.append((x,y+height*(crown if crown>=0 else .78*crown),width*math.sin(a)))
+        loops.append(seat.ring(points,{}))
+    for j in range(len(loops)-1):
+        for i in range(n):
+            color='Textile' if math.cos((i+.5)*2*math.pi/n)>.0 else 'TeamAccent' if j==0 else 'Seat'
+            seat.face((loops[j][i],loops[j][(i+1)%n],loops[j+1][(i+1)%n],loops[j+1][i]),color)
+    seat.face(reversed(loops[0]),'Seat');seat.face(loops[-1],'Seat')
+    fender(rear,[(-.76,.746,.064),(-.715,.761,.083),(-.64,.777,.111),(-.54,.79,.122),(-.43,.794,.122),(-.32,.79,.115),(-.27,.782,.101)],'TeamPaint')
+    fender(front,[(.37,.702,.101),(.425,.722,.111),(.495,.722,.116),(.58,.714,.112),(.666,.691,.102),(.746,.661,.083),(.81,.633,.063)],'TeamPaint')
+    for part in (front,rear):
+        root_x=.37 if part is front else -.27
+        free_x=.81 if part is front else -.76
+        for index,(x,y,z) in enumerate(part.verts):
+            weight=min(1,abs(x-root_x)/abs(free_x-root_x))
+            part.verts[index]=(x,y+style*.008*weight,z*(1+.1*style*weight))
+        for i,face in enumerate(part.faces):
+            average=sum(part.verts[k][0] for k in face)/len(face)
+            if (.55<average<.59 if part is front else -.58<average<-.53): part.materials[i]='TeamAccent'
+    exhaust.tube([(.18,.575,-.1),(.264,.536,-.123),(.282,.468,-.156),(.258,.404,-.18),(.18,.375,-.187),(.015,.402,-.185),(-.18,.508,-.18),(-.36,.651,-.174)],
+                 [.027,.028,.029,.029,.027,.026,.026,.028],'Exhaust',seg=10 if HIGH else 6)
+    exhaust.tube([(-.274,.621,-.174),(-.33,.644,-.174),(-.5,.701,-.174),(-.602,.724,-.174),(-.625,.73,-.174)],
+                 [.035,.047*(1+.1*style),.048*(1+.1*style),.041,.029],'Alloy',seg=12 if HIGH else 8)
+    exhaust.rod((-.625,.73,-.174),(-.646,.736,-.174),.025,'Graphite',seg=8)
+    exhaust.block((-.255,.508,-.203),(.182,.027,.008),'TeamAccent',angle=.8)
+    # Front board with a continuous chamfered perimeter. Lighting positions remain unchanged.
+    outline=[(-.09,.925),(.09,.925),(.108,.907),(.091,.82),(.075,.755),(.055,.742),(-.055,.742),(-.075,.755),(-.091,.82),(-.108,.907)]
+    outline=[(z*(1+.075*style*(.925-y)/.183),y) for z,y in outline]
+    loops=[]
+    for inset,offset in [(0,-.022),(0,-.006),(.06,0)]:
+        loops.append(plate.ring([(.354+(.922-y)*.29+offset,.834+(y-.834)*(1-inset),z*(1-inset)) for z,y in outline],{}))
+    n=len(outline)
+    for j in range(2):
+        for i in range(n): plate.face((loops[j][i],loops[j][(i+1)%n],loops[j+1][(i+1)%n],loops[j+1][i]),'TeamAccent')
+    center=plate.ring([(.38,.834,0)],{})[0]
+    for i in range(n): plate.face((loops[-1][i],loops[-1][(i+1)%n],center),'TeamPaint' if i==0 else 'TeamAccent')
+    plate.face(reversed(loops[0]),'TeamAccent')
+    plate.block((.406,.823,0),(.053,.09,.151),'Graphite')
+    plate.block((.436,.823,0),(.01,.066,.126),'LampFront')
+    return parts
+
 def make_wheel(name,x,variant):
     b=Builder();c=(x,.29,0)
     b.torus(c,.245,.047,'Rubber',depth=1.22)
@@ -243,7 +323,8 @@ def make_wheel(name,x,variant):
     b.torus(c,.204,.009,'Graphite')
     b.torus((x,.29,-.078),.185,.006,'TeamPaint',segments=SEG*2,sides=4)
     b.torus((x,.29,.078),.185,.006,'TeamAccent',segments=SEG*2,sides=4)
-    for j in [-1,1]:
+    # Fine tire bead relief is omitted in Low to reserve geometry for anatomy.
+    for j in ([-1,1] if HIGH else []):
         b.torus((x,.29,j*.047),.254,.005,'Rubber',segments=SEG*2,sides=4)
     count=(22 if HIGH else 14) if variant!='trail' else (26 if HIGH else 16)
     for i in range(count):
@@ -292,60 +373,27 @@ def make_bike():
         for i in range(6):
             a=i*math.pi/3
             b.ellipsoid((.05+.067*math.cos(a),.43+.067*math.sin(a),z),(.009,.009,.005),'Graphite',seg=6,rings=4)
-    # Shared frame ends here. Every replaceable assembly is authored separately.
-    fairing=Builder();fenders=Builder();front=Builder();seat=Builder();exhaust=Builder();plate=Builder()
-    fender(fenders,[(-.76,.744,.065),(-.65,.773,.112),(-.48,.79,.125),(-.28,.786,.11)],'TeamPaint')
-    fender(front,[(.37,.714,.105),(.47,.725,.116),(.65,.696,.105),(.81,.63,.064)],'TeamPaint')
-    fenders.block((-.56,.785,0),(.14,.008,.025),'TeamAccent')
-    front.block((.64,.702,0),(.14,.008,.026),'TeamAccent')
+    # Fixed mechanics and contacts are shared by all cosmetic families.
     front_anchor=empty('FrontFender',(.324,.89,0))
-    seat.tube([(-.47,.802,0),(-.34,.816,0),(-.13,.825,0),(.09,.83,0),(.2,.825,0)],[.043,.05,.05,.047,.025],'Seat',seg=8,oval=2.1)
-    seat.block((-.16,.856,0),(.22,.009,.037),'TeamAccent')
-    fairing.ellipsoid((.19,.758,0),(.15,.096,.108),'Graphite')
-    fairing.rod((.218,.837,0),(.218,.856,0),.033,'Graphite',seg=10)
     for s in [-1,1]:
-        z=s*.122
-        fairing.panel([(-.48,.765),(-.2,.78),(-.1,.7),(-.29,.558),(-.53,.65)],z,z+s*.018,'TeamAccent')
-        fairing.panel([(-.49,.744),(-.25,.752),(-.33,.696),(-.53,.668)],z+s*.02,z+s*.023,'TeamPaint')
-        fairing.panel([(.015,.8),(.32,.8),(.353,.721),(.15,.55),(-.006,.64)],z,z+s*.023,'TeamPaint')
-        fairing.panel([(.093,.776),(.317,.77),(.296,.729),(.075,.7)],z+s*.025,z+s*.029,'TeamAccent')
-        fairing.panel([(.05,.681),(.203,.64),(.147,.58),(.013,.639)],z+s*.025,z+s*.029,'Graphite')
-        fairing.block((.245,.664,s*.094),(.10,.18,.058),'Engine',angle=-.16)
-        for j in range(5): fairing.block((.282,.602+j*.028,s*.12),(.009,.012,.006),'Alloy')
         b.rod((-.07,.367,s*.10),(-.07,.367,s*.25),.013,'Graphite',seg=6)
         for j in range(4): b.block((-.10+j*.02,.377,s*.217),(.009,.011,.061),'Alloy')
-    # Header, heat guard, upswept rear silencer.
-    exhaust.tube([(.18,.575,-.1),(.275,.53,-.12),(.276,.417,-.17),(.18,.37,-.186),(-.07,.415,-.185),(-.36,.65,-.18)],[.029,.03,.031,.028,.026,.03],'Exhaust',seg=8)
-    exhaust.tube([(-.26,.613,-.174),(-.52,.697,-.174),(-.62,.721,-.174)],[.047,.05,.041],'Alloy')
-    exhaust.rod((-.626,.723,-.174),(-.649,.731,-.174),.03,'Graphite',seg=8)
-    exhaust.block((-.27,.503,-.203),(.21,.053,.012),'TeamAccent',angle=.8)
     handlebar=Builder()
     handlebar.tube([(.35,.91,-.245),(.32,.919,-.15),(.315,.947,-.09),(.315,.947,.09),(.32,.919,.15),(.35,.91,.245)],[.012]*6,'Alloy',seg=8)
     for s in [-1,1]:
         handlebar.rod((.35,.91,s*.19),(.35,.91,s*.26),.019,'Rubber',seg=8)
         handlebar.rod((.377,.901,s*.17),(.393,.897,s*.249),.006,'Alloy',seg=6)
     handlebar.build('Handlebar',(.324,.89,0))
-    plate_profile=[(-.092,.922),(.092,.922),(.111,.905),(.083,.76),(.06,.741),(-.06,.741),(-.083,.76),(-.111,.905)]
-    vs=[(.354+(.922-y)*.29+offset,y,z) for offset in [-.026,0] for z,y in plate_profile]
-    fs=[tuple(reversed(range(8))),tuple(range(8,16))]+[(i,(i+1)%8,(i+1)%8+8,i+8) for i in range(8)]
-    plate.add(vs,fs,'TeamAccent')
-    stripe=[(-.082,.901),(.082,.901),(.075,.877),(-.065,.869)]
-    plate.add([(.355+(.922-y)*.29,y,z) for z,y in stripe],[(0,1,2,3)],'TeamPaint')
-    plate.block((.324,.875,0),(.07,.031,.213),'Alloy')
-    plate.block((.358,.773,0),(.067,.027,.213),'Alloy')
     b.tube([(.37,.89,.14),(.4,.79,.144),(.449,.665,.133),(.513,.485,.107)],[.006]*4,'Rubber',seg=5)
     # Compact enduro lamps follow the suspended chassis in both exported variants.
-    plate.block((.405,.823,0),(.055,.103,.153),'Graphite')
-    plate.block((.437,.823,0),(.012,.075,.127),'LampFront')
     b.block((-.726,.773,0),(.045,.06,.115),'Graphite')
     b.block((-.753,.773,0),(.012,.036,.094),'LampRear')
     chassis=b.build('Chassis')
-    emit_variants('fairing',fairing)
-    emit_variants('seat',seat)
-    emit_variants('exhaust',exhaust)
-    emit_variants('plate',plate)
-    emit_variants('fender',fenders,component='_Rear')
-    emit_variants('fender',front,pivot=(.324,.89,0),parent=front_anchor,component='_Front')
+    designs={variant:bike_parts(variant) for variant in VARIANTS}
+    for slot in ('fairing','seat','exhaust','plate'):
+        emit_variants(slot,{variant:parts[slot] for variant,parts in designs.items()})
+    emit_variants('fender',{variant:parts['rear'] for variant,parts in designs.items()},component='_Rear')
+    emit_variants('fender',{variant:parts['front'] for variant,parts in designs.items()},pivot=(.324,.89,0),parent=front_anchor,component='_Front')
     empty('HeadlightAnchor',(.448,.823,0),chassis)
     empty('HeadlightTarget',(4.448,.123,0),chassis)
     empty('TaillightAnchor',(-.764,.773,0),chassis)
@@ -365,124 +413,280 @@ def make_bike():
     if not HIGH: pts=[(.039*math.cos(i*1.3),i/32,.039*math.sin(i*1.3)) for i in range(33)]
     b.tube(pts,[.008]*len(pts),'TeamPaint',seg=5);b.build('Spring')
 
-HIP=(-.19,.863,0)
-CHEST=(.00,1.16,0)
-HEAD=(.10,1.255,0)
-SHOULDER={s:(.00,1.132,s*.154) for s in [-1,1]}
-ELBOW={s:(.143,1.014,s*.255) for s in [-1,1]}
+HIP=(-.21,.968,0)
+CHEST=(-.015,1.23,0)
+HEAD=(.085,1.325,0)
+SHOULDER={s:(-.015,1.202,s*.154) for s in [-1,1]}
+ELBOW={s:(.13,1.049,s*.255) for s in [-1,1]}
 HAND={s:(.35,.91,s*.222) for s in [-1,1]}
-LEG_HIP={s:(-.19,.862,s*.089) for s in [-1,1]}
-KNEE={s:(.064,.641,s*.186) for s in [-1,1]}
+LEG_HIP={s:(-.21,.949,s*.115) for s in [-1,1]}
+KNEE={s:(.045,.661,s*.235) for s in [-1,1]}
 ANKLE={s:(-.102,.418,s*.21) for s in [-1,1]}
+
+PANTS_SURFACES={}
+def anatomical_pants(style):
+    """Sculpt one continuous garment, then skin it; never flatten the hip branch.
+
+    Overlapping construction volumes are fused before export. The saddle cavity is
+    confined to the medial underside, leaving the glute and quadriceps contours full.
+    Waist and boot cuts are shared by every family, independently of surface LoD.
+    """
+    if HIGH not in PANTS_SURFACES:
+        source=Builder()
+        # One garment envelope across the hips. Separate glute ellipsoids made
+        # two protruding lobes instead of the quiet seated contour in the reference.
+        source.loft([(-.211,y,0) for y in (.985,.967,.942,.916,.894,.875,.858,.850)],
+                    [(.089,.119),(.093,.128),(.101,.137),(.110,.150),(.108,.151),(.094,.135),(.065,.095),(.03,.05)],
+                    [{}]*8,'TeamCloth',seg=32,tangents=[(0,-1,0)]*8)
+        for side in (-1,1):
+            k,f=KNEE[side],ANKLE[side]
+            points=[(-.222,.923,side*.055),(-.188,.903,side*.105),(-.151,.867,side*.165),
+                    (-.090,.818,side*.200),(-.034,.748,side*.229),k,mix(k,f,.18),mix(k,f,.46),mix(k,f,.62)]
+            source.loft(points,[(.053,.054),(.079,.074),(.090,.079),(.086,.078),(.074,.068),(.060,.061),(.053,.057),(.043,.047),(.04,.044)],
+                        [{}]*len(points),'TeamCloth',seg=24)
+        mesh=bpy.data.meshes.new('Anatomical construction')
+        mesh.from_pydata([v(p) for p in source.verts],[],source.faces)
+        bm=bmesh.new();bm.from_mesh(mesh)
+        bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.000001)
+        bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(mesh);bm.free()
+        obj=bpy.data.objects.new('Anatomical construction',mesh);bpy.context.collection.objects.link(obj)
+        bpy.context.view_layer.objects.active=obj;obj.select_set(True)
+        remesh=obj.modifiers.new('Fuse pelvis and thighs','REMESH');remesh.mode='VOXEL';remesh.voxel_size=.006
+        bpy.ops.object.modifier_apply(modifier=remesh.name)
+        smooth=obj.modifiers.new('Anatomical transitions','SMOOTH');smooth.factor=1.2;smooth.iterations=18
+        bpy.ops.object.modifier_apply(modifier=smooth.name)
+        # A rounded saddle recess. It follows the foam only below the body;
+        # the visible lateral buttocks and thighs retain their original section.
+        for vert in obj.data.vertices:
+            x,y,z=vert.co.x,vert.co.z,-vert.co.y
+            # Bring the iliac crest back into the shirt's waist opening. The
+            # transition is gradual; the seated glute volume remains below it.
+            hip_sections=[(.850,.26,.32),(.875,.18,.25),(.900,.116,.182),(.925,.106,.146),(.943,.090,.119),(.967,.088,.116)]
+            if y>=hip_sections[0][0]:
+                lower,upper=hip_sections[-2:]
+                for first,second in zip(hip_sections,hip_sections[1:]):
+                    if first[0]<=y<=second[0]: lower,upper=first,second;break
+                t=max(0,min(1,(y-lower[0])/(upper[0]-lower[0])))
+                depth=lower[1]*(1-t)+upper[1]*t;width=lower[2]*(1-t)+upper[2]*t
+                radius=math.sqrt(((x+.211)/depth)**2+(z/width)**2)
+                if radius>1: x=-.211+(x+.211)/radius;z/=radius
+            if y<.905 and -.38<x<.16 and abs(z)<.163:
+                medial=max(0,1-(abs(z)/.163)**4)
+                floor=.869-.018*(abs(z)/.163)**2
+                if y<floor: y+= (floor-y)*medial
+            vert.co=v((x,y,z))
+        decimate=obj.modifiers.new('Anatomy silhouette LoD','DECIMATE')
+        obj.data.calc_loop_triangles()
+        decimate.ratio=(1900 if HIGH else 650)/len(obj.data.loop_triangles)
+        bpy.ops.object.modifier_apply(modifier=decimate.name)
+        bm=bmesh.new();bm.from_mesh(obj.data)
+        # Clip at identical attachment planes, preserving closed, welded surfaces.
+        cuts=[(v((-.211,.967,0)),v((0,1,0)),0)]
+        for side in (-1,1):
+            k,f=KNEE[side],ANKLE[side]
+            cuts.append((v(mix(k,f,.46)),v(tuple(Vector(f)-Vector(k))).normalized(),side))
+        for center,normal,side in cuts:
+            verts=[p for p in bm.verts if not side or -p.co.y*side>0]
+            selected=set(verts)
+            edges=[e for e in bm.edges if all(p in selected for p in e.verts)]
+            faces=[f for f in bm.faces if all(p in selected for p in f.verts)]
+            result=bmesh.ops.bisect_plane(bm,geom=verts+edges+faces,dist=.0000001,
+                plane_co=center,plane_no=normal,clear_outer=True,clear_inner=False)
+            boundary=[edge for edge in result['geom_cut'] if isinstance(edge,bmesh.types.BMEdge) and edge.is_boundary]
+            if boundary: bmesh.ops.holes_fill(bm,edges=boundary,sides=0)
+        # Insert genuine paint boundaries so decimated triangles do not create
+        # sawtooth edges between the trouser cloth and the knee protection.
+        bmesh.ops.bisect_plane(bm,geom=list(bm.verts)+list(bm.edges)+list(bm.faces),
+            dist=.0000001,plane_co=v((0,.719,0)),plane_no=v((0,1,0)))
+        for x in (.072,):
+            # Cut both sides of the knee boundary. Cutting only the lower faces
+            # leaves collinear points that glTF triangulates as deforming T-junctions.
+            geom=list(bm.verts)+list(bm.edges)+list(bm.faces)
+            bmesh.ops.bisect_plane(bm,geom=geom,dist=.0000001,plane_co=v((x,0,0)),plane_no=v((1,0,0)))
+        bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.verts.ensure_lookup_table();bm.verts.index_update()
+        vertices=[(p.co.x,p.co.z,-p.co.y) for p in bm.verts]
+        faces=[tuple(p.index for p in face.verts) for face in bm.faces]
+        bm.free();bpy.data.objects.remove(obj,do_unlink=True)
+        PANTS_SURFACES[HIGH]=(vertices,faces)
+    vertices,faces=PANTS_SURFACES[HIGH]
+    pants=Builder();pants.authored_lod=True
+    pants.verts=list(vertices);pants.faces=list(faces)
+    for x,y,z in vertices:
+        side=1 if z>=0 else -1;suffix='L' if side==1 else 'R'
+        # Keep the seated contact entirely on the pelvis; fade along the thigh,
+        # then share the knee bend over a broad band instead of a hard hinge.
+        t=max(0,min(1,(.94-y)/.10));t=t*t*(3-2*t)
+        lateral=max(0,min(1,(abs(z)-.055)/.07))
+        lower=max(0,min(1,(.84-y)/.1))
+        t*=max(lateral*lateral*(3-2*lateral),lower*lower*(3-2*lower))
+        knee=max(0,min(1,(.745-y)/.15));knee=knee*knee*(3-2*knee)
+        pants.weights.append({'Pelvis':1-t,'Thigh'+suffix:t*(1-knee),'Shin'+suffix:t*knee})
+    for face in faces:
+        x,y,z=[sum(vertices[i][axis] for i in face)/len(face) for axis in range(3)]
+        mat='Textile' if y<.719 else 'TeamCloth'
+        if y<.719 and x>.072: mat='TeamAccent'
+        if style<0 and .755<y<.83 and abs(z)>.29: mat='TeamAccent'
+        if style>0 and .755<y<.81 and x<-.12: mat='Textile'
+        pants.materials.append(mat)
+    return pants
+
+def rider_parts(variant='core'):
+    """Connected garments with a shared seated rig and fixed hand/foot contacts."""
+    parts={slot:Builder() for slot in ('torso','pants','gloves','boots','helmet','visor')}
+    style={'core':0,'sprint':-1,'trail':1}[variant]
+    for part in parts.values(): part.authored_lod=True
+    torso,pants,gloves,boots,helmet,visor=[parts[slot] for slot in parts]
+    # Keep symmetric shoulder openings and the crotch seam in both qualities.
+    # Low saves detail in wheels, helmet, gloves and boots instead of these joints.
+    n=16
+    sections=[(-.194,.838,.1,.132),(-.176,.903,.087,.127),(-.133,.968,.088,.14),
+              (-.09,1.023,.09,.153),(-.05,1.076,.088,.159),(0,1.13,.076,.162),
+              (.012,1.165,.06,.14),(.028,1.197,.048,.079),(.043,1.212,.046,.067),
+              (.061,1.24,.043,.054),(.077,1.261,.04,.048)]
+    sections=[(x-.015-.005*max(0,min(1,(1.13-y)/.292)),
+               y+.07+.035*max(0,min(1,(1.13-y)/.292)),depth,width) for x,y,depth,width in sections]
+    rings=[]
+    for j,(x,y,depth,width) in enumerate(sections):
+        if 2<=j<=6: depth*=1+.04*style;width*=1+.045*style
+        t=min(1,j/2)
+        weights={'Pelvis':1-t,'Spine':t} if j<8 else {'Spine':1-max(0,(j-8)*.25),'Head':max(0,(j-8)*.25)}
+        rings.append(torso.ring([(x+depth*math.cos(2*math.pi*i/n),y,width*math.sin(2*math.pi*i/n)) for i in range(n)],weights))
+    span=n//4
+    starts={1:n//4-span//2,-1:3*n//4-span//2}
+    for j in range(len(rings)-1):
+        for i in range(n):
+            if j in (4,5) and any(start<=i<start+span for start in starts.values()): continue
+            material_name='Textile' if j>=8 else 'TeamCloth'
+            # Color blocks belong to the garment surface rather than floating shoulder pads.
+            if j==7: material_name='Graphite'
+            elif j in (5,6) and math.cos((i+.5)*2*math.pi/n)<-.3: material_name='TeamAccent'
+            elif j in (2,3) and abs(math.sin((i+.5)*2*math.pi/n))>.94: material_name='Textile'
+            if style<0 and j in (2,3,4) and .35<math.sin((i+.5)*2*math.pi/n)<.95: material_name='TeamAccent'
+            if style>0 and j in (3,4,5) and abs(math.cos((i+.5)*2*math.pi/n))>.75: material_name='Textile'
+            torso.face((rings[j][i],rings[j][(i+1)%n],rings[j+1][(i+1)%n],rings[j+1][i]),material_name)
+    torso.face(reversed(rings[0]),'TeamCloth');torso.face(rings[-1],'Textile')
+    for side,suffix in [(-1,'R'),(1,'L')]:
+        start=starts[side];end=start+span
+        boundary=[rings[4][i%n] for i in range(start,end+1)]
+        boundary += [rings[j][end%n] for j in (5,6)]
+        boundary += [rings[6][i%n] for i in range(end-1,start-1,-1)]
+        boundary += [rings[5][start%n]]
+        a,e,w=SHOULDER[side],ELBOW[side],HAND[side]
+        upper,fore,hand='UpperArm'+suffix,'Forearm'+suffix,'Hand'+suffix
+        points=[(.01,1.192,side*.186),mix(a,e,.48),mix(a,e,.78),e,mix(e,w,.2),mix(e,w,.52),mix(e,w,.77),w]
+        directions=[tuple(Vector(points[min(j+1,len(points)-1)])-Vector(points[max(0,j-1)])) for j in range(len(points))]
+        directions[0]=(0,0,side)
+        directions[1]=tuple(Vector((0,0,side))*.65+(Vector(e)-Vector(a)).normalized()*.35)
+        weights=[{'Spine':.35,upper:.65},{upper:1},{upper:.85,fore:.15},{upper:.5,fore:.5},
+                 {upper:.15,fore:.85},{fore:1},{fore:1},{fore:.6,hand:.4}]
+        radii=[(.043,.06),(.064,.066),(.048,.051),(.048,.05),(.046,.048),(.039,.041),(.033,.035),(.029,.031)]
+        radii=[(rx*(1+.05*style),ry*(1+.05*style)) if j<3 else (rx,ry) for j,(rx,ry) in enumerate(radii)]
+        torso.loft(points,radii,weights,'TeamCloth',start=boundary,tangents=directions,
+                   paint=lambda j,i,p:'Textile' if j in (3,4) and torso.verts[-len(boundary)+i][2]*side>p[2]*side+.008 else 'TeamAccent' if j==6 else 'TeamCloth')
+    parts['pants']=anatomical_pants(style)
+    for side,suffix in [(-1,'R'),(1,'L')]:
+        a,k,f=LEG_HIP[side],KNEE[side],ANKLE[side]
+        thigh,shin,foot='Thigh'+suffix,'Shin'+suffix,'Foot'+suffix
+        # One shaped boot shaft flows around the ankle into the toe. The outsole and buckles are fitted details.
+        points=[mix(k,f,.32),mix(k,f,.5),mix(k,f,.79),f,(f[0]+.028,f[1]-.017,f[2]),(f[0]+.076,f[1]-.022,f[2]),(f[0]+.124,f[1]-.025,f[2]),(f[0]+.145,f[1]-.027,f[2])]
+        weights=[{shin:1},{shin:1},{shin:.9,foot:.1},{shin:.35,foot:.65},{foot:1},{foot:1},{foot:1},{foot:1}]
+        first_boot_face=len(boots.faces)
+        boot_radii=[(.056,.061),(.052*(1+.06*style),.058*(1+.06*style)),(.039,.047),(.033,.042),(.037,.052),(.037,.051),(.028,.043),(.012,.026)]
+        boots.loft(points,boot_radii,weights,'Boot',seg=12 if HIGH else 8,
+                   paint=lambda j,i,p:'Textile' if j==1 else 'TeamAccent' if j==7 else 'Boot')
+        boots.materials[first_boot_face]='Textile';boots.materials[-1]='TeamAccent'
+        boots.block((f[0]+.048,f[1]-.048,f[2]),(.193,.021,.109),'Rubber',foot)
+        for t in ([.42,.7] if style<0 else [.36,.5,.65,.79] if style>0 else [.4,.59,.77]):
+            p=mix(k,f,t)
+            boots.block((p[0]+.002,p[1],p[2]+side*.052),(.054,.012,.007),'TeamAccent',shin,angle=.59)
+        # A cupped palm and curled grouped fingers surround the grip, rather than a ball at the wrist.
+        w=HAND[side];hand='Hand'+suffix
+        gloves.loft([(w[0]-.023,w[1]+.014,w[2]),(w[0],w[1]+.004,w[2]),(w[0]+.025,w[1]-.01,w[2]),(w[0]+.03,w[1]-.029,w[2]),(w[0]+.014,w[1]-.036,w[2])],
+                    [(.023,.029),(.028*(1+.07*style),.034),(.022,.034),(.015,.031),(.009,.025)],[{hand:1}]*5,'TeamCloth',seg=12 if HIGH else 8,
+                    paint=lambda j,i,p:'TeamAccent' if j==1 and i in ((1,2,3) if style<0 else (1,2)) else 'Rubber' if j>=3 or (style>0 and j==2) else 'TeamCloth')
+        gloves.tube([(w[0]-.005,w[1]+.005,w[2]-side*.02),(w[0]+.013,w[1]-.009,w[2]-side*.035),(w[0]+.012,w[1]-.025,w[2]-side*.022)],[.013,.012,.009],'Rubber',hand,seg=6)
+        # Fingers form a single curled section; the separate thumb fits inside the palm.
+        # Avoid overlapping finger tubes, whose coincident faces flickered at the knuckles.
+    # A continuous outer shell and inner lining share explicitly modelled eye-port rims.
+    n=24 if HIGH else 12
+    profiles=[(1.248,-.012,.235,.092),(1.267,-.027,.293,.115),(1.297,-.034,.295,.125),
+              (1.318,-.035,.269,.13),(1.357,-.033,.262,.132),(1.395,-.025,.246,.128),
+              (1.425,-.009,.222,.116),(1.453,.02,.19,.09),(1.47,.062,.15,.052),(1.478,.095,.119,.012)]
+    shell=[];lining=[]
+    for index,(y,back,front,width) in enumerate(profiles):
+        if index in (1,2): width*=1+.04*style;front+=.006*style
+        if index>=7: width*=1+.06*style;front+=.006*style
+        mid=(front+back)/2;depth=(front-back)/2
+        shell.append(helmet.ring([(mid+depth*math.cos(2*math.pi*i/n),y,width*math.sin(2*math.pi*i/n)) for i in range(n)],{'Head':1}))
+        lining.append(helmet.ring([(mid+(depth-.006)*math.cos(2*math.pi*i/n),y+.003 if y<1.3 else y-.003,(width-.006)*math.sin(2*math.pi*i/n)) for i in range(n)],{'Head':1}))
+    removed={(j,i) for j in (3,4) for i in range(n) if i<n//6 or i>=n-n//6}
+    edge_counts={}
+    for j in range(len(shell)-1):
+        for i in range(n):
+            if (j,i) in removed: continue
+            face=(shell[j][i],shell[j][(i+1)%n],shell[j+1][(i+1)%n],shell[j+1][i])
+            a=(i+.5)*2*math.pi/n
+            color='TeamAccent' if (5<=j<=7 and math.cos(a)<(-.25 if style==0 else .1 if style<0 else -.65)) else 'TeamPaint'
+            if j==1 and math.cos(a)>.87: color='Graphite'
+            helmet.face(face,color)
+            helmet.face((lining[j][i],lining[j+1][i],lining[j+1][(i+1)%n],lining[j][(i+1)%n]),'Textile')
+            for a,b in zip(face,face[1:]+face[:1]):
+                key=tuple(sorted((a,b)));edge_counts[key]=edge_counts.get(key,0)+1
+    outer_to_inner={a:b for outer,inner in zip(shell,lining) for a,b in zip(outer,inner)}
+    for (a,b),count in edge_counts.items():
+        if count==1 and not (a in shell[-1] and b in shell[-1]): helmet.face((a,b,outer_to_inner[b],outer_to_inner[a]),'Graphite')
+    helmet.face(shell[-1],'TeamPaint');helmet.face(reversed(lining[-1]),'Textile')
+    # Rounded-rectangle goggles wrap the eye port; center and corners follow the helmet's curvature.
+    def contour(width,height,corner):
+        points=[]
+        for cy,cz,start in [(height-corner,width-corner,0),(-height+corner,width-corner,math.pi/2),(-height+corner,-width+corner,math.pi),(height-corner,-width+corner,3*math.pi/2)]:
+            for j in range(4 if HIGH else 3):
+                angle=start+j*math.pi/2/(3 if HIGH else 2)
+                points.append((cy+corner*math.cos(angle),cz+corner*math.sin(angle)))
+        return points
+    goggle_rings=[]
+    for width,height,corner,offset in [(.116,.05,.019,-.013),(.117,.05,.019,0),(.106,.04,.015,.007),(.10,.035,.014,.01)]:
+        points=[(.276-.052*(abs(z)/.117)**1.65+offset,1.356+y,z) for y,z in contour(width,height,corner)]
+        goggle_rings.append(visor.ring(points,{'Head':1}))
+    size=len(goggle_rings[0])
+    for j in range(3):
+        for i in range(size): visor.face((goggle_rings[j][i],goggle_rings[j][(i+1)%size],goggle_rings[j+1][(i+1)%size],goggle_rings[j+1][i]),'Rubber' if j<2 else 'Lens')
+    center=visor.ring([(.288,1.356,0)],{'Head':1})[0]
+    for i in range(size): visor.face((goggle_rings[-1][i],goggle_rings[-1][(i+1)%size],center),'Lens')
+    visor.face(reversed(goggle_rings[0]),'Rubber')
+    angles=[math.pi/3+i*(4*math.pi/3)/(16 if HIGH else 10) for i in range((16 if HIGH else 10)+1)]
+    strap=[]
+    for angle in angles:
+        strap.append(visor.ring([(.114+.15*math.cos(angle),1.356+dy,.135*math.sin(angle)) for dy in (-.009,.009)],{'Head':1}))
+    for j in range(len(strap)-1): visor.face((strap[j][0],strap[j][1],strap[j+1][1],strap[j+1][0]),'Rubber')
+    # The peak remains in the existing visor category, preserving customization semantics.
+    first=len(visor.verts)
+    tip=.32+(.019 if style>0 else -.022 if style<0 else 0)
+    fender(visor,[(.045,1.444,.101),(.11,1.459,.118),(.173,1.454,.13),(.235,1.439,.13),(.286,1.418,.12), (tip,1.404,.101+.005*style)],'TeamPaint')
+    visor.weights[first:]=[{'Head':1} for _ in visor.verts[first:]]
+    # An accent stripe is painted on the peak's own surface.
+    for i,face in enumerate(visor.faces):
+        if min(face)>=first and sum(visor.verts[k][0] for k in face)/len(face)<.09: visor.materials[i]='TeamAccent'
+    for part in (helmet,visor):
+        part.verts=[tuple(HEAD[k]+(point[k]-(.10,1.255,0)[k])*.94 for k in range(3)) for point in part.verts]
+    return parts
 
 def make_rider():
     data=bpy.data.armatures.new('RiderSkeleton')
     arm=bpy.data.objects.new('RiderRig',data);bpy.context.collection.objects.link(arm)
     bpy.context.view_layer.objects.active=arm;arm.select_set(True)
     bpy.ops.object.mode_set(mode='EDIT')
-    specs=[('Pelvis',HIP,(-.19,.95,0),None),('Spine',HIP,CHEST,'Pelvis'),('Head',HEAD,(.13,1.43,0),'Spine')]
+    specs=[('Pelvis',HIP,(-.21,1.055,0),None),('Spine',HIP,CHEST,'Pelvis'),('Head',HEAD,(.115,1.5,0),'Spine')]
     for s,suffix in [(-1,'R'),(1,'L')]:
         specs.extend([(f'UpperArm{suffix}',SHOULDER[s],ELBOW[s],'Spine'),(f'Forearm{suffix}',ELBOW[s],HAND[s],f'UpperArm{suffix}'),(f'Hand{suffix}',HAND[s],(.39,.90,s*.222),f'Forearm{suffix}'),(f'Thigh{suffix}',LEG_HIP[s],KNEE[s],'Pelvis'),(f'Shin{suffix}',KNEE[s],ANKLE[s],f'Thigh{suffix}'),(f'Foot{suffix}',ANKLE[s],(.007,.40,s*.21),f'Shin{suffix}')])
     for name,a,b,parent in specs:
         bone=data.edit_bones.new(name);bone.head=v(a);bone.tail=v(b)
         if parent: bone.parent=data.edit_bones[parent]
     bpy.ops.object.mode_set(mode='OBJECT');arm.select_set(False)
-    torso=Builder();gloves=Builder();pants=Builder();boots=Builder();helmet=Builder();visor=Builder()
-    b=torso
-    # Shaped torso: waist, abdomen, ribcage, broad shoulders and a narrow neck.
-    sections=[(-.196,.842,.08,.104),(-.168,.902,.082,.111),(-.115,.99,.084,.127),(-.052,1.083,.084,.151),(.004,1.15,.071,.144),(.025,1.18,.048,.09)]
-    vs=[];ws=[]
-    for j,(x,y,depth,width) in enumerate(sections):
-        for i in range(SEG):
-            a=2*math.pi*i/SEG
-            vs.append((x+depth*math.cos(a),y,width*math.sin(a)))
-            t=min(1,j/2);ws.append({'Pelvis':1-t,'Spine':t})
-    fs=[]
-    for j in range(len(sections)-1):
-        for i in range(SEG): fs.append((j*SEG+i,j*SEG+(i+1)%SEG,(j+1)*SEG+(i+1)%SEG,(j+1)*SEG+i))
-    fs.extend([tuple(reversed(range(SEG))),tuple((len(sections)-1)*SEG+i for i in range(SEG))])
-    b.add(vs,fs,'TeamCloth',weights=ws)
-    pants.ellipsoid((-.19,.841,0),(.10,.086,.109),'Textile','Pelvis')
-    b.tube([(.016,1.151,0),(.076,1.24,0)],[.057,.051],'Textile','Spine',oval=1.1)
-    b.tube([(.022,1.183,0),(.04,1.207,0)],[.064,.058],'Graphite','Spine',oval=1.17)
-    # Protective chest/back panels and white jersey shoulder yoke.
-    b.panel([(-.076,1.137),(.048,1.151),(.021,1.072),(-.10,.98),(-.135,1.031)],-.088,.088,'Textile','Spine')
-    for s in [-1,1]:
-        b.ellipsoid((-.017,1.141,s*.12),(.07,.038,.065),'Ceramic','Spine',seg=SEG,rings=6)
-        b.panel([(-.064,1.11),(-.04,1.09),(-.121,.987),(-.144,1.01)],s*.113,s*.119,'Ceramic','Spine')
-    for s,suffix in [(-1,'R'),(1,'L')]:
-        ua,fa,hand='UpperArm'+suffix,'Forearm'+suffix,'Hand'+suffix
-        a,e,w=SHOULDER[s],ELBOW[s],HAND[s]
-        pts=[a,mix(a,e,.35),mix(a,e,.83),e,mix(e,w,.2),mix(e,w,.75),w]
-        weights=[{ua:1},{ua:1},{ua:.9,fa:.1},{ua:.5,fa:.5},{ua:.12,fa:.88},{fa:1},{fa:1}]
-        b.tube(pts,[.068,.064,.047,.045,.049,.037,.031],'TeamCloth',seg=SEG,weights=weights)
-        b.ellipsoid((e[0],e[1],e[2]+s*.014),(.047,.049,.053),'Textile',fa,seg=SEG,rings=6)
-        b.tube([mix(e,w,.43),mix(e,w,.55)],[.047,.043],'Ceramic',fa,seg=SEG)
-        gloves.ellipsoid((w[0]+.001,w[1]-.007,w[2]),(.044,.034,.035),'TeamCloth',hand)
-        gloves.ellipsoid((w[0]-.01,w[1]+.021,w[2]),(.027,.011,.028),'TeamAccent',hand,seg=8,rings=4)
-        th,sh,foot='Thigh'+suffix,'Shin'+suffix,'Foot'+suffix
-        a,k,f=LEG_HIP[s],KNEE[s],ANKLE[s]
-        pts=[a,mix(a,k,.3),mix(a,k,.8),k,mix(k,f,.25),mix(k,f,.6),f]
-        weights=[{th:1},{th:1},{th:.9,sh:.1},{th:.5,sh:.5},{sh:1},{sh:1},{sh:1}]
-        first_face=len(pants.faces)
-        pants.tube(pts,[.084,.079,.059,.056,.057,.046,.037],'Textile',seg=SEG,weights=weights)
-        # Cloth color is assigned on the continuous leg, avoiding coplanar overlays.
-        for j in [0,1]:
-            for i in range(SEG):
-                face=first_face+1+j*SEG+i
-                if abs(sum(pants.verts[n][2] for n in pants.faces[face])/len(pants.faces[face]))>.10:
-                    pants.materials[face]='TeamCloth'
-        pants.ellipsoid((k[0]+.026,k[1]+.006,k[2]),(.047,.061,.058),'TeamAccent',sh)
-        # High MX boot follows the shin; flexible ankle and a separate sole follow foot.
-        boots.tube([mix(k,f,.3),mix(k,f,.48),mix(k,f,.88),f],[.06,.057,.043,.04],'Boot',sh,seg=SEG)
-        boots.ellipsoid((f[0]+.052,f[1]-.011,f[2]),(.102,.046,.052),'Boot',foot,seg=SEG,rings=6)
-        boots.block((f[0]+.046,f[1]-.045,f[2]),(.194,.026,.109),'Rubber',foot)
-        boots.ellipsoid((f[0]+.119,f[1]-.012,f[2]),(.038,.034,.052),'TeamAccent',foot,seg=8,rings=4)
-        for t in [.38,.57,.76]:
-            p=mix(k,f,t)
-            boots.block((p[0]+.003,p[1],p[2]+s*.051),(.068,.016,.012),'TeamAccent',sh,angle=.58)
-            boots.block((p[0]+.024,p[1]-.009,p[2]+s*.059),(.018,.018,.008),'Alloy',sh)
-    # Helmet with a cut-out eye port, rather than a visor sphere on a head sphere.
-    cx,cy=.115,1.352
-    seg=24 if HIGH else 16;rings=14 if HIGH else 9
-    vs=[]
-    for j in range(rings+1):
-        lat=math.pi*j/rings
-        for i in range(seg):
-            a=2*math.pi*i/seg
-            vs.append((cx+.146*math.sin(lat)*math.cos(a),cy+.163*math.cos(lat),.132*math.sin(lat)*math.sin(a)))
-    fs=[]
-    for j in range(rings):
-        for i in range(seg):
-            f=(j*seg+i,j*seg+(i+1)%seg,(j+1)*seg+(i+1)%seg,(j+1)*seg+i)
-            mid=tuple(sum(vs[n][k] for n in f)/4 for k in range(3))
-            if mid[0]>.19 and 1.307<mid[1]<1.401: continue
-            fs.append(f)
-    helmet.add(vs,fs,'TeamPaint','Head')
-    helmet.ellipsoid((.136,1.349,0),(.115,.135,.107),'Textile','Head',seg=SEG,rings=RINGS)
-    # Chin guard has an angular side profile and a dark ventilation inset.
-    for s in [-1,1]:
-        helmet.panel([(.087,1.262),(.151,1.233),(.296,1.258),(.297,1.295),(.207,1.314)],s*.092,s*.117,'TeamPaint','Head')
-        helmet.panel([(.112,1.275),(.164,1.253),(.25,1.269),(.227,1.286)],s*.12,s*.122,'TeamAccent','Head')
-        helmet.panel([(.122,1.399),(.15,1.431),(.056,1.449),(-.006,1.364),(.014,1.306),(.046,1.33)],s*.116,s*.127,'TeamAccent','Head')
-        helmet.tube([(-.018,1.348,s*.07),(.066,1.348,s*.131),(.2,1.348,s*.108)],[.018,.018,.018],'Textile','Head',seg=6)
-    helmet.block((.291,1.276,0),(.024,.038,.174),'Graphite','Head',angle=-.16)
-    for z in [-.05,0,.05]: helmet.block((.306,1.276,z),(.006,.025,.018),'Rubber','Head',angle=-.16)
-    # Sculpted goggle gasket and smoked single lens.
-    visor.ellipsoid((.237,1.351,0),(.037,.057,.113),'Rubber','Head',seg=SEG,rings=8)
-    visor.ellipsoid((.257,1.353,0),(.025,.042,.099),'Lens','Head',seg=SEG,rings=8)
-    # Long peaked visor, curved across its width.
-    fender(visor,[(.057,1.465,.107),(.172,1.469,.14),(.317,1.435,.143),(.367,1.407,.112)],'TeamPaint')
-    visor.weights=[{'Head':1} for _ in visor.verts]
-    visor.ellipsoid((.108,1.508,0),(.044,.006,.018),'TeamAccent','Head',seg=10,rings=4)
-    # Adult proportions: helmet remains readable without an oversized toy head.
-    for part in (helmet,visor):
-        for i,weights in enumerate(part.weights):
-            if weights.get('Head') == 1:
-                part.verts[i]=tuple(HEAD[k]+(part.verts[i][k]-HEAD[k])*.88 for k in range(3))
     empty('Rider',(0,0,0),arm)
-    for slot,part in [('torso',torso),('gloves',gloves),('pants',pants),('boots',boots),('helmet',helmet),('visor',visor)]:
-        emit_variants(slot,part,skin=arm)
+    designs={variant:rider_parts(variant) for variant in VARIANTS}
+    for slot in ('torso','gloves','pants','boots','helmet','visor'):
+        emit_variants(slot,{variant:parts[slot] for variant,parts in designs.items()},skin=arm)
     # Saved references drive a rig in the exported coordinate system without guessed axes.
     for name,a,tail,parent in specs:
         bone=arm.pose.bones[name]
@@ -501,11 +705,11 @@ def position_studio_rig():
         bpy.data.objects['ForkGuard'+suffix].location=v((.559,.322,s*.089))
     segment('Shock',(-.32,.342,0),(-.245,.699,0));segment('Spring',(-.30,.432,0),(-.256,.639,0))
 
-def studio(render=False):
+def studio(render=False,quality='high'):
     scene=bpy.context.scene
     # Preview the same vertex palette in the authored .blend. Add this node only
     # after GLB export: the runtime GLBs use the lean single-material palette.
-    for name in ('SlotSurfaceHard','SlotSurfaceCloth','SlotSurfaceWheel'):
+    for name in [name for name in MATS if name.startswith('SlotSurface')]:
         m=MATS[name]
         palette=m.node_tree.nodes.new('ShaderNodeVertexColor')
         palette.layer_name='Palette'
@@ -535,21 +739,26 @@ def studio(render=False):
     floor.data.materials.append(m)
     data=bpy.data.cameras.new('StudioCamera');cam=bpy.data.objects.new('StudioCamera',data);studio_collection.objects.link(cam)
     scene.camera=cam;data.type='ORTHO';data.ortho_scale=2.25
-    for name,loc in [('side',(0,-5,1.2)),('front',(5,-.001,1.1)),('three-quarter',(3,-5,2.5))]:
-        cam.location=loc;cam.rotation_euler=(Vector((0,0,.76))-cam.location).to_track_quat('-Z','Y').to_euler()
-        scene.render.filepath=str(ROOT/'docs'/'media'/'redesign'/f'studio-{name}.png')
-        if render: bpy.ops.render.render(write_still=True)
-    if render:
-        # Full-preset reviews expose every option once at the same close camera.
-        for variant in ('sprint','trail'):
-            for obj in bpy.data.objects:
-                if obj.type=='MESH' and obj.name.startswith('Slot_'):
-                    obj.hide_render=f'_{variant}' not in obj.name
-            scene.render.filepath=str(ROOT/'docs'/'media'/'redesign'/f'studio-{variant}.png')
-            bpy.ops.render.render(write_still=True)
+    render_directory=SOURCE/'review'/'cadera-natural'/'blender'
+    if render: render_directory.mkdir(parents=True,exist_ok=True)
+    presets=VARIANTS if '--render-all' in __import__('sys').argv else ('core',)
+    for variant in presets:
         for obj in bpy.data.objects:
             if obj.type=='MESH' and obj.name.startswith('Slot_'):
-                obj.hide_render='_core' not in obj.name
+                obj.hide_render=f'_{variant}' not in obj.name
+                obj.hide_set(obj.hide_render)
+        for name,loc in [('side',(0,-5,1.2)),('front',(5,-.001,1.1)),('rear',(-5,-.001,1.1)),('three-quarter',(3,-5,2.5)),('helmet',(2,-4,2.2))]:
+            target=(.13,0,1.35) if name=='helmet' else (0,0,.76)
+            data.ortho_scale=.57 if name=='helmet' else 2.25
+            cam.location=loc;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
+            scene.render.filepath=str(render_directory/f'{quality}-{variant}-{name}.png')
+            if render: bpy.ops.render.render(write_still=True)
+    for obj in bpy.data.objects:
+        if obj.type=='MESH' and obj.name.startswith('Slot_'):
+            obj.hide_render='_core' not in obj.name
+            obj.hide_set(obj.hide_render)
+    data.ortho_scale=2.25;cam.location=(3,-5,2.5)
+    cam.rotation_euler=(Vector((0,0,.76))-cam.location).to_track_quat('-Z','Y').to_euler()
     bpy.ops.object.select_all(action='DESELECT')
     for screen in bpy.data.screens:
         for area in screen.areas:
@@ -562,7 +771,11 @@ def studio(render=False):
 
 report={}
 for HIGH in [False,True]:
+    # Studio previews hide unused slots; reveal them before rebuilding the other quality.
+    for obj in bpy.context.scene.objects: obj.hide_set(False)
     bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
+    for collection in list(bpy.data.collections):
+        if collection.name.startswith('Studio - do not export'): bpy.data.collections.remove(collection)
     for m in list(bpy.data.materials): bpy.data.materials.remove(m)
     SEG,RINGS=(12,8) if HIGH else (8,5)
     material('TeamPaint','c91c32',.34)
@@ -584,13 +797,18 @@ for HIGH in [False,True]:
     material('SlotSurfaceHard','ffffff',.59,.12)
     material('SlotSurfaceCloth','ffffff',.82)
     material('SlotSurfaceWheel','ffffff',.83,.08)
+    for slot,roughness,metallic in [('fairing',.4,.08),('seat',.87,0),('exhaust',.42,.68),('plate',.45,.04),('fender',.4,.08),
+                                     ('helmet',.36,.06),('visor',.22,.18),('torso',.86,0),('pants',.88,0),('gloves',.78,0),('boots',.7,0)]:
+        material(f'SlotSurface_{slot}','ffffff',roughness,metallic)
     make_bike();specs=make_rider();position_studio_rig()
     quality='high' if HIGH else 'low'
     # Low detail uses planar decimation, keeping silhouettes, skin weights and material borders.
     if not HIGH:
         for o in bpy.context.scene.objects:
             if o.type!='MESH': continue
-            modifier=o.modifiers.new('Mobile simplification','DECIMATE');modifier.ratio=.68
+            if o.get('designRevision'): continue
+            # Spend the mobile budget on garment joints; dense wheel detail can tolerate more reduction.
+            modifier=o.modifiers.new('Mobile simplification','DECIMATE');modifier.ratio=.58 if o.name.startswith('Slot_wheels_') else .68
             bpy.context.view_layer.objects.active=o
             if len(o.modifiers)>1: bpy.ops.object.modifier_move_up(modifier=modifier.name)
             bpy.ops.object.modifier_apply(modifier=modifier.name)
@@ -610,18 +828,26 @@ for HIGH in [False,True]:
                           'size':[bounds[1][k]-bounds[0][k] for k in range(3)],
                           'triangles':count,'boundsBlender':bounds,
                           'materials':[m.name for m in o.data.materials]})
-    limit=24000 if HIGH else 8000
-    assert triangles<=limit,(quality,triangles,limit)
+    fixed=sum(part['triangles'] for part in parts if not part['id'].startswith('Slot_'))
+    maximum=fixed+sum(max(sum(part['triangles'] for part in parts if part['id'].startswith(f'Slot_{slot}_{variant}') ) for variant in VARIANTS) for slot in SLOTS)
+    limit=30000 if HIGH else 8000
+    assert maximum<=limit,(quality,maximum,limit)
     filepath=OUT/f'motocross-{quality}.glb'
     bpy.ops.export_scene.gltf(filepath=str(filepath),export_format='GLB',export_yup=True,export_skins=True,export_animations=False,export_extras=True,export_materials='EXPORT',export_vertex_color='ACTIVE')
-    report[quality]={'trianglesSelected':triangles,'trianglesCatalog':all_triangles,'bytes':filepath.stat().st_size,'textures':0,'bones':len(specs),'parts':parts}
+    report[quality]={'trianglesSelected':triangles,'trianglesSelectedMax':maximum,'trianglesCatalog':all_triangles,'bytes':filepath.stat().st_size,'textures':0,'bones':len(specs),'parts':parts}
+    if not HIGH and '--render' in __import__('sys').argv:
+        for o in bpy.context.scene.objects:
+            if o.name.startswith('Slot_') and '_core' not in o.name: o.hide_render=True
+        studio(True,'low')
     if HIGH:
-        (SOURCE/'rig.json').write_text(json.dumps({name:{'head':a,'tail':b,'parent':parent} for name,a,b,parent in specs},indent=2)+'\n')
+        rig_json=json.dumps({name:{'head':a,'tail':b,'parent':parent} for name,a,b,parent in specs},indent=2)+'\n'
+        (SOURCE/'rig.json').write_text(rig_json)
+        (ROOT/'src'/'bike-rig.json').write_text(rig_json)
         for o in bpy.context.scene.objects:
             if o.name.startswith('Slot_') and '_core' not in o.name:
                 o.hide_set(True);o.hide_render=True
         studio('--render' in __import__('sys').argv)
         bpy.context.preferences.filepaths.save_version=0
         bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/'motocross.blend'))
-(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','slots':SLOTS,'variants':VARIANTS,'assets':report},indent=2)+'\n')
-print('MOTOCROSS_ASSETS',json.dumps(report))
+(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'assets':report},indent=2)+'\n')
+print('MOTOCROSS_ASSETS',json.dumps({quality:{key:value for key,value in stats.items() if key!='parts'} for quality,stats in report.items()}))

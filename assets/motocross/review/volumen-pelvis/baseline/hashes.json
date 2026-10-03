@@ -1,0 +1,30 @@
+[
+  {
+    "Hash": "09BF22A33646D71C8726641C36251D7C9FF0A2BDDB4DEA047590AED99D530155",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\bike-model.ts"
+  },
+  {
+    "Hash": "C6F9333B2F3863F837B982E353E2B5B5F8DA1E61D8573BAF95BCCE11A270A040",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\bike-rig.json"
+  },
+  {
+    "Hash": "63FD7C48286F60D18D39A938186A0296F6BA5D7CF6D700205056945F305D525C",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\build-motocross.py"
+  },
+  {
+    "Hash": "9D9E09C8447A2BF645A6FADE1FF708B08E2D5153A3B22C2ED6567F7FC8F244AB",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\manifest.json"
+  },
+  {
+    "Hash": "7AD059CD2D3EDA6D6DD82A49CDE43E49C2F22D79248D4BC8DEAFFFE03099D3B1",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\motocross-high.glb"
+  },
+  {
+    "Hash": "72E4DF1663CF1BAC278DAB8250F62C706FAEA83A1BFCF51A4D4693EAC589E4FD",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\motocross-low.glb"
+  },
+  {
+    "Hash": "2B4057FBE8998AA8ADD60BED1659B88B4D5282E58D4805FDC3A81524E2137650",
+    "Path": "C:\\Code\\ExciteBike\\assets\\motocross\\review\\volumen-pelvis\\baseline\\motocross.blend"
+  }
+]

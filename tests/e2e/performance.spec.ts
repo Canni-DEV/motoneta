@@ -1,9 +1,23 @@
 import { expect, test } from '@playwright/test';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 test('six riders and five ghosts in both qualities retain stable rendering resources', async ({
   page,
 }, info) => {
   test.setTimeout(180000);
+  if (process.env.MODEL_BENCHMARK_RUNTIME) {
+    const snapshot = process.env.MODEL_BENCHMARK_RUNTIME;
+    await page.route('**/src/bike-model.ts*', async (route) => {
+      const response = await route.fetch({ url: new URL(snapshot, route.request().url()).href });
+      await route.fulfill({ response });
+    });
+  }
+  if (process.env.MODEL_BENCHMARK_MODELS) {
+    await page.route('**/models/motocross-*.glb', async (route) => route.fulfill({
+      contentType: 'model/gltf-binary',
+      body: await readFile(join(process.env.MODEL_BENCHMARK_MODELS!, new URL(route.request().url()).pathname.split('/').at(-1)!)),
+    }));
+  }
   await page.route('http://127.0.0.1:5173/', (route) =>
     route.fulfill({
       contentType: 'text/html',
@@ -160,4 +174,8 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
     contentType: 'application/json',
   });
   await writeFile('test-results/new-modes-performance.json', JSON.stringify(measurements, null, 2));
+  if (process.env.MODEL_BENCHMARK_OUTPUT) {
+    await mkdir(process.env.MODEL_BENCHMARK_OUTPUT, { recursive: true });
+    await writeFile(join(process.env.MODEL_BENCHMARK_OUTPUT, `run-${info.repeatEachIndex}.json`), JSON.stringify(measurements, null, 2));
+  }
 });

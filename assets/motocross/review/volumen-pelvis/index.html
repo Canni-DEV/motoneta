@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MotoNeta · Volumen de glúteos y muslos</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101920;color:#edf2f4;font:16px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:28px}h1{font-size:30px;line-height:1.2;margin:8px 0 14px}p{color:#b5c8d1;max-width:1000px}.eyebrow{color:#f4a37d;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.controls{display:flex;gap:18px;flex-wrap:wrap;margin:24px 0;padding:18px 0;border-block:1px solid #3a4b54}label{display:grid;gap:6px;font-size:14px}select{font:inherit;padding:10px 16px;border-radius:8px;border:1px solid #657883;background:#253741;color:white}.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}figure{margin:0;background:#17232b;border-radius:12px;overflow:hidden}figcaption{padding:12px 16px;background:#21313a}img{display:block;width:100%;height:auto}a{color:#ffb697}.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:22px 0}.notes article{padding:18px;background:#1c2b33;border-radius:10px}.notes h2{font-size:17px;margin:0 0 8px}.notes p{font-size:14px;margin:0}details{border-top:1px solid #3a4b54;padding:18px 0;margin-top:20px}details a{display:inline-block;margin:12px 18px 0 0}footer{font-size:14px;color:#afc0c8;padding:20px 0}@media(max-width:760px){main{padding:18px}.pair,.notes{grid-template-columns:1fr}h1{font-size:25px}}
+</style>
+<main>
+  <div class="eyebrow">Esencial · Volumen corporal · Revisión 4</div>
+  <h1>Glúteos y muslos con volumen</h1>
+  <p>La altura y el asiento aprobados se conservan. Esta corrección redondea los glúteos, da espesor a los muslos y construye una transición continua alrededor de la zona de apoyo. Compará especialmente la vista posterior y los primeros planos.</p>
+  <div class="controls"><label>Acabado<select id="finish"><option value="color">Colores del juego</option><option value="neutral">Volumen neutro</option></select></label>
+    <label>Calidad<select id="quality"><option value="high">Alta</option><option value="low">Rendimiento</option></select></label>
+    <label>Vista<select id="view"><option value="three-quarter">Tres cuartos</option><option value="side">Lateral</option><option value="front">Frontal</option><option value="rear" selected>Posterior</option><option value="contact">Pelvis, muslos y asiento</option><option value="seat">Asiento sin piloto</option><option value="cutaway">Piloto transparente</option><option value="body">Torso y brazos</option><option value="helmet">Casco</option></select></label>
+    <label>Movimiento<select id="pose"><option value="ground">Sentado activo</option><option value="steering">Giro</option><option value="wheelie">Caballito</option><option value="flight">Vuelo</option><option value="landing">Aterrizaje</option><option value="rolling">Rodado</option><option value="down">Caída</option><option value="mounting">Volver a montar</option></select></label>
+  </div>
+  <div class="pair">
+    <figure><figcaption>Antes · base aprobada</figcaption><a id="before-link" target="_blank"><img id="before" alt="Modelo anterior en material neutro"></a></figure>
+    <figure><figcaption>Ahora · glúteos y muslos con volumen</figcaption><a id="after-link" target="_blank"><img id="after" alt="Nueva base Esencial en material neutro"></a></figure>
+  </div>
+  <div class="notes">
+    <article><h2>Apoyo y proporciones</h2><p>Glúteos redondeados, muslos más gruesos y un apoyo definido. La zona interna acompaña el asiento sin reducir el volumen exterior.</p></article>
+    <article><h2>Asiento y altura aprobados</h2><p>El asiento, el rig y las demás piezas conservan exactamente su geometría y posición. Esta iteración modifica únicamente el pantalón.</p></article>
+    <article><h2>Qué revisar</h2><p>Revisá el grosor posterior de los glúteos y muslos y su continuidad. Podés alternar color y material neutro, o examinar el apoyo con transparencia.</p></article>
+  </div>
+  <details><summary>Comprobaciones técnicas y archivos</summary>
+    <p>El rig mantiene sus 15 huesos y los IDs de personalización. Las variantes comparten la base anatómica para conservar la compatibilidad; esta revisión visual corresponde a Esencial.</p>
+    <a href="validation.json">Resumen de validación</a><a href="clearance.json">Cruces y apoyo en poses animadas</a><a href="topology.json">Continuidad e interfaces</a><a href="performance/comparison.json">Rendimiento</a><a href="../ergonomia/index.html">Revisión anterior</a>
+  </details>
+  <footer>Misma cámara e iluminación en ambas versiones. Pulsá una imagen para abrirla a tamaño completo. El selector de acabado permite estudiar el volumen con o sin pintura.</footer>
+</main>
+<script>
+const quality=document.querySelector('#quality'),view=document.querySelector('#view'),pose=document.querySelector('#pose'),finish=document.querySelector('#finish');
+function update(){const suffix=pose.value==='ground'?view.value:pose.value;view.disabled=pose.value!=='ground';for(const [id,folder] of (finish.value==='color'?[['before','../volumen-pelvis-antes-color/'],['after','../volumen-pelvis-color/']]:[['before','../ergonomia/'],['after','']])){const path=`${folder}${quality.value}-${suffix}.png`;document.querySelector(`#${id}`).src=path;document.querySelector(`#${id}-link`).href=path;}}
+for(const control of [quality,view,pose,finish])control.addEventListener('change',update);update();
+</script>
+</html>
