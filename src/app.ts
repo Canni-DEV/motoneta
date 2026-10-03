@@ -29,6 +29,12 @@ import {
 } from './core/maps';
 import { abandonPlayer, createRace, isFinished, raceResult, stepRace } from './core/racing';
 import { appendInput, newRecording, Playback, validateRecording } from './core/recording';
+import {
+  personalRecord,
+  preparePersonalGhost,
+  quickRaceConfig,
+  type PersonalGhostReference,
+} from './core/personal-ghost';
 import { formatTime } from './core/simulation';
 import { TIME_LABELS } from './core/time-of-day';
 import {
@@ -59,6 +65,7 @@ import {
   type SetupPresentation,
 } from './ui/navigation';
 import { raceView, updateHud } from './ui/race-view';
+import { personalGhostResults } from './ui/personal-ghost-view';
 import {
   finishTable,
   generatorView,
@@ -109,6 +116,10 @@ export async function startApp() {
   let ghosts: Playback[] = [],
     ghostNames: PlayerProfile[] = [],
     session: CompetitionSession | null = null;
+  let quickGhostEnabled = false;
+  let quickStartGeneration = 0;
+  let quickSetupSignature = '';
+  let quickAttempt: { reference: PersonalGhostReference | null } | null = null;
   let returnScreen = 'quick',
     setup: Setup = {
       mode: 'quick',
@@ -197,6 +208,7 @@ export async function startApp() {
   }
   const profile = () =>
     store.state.profiles.find((p) => p.id === store.state.activeProfile) ?? store.state.profiles[0];
+  const quickConfig = () => quickRaceConfig(setup.courses[0], profile(), setup.bots, setup.difficulty);
   const editor = new Editor(
     store.state.draft,
     (d) =>
@@ -265,12 +277,20 @@ export async function startApp() {
       content = sessionView(session);
       course = session.courses[Math.min(session.courseIndex, session.courses.length - 1)];
     } else {
+      const config = setup.mode === 'quick' ? quickConfig() : null;
+      const signature = config ? JSON.stringify([config, quickGhostEnabled]) : '';
+      if (signature !== quickSetupSignature) {
+        quickSetupSignature = signature;
+        quickStartGeneration++;
+      }
+      const record = config ? personalRecord(store.state.records, config) : undefined;
       content = setupView(
         setup,
         catalog(),
         store.state.profiles,
-        models === 'ready',
+        models === 'ready' && !startBusy,
         setupViews[setup.mode],
+        config ? { record, enabled: quickGhostEnabled, available: !!record && storageReady, busy: startBusy } : undefined,
       );
       course = setup.courses[setupViews[setup.mode].course] ?? setup.courses[0] ?? BUILTINS[0];
     }
@@ -317,6 +337,8 @@ export async function startApp() {
     } else if (storageReady) warning?.remove();
   }
   function navigate(next: Screen, remember = true) {
+    quickStartGeneration++;
+    quickAttempt = null;
     if (cinematicHelpTimer) clearTimeout(cinematicHelpTimer);
     attractTicket++;
     attractStarting = false;
@@ -419,11 +441,14 @@ export async function startApp() {
     ghostRecordings: Recording[] = [],
     presentation: 'manual' | 'attract' = 'manual',
     preparedTimeline: CinematicTimeline | null = null,
+    attempt: { reference: PersonalGhostReference | null } | null = null,
   ) {
     if (!world || models !== 'ready') {
       toast('Esperá a que la vista 3D esté lista.');
       return;
     }
+    // A new race or replay supersedes any pending personal-ghost load.
+    quickStartGeneration++;
     if (screen !== 'race') navigation.rememberView();
     closeModal();
     paused = false;
@@ -442,6 +467,7 @@ export async function startApp() {
     document.body.dataset.cinematic = String(!!world.cinematic);
     document.body.dataset.attract = String(presentation === 'attract' && !!watch);
     race = playback?.race ?? createRace(config!);
+    quickAttempt = attempt;
     recording = watch ? null : newRecording(config!);
     lastRecording = watch;
     ghosts = ghostRecordings.map((r) => new Playback(r));
@@ -464,7 +490,7 @@ export async function startApp() {
     document.body.dataset.screen = 'race';
     patch(ui, presentation === 'attract' && watch
       ? '<div class="attract-hint">Escape para volver al menú</div>'
-      : raceView(race, ghostNames, !!watch) + (watch ? `<div class="cinematic-controls">${b('toggle-cinematic', icon('camera'), '', 'class="cinematic-toggle" aria-label="Activar cámara cinematográfica" aria-pressed="false" data-tooltip="Activar cámara cinematográfica · C"')}</div>` : ''));
+      : raceView(race, ghostNames, !!watch, quickAttempt?.reference) + (watch ? `<div class="cinematic-controls">${b('toggle-cinematic', icon('camera'), '', 'class="cinematic-toggle" aria-label="Activar cámara cinematográfica" aria-pressed="false" data-tooltip="Activar cámara cinematográfica · C"')}</div>` : ''));
     viewport.attach($('#backdrop-host'), 'race');
     document.querySelector('.race-identity>div')?.insertAdjacentHTML(
       'beforeend',
@@ -630,6 +656,7 @@ export async function startApp() {
       ? finishTable(r.finishes, [r.config.player, ...r.config.bots])
       : '';
     const time = own?.ticks == null ? 'No terminó' : formatTime(ticksToTime(own.ticks));
+    const comparison = quickAttempt?.reference ? personalGhostResults(r, quickAttempt.reference) : '';
     const best =
       recording && store.state.records.find((v) => v.key === recordKey(recording!.config));
     if (saved && !playback && !resultFeedbackPlayed && recording && own?.ticks != null) {
@@ -643,7 +670,7 @@ export async function startApp() {
       else if (r && r.config.bots.length && r.rank === 1) audio.playCue('victory', 0.2, 0.7);
     }
     showModal(
-      `<h2>${playback ? 'Repetición finalizada' : 'Resultado'}</h2><div class="result-time">${time}</div><p class="dialog-description">${TIME_LABELS[activeTimeOfDay]} · ${WEATHER_LABELS[activeWeather]}</p>${best && own?.ticks === best.ticks ? '<p>Mejor marca personal</p>' : ''}${table}<div class="lap-times">${race.laps.map((t, i) => `<span>Vuelta ${i + 1}<b>${formatTime(t - (race!.laps[i - 1] ?? 0))}</b></span>`).join('')}</div>${!saved ? `<p role="alert">No se pudo guardar el resultado. Reintentá o exportá la repetición.</p>${b('retry-save', 'Reintentar guardado', '', 'class="primary"')}` : ''}<div class="actions">${!session ? b('retry', 'Volver a correr', '', saved ? '' : 'disabled') : ''}${b('watch', 'Ver repetición', '', saved ? '' : 'disabled')}${b('export-replay', 'Exportar repetición')}${b('leave-race', session ? 'Ver clasificación' : returnScreen === 'editor' ? 'Editor' : 'Volver', '', !saved ? 'disabled' : 'class="primary"')}</div>`,
+      `<h2>${playback ? 'Repetición finalizada' : 'Resultado'}</h2><div class="result-time">${time}</div><p class="dialog-description">${TIME_LABELS[activeTimeOfDay]} · ${WEATHER_LABELS[activeWeather]}</p>${best && own?.ticks === best.ticks ? '<p>Mejor marca personal</p>' : ''}${table}${comparison || `<div class="lap-times">${race.laps.map((t, i) => `<span>Vuelta ${i + 1}<b>${formatTime(t - (race!.laps[i - 1] ?? 0))}</b></span>`).join('')}</div>`}${!saved ? `<p role="alert">No se pudo guardar el resultado. Reintentá o exportá la repetición.</p>${b('retry-save', 'Reintentar guardado', '', 'class="primary"')}` : ''}<div class="actions">${!session ? b('retry', 'Volver a correr', '', saved ? '' : 'disabled') : ''}${b('watch', 'Ver repetición', '', saved ? '' : 'disabled')}${b('export-replay', 'Exportar repetición')}${b('leave-race', session ? 'Ver clasificación' : returnScreen === 'editor' ? 'Editor' : 'Volver', '', !saved ? 'disabled' : 'class="primary"')}</div>`,
     );
   }
   async function finish() {
@@ -699,22 +726,55 @@ export async function startApp() {
       saveBusy = false;
     }
   }
+  async function startQuickRace(config: RaceConfig, includeGhost: boolean, origin: Screen, generation: number) {
+    const current = () => generation === quickStartGeneration && screen === origin;
+    let reference: PersonalGhostReference | null = null;
+    const recordings: Recording[] = [];
+    if (includeGhost) {
+      const record = personalRecord(store.state.records, config);
+      if (!record) throw new Error('No hay un récord para esta configuración.');
+      let source: Recording | undefined;
+      try {
+        source = await store.replay(record.replayId);
+      } catch (error) {
+        if (!current()) return;
+        throw error;
+      }
+      if (!current()) return;
+      if (!source) throw new Error('No se encontró la repetición de tu récord. Podés desmarcar el fantasma y comenzar.');
+      const prepared = preparePersonalGhost(record, config, source);
+      recordings.push(prepared.replay);
+      reference = prepared.reference;
+    }
+    if (!current()) return;
+    returnScreen = 'quick';
+    session = null;
+    run(config, null, recordings, 'manual', null, { reference });
+  }
+
+  async function retryQuickRace() {
+    if (startBusy || !recording || !quickAttempt) return;
+    startBusy = true;
+    const button = modal.querySelector<HTMLButtonElement>('[data-action="retry"]');
+    if (button) button.disabled = true;
+    try {
+      await startQuickRace(structuredClone(recording.config), !!quickAttempt.reference, 'race', quickStartGeneration);
+    } finally {
+      startBusy = false;
+      if (button?.isConnected) button.disabled = false;
+    }
+  }
+
   async function startSetup(replace = false) {
     if (startBusy) return;
     startBusy = true;
     try {
       if (models !== 'ready') throw new Error('Esperá a que la vista 3D esté lista.');
       if (setup.mode === 'quick') {
-        returnScreen = 'quick';
-        session = null;
-        run({
-          ...structuredClone(setup.courses[0]),
-          mode: 'quick',
-          player: profile(),
-          bots: makeBots(setup.bots),
-          difficulty: setup.difficulty,
-          seed: 1984,
-        });
+        const config = quickConfig();
+        const includeGhost = quickGhostEnabled && storageReady && !!personalRecord(store.state.records, config);
+        render();
+        await startQuickRace(config, includeGhost, 'quick', quickStartGeneration);
         return;
       }
       if (setup.courses.length < (setup.mode === 'tournament' ? 3 : 1))
@@ -755,6 +815,7 @@ export async function startApp() {
       refreshSession(s.mode);
     } finally {
       startBusy = false;
+      if (screen === 'quick') render();
     }
   }
   async function beginTurn() {
@@ -903,6 +964,7 @@ export async function startApp() {
   }
   async function leaveRace() {
     if (activity === 'finishing') return;
+    quickStartGeneration++;
     if (session && activity === 'running' && !playback) {
       showModal(
         `<h2>Abandonar carrera</h2><p>Este turno contará como no terminado y sumará cero puntos.</p>${b('confirm-abandon', 'Abandonar')}${b('resume', 'Continuar corriendo', '', 'class="primary"')}`,
@@ -969,6 +1031,7 @@ export async function startApp() {
             profilesView();
             break;
           case 'activate-profile':
+            quickStartGeneration++;
             await store.update((s) => {
               s.activeProfile = value;
             });
@@ -1411,7 +1474,9 @@ export async function startApp() {
             break;
           case 'retry':
             if (session) return;
-            if (playback) {
+            if (quickAttempt) {
+              await retryQuickRace();
+            } else if (playback) {
               const r = playback.recording;
               run({ ...structuredClone(r.config), player: profile(), mode: 'quick' });
             } else if (recording)
@@ -1541,6 +1606,7 @@ export async function startApp() {
           return;
         }
         if (el.id === 'active-profile') {
+          quickStartGeneration++;
           await store.update((s) => {
             s.activeProfile = el.value;
           });
@@ -1569,6 +1635,8 @@ export async function startApp() {
         if (el.id === 'bots') setup.bots = Number(el.value);
         if (el.id === 'difficulty') setup.difficulty = el.value as Setup['difficulty'];
         if (el.id === 'laps') setup.courses[0].track.laps = Number(el.value);
+        if (el.id === 'quick-ghost') quickGhostEnabled = el.checked;
+        if (['bots', 'difficulty', 'laps', 'quick-ghost'].includes(el.id)) render();
         if (el.id === 'map-filter') {
           setup.filter = el.value as Setup['filter'];
           render();
@@ -1880,7 +1948,7 @@ export async function startApp() {
       controls.sample();
     }
     if (screen === 'race' && race && now - lastHud > 40) {
-      updateHud(race, settings);
+      updateHud(race, settings, quickAttempt?.reference);
       lastHud = now;
     }
     if (world) world.beatDelay = audio.beatDelay();
@@ -1914,6 +1982,7 @@ export async function startApp() {
         setup: structuredClone(setup),
         profiles: structuredClone(store.state.profiles),
         records: structuredClone(store.state.records),
+        personalGhost: quickAttempt?.reference ? structuredClone(quickAttempt.reference) : null,
         ghosts: ghosts.map((g) => ({
           frame: g.race.frame,
           done: g.done,
