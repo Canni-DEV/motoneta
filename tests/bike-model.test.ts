@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { DoubleSide, Group, Mesh, MeshStandardMaterial, Raycaster, SkinnedMesh, Vector3 } from 'three';
+import { Box3, DoubleSide, Group, Mesh, MeshStandardMaterial, Raycaster, SkinnedMesh, Vector3 } from 'three';
 import {
   Bike,
   createBikeAssetLoader,
@@ -176,6 +176,86 @@ describe('exported model resources and lifecycle', () => {
     bike.setAppearance(appearance);
     bike.setAppearance(appearance, true);
     expect((bike as any).ownedMaterials.length).toBe(count);
+    bike.dispose();
+  });
+  it.each(['high', 'low'] as const)('%s ghosts preserve paint and reuse independent faded materials', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality), other = new Bike(0x123456, assets, quality);
+    const appearance = defaultAppearance('#00ff00');
+    appearance.paints.helmet = { primary: '#ff0000', accent: '#ffff00' };
+    appearance.parts.helmet = 'trail';
+    bike.setAppearance(appearance);
+    const all = [...meshes(bike.variants.high), ...meshes(bike.riderLayer)];
+    const originals = all.map((mesh) => mesh.material);
+    const colors = (bike as any).painted.map((part: any) => Array.from(part.attribute.array));
+    bike.setAppearance(appearance, true);
+    const faded = all.map((mesh) => mesh.material);
+    const allocations = (bike as any).ownedMaterials.length;
+    for (const opacity of [0.1, 0.225, 0.35, 0.1]) {
+      bike.setGhostOpacity(opacity);
+      bike.setLighting(1);
+      for (const mesh of all) {
+        for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+          expect(material.opacity).toBe(opacity);
+          expect(material.transparent).toBe(true);
+          expect(material.depthWrite).toBe(false);
+          expect(material.depthTest).toBe(true);
+          if (/^Lamp/.test(material.name)) expect((material as MeshStandardMaterial).emissiveIntensity).toBe(0);
+        }
+        expect(mesh.castShadow).toBe(false);
+      }
+    }
+    expect(bike.headlight.intensity).toBe(0);
+    expect((bike as any).painted.map((part: any) => Array.from(part.attribute.array))).toEqual(colors);
+    bike.setQuality(quality === 'high' ? 'low' : 'high');
+    expect(bike.ghostOpacity).toBe(0.1);
+    bike.setAppearance(appearance);
+    bike.setGhostOpacity(0.1);
+    bike.setLighting(1);
+    all.forEach((mesh, i) => {
+      expect(mesh.material).toBe(originals[i]);
+      expect(mesh.castShadow).toBe(true);
+      for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        expect(material.opacity).toBe(1);
+        if (/^Lamp/.test(material.name)) expect((material as MeshStandardMaterial).emissiveIntensity).toBeGreaterThan(0);
+      }
+    });
+    bike.setAppearance(appearance, true);
+    all.forEach((mesh, i) => {
+      expect(mesh.material).toBe(faded[i]);
+      for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) expect(material.opacity).toBe(0.35);
+    });
+    expect((bike as any).ownedMaterials.length).toBe(allocations);
+    expect(meshes(other.variants[quality]).every((mesh) =>
+      (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).every((material) => material.opacity === 1),
+    )).toBe(true);
+    bike.dispose(); other.dispose();
+  });
+  it.each(['high', 'low'] as const)('%s visual bounds follow poses and ignore blinking without rescanning geometry', (quality) => {
+    const bike = new Bike(0xc91c32, assets, quality), bounds = new Box3(), point = new Vector3();
+    for (const pose of [
+      state(), state({ time: 1, tilt: 0.8, grounded: false }),
+      state({ time: 2, recovery: true, crashPhase: 'down', crashPhaseAge: 30, lane: 0 }),
+      state({ time: 3, recovery: true, crashPhase: 'mounting', crashPhaseAge: 15, lane: 3 }),
+    ]) {
+      bike.update(pose);
+      expect(bike.getVisualBounds(bounds)).toBe(bounds);
+      expect(bounds.isEmpty()).toBe(false);
+      for (const mesh of [...visibleMeshes(bike.variants[quality]), ...visibleMeshes(bike.rider as Group)]) {
+        // Sample actual skinned vertices to catch incorrect bone-tail lengths in envelopes.
+        for (let vertex = 0; vertex < mesh.geometry.attributes.position.count; vertex += 32) {
+          mesh.getVertexPosition(vertex, point).applyMatrix4(mesh.matrixWorld);
+          expect(bounds.containsPoint(point), `${mesh.name}/${vertex} pose=${pose.time} point=${point.toArray()} bounds=${bounds.min.toArray()}..${bounds.max.toArray()}`).toBe(true);
+        }
+      }
+    }
+    const before = bounds.clone();
+    bike.body.visible = bike.riderLayer.visible = false;
+    bike.getVisualBounds(bounds);
+    expect(bounds.equals(before)).toBe(true);
+    bike.root.position.set(10, 5, 2);
+    bike.getVisualBounds(bounds);
+    expect(bounds.min.x).toBeCloseTo(before.min.x + 10);
+    expect(bounds.max.y).toBeCloseTo(before.max.y + 5);
     bike.dispose();
   });
 });

@@ -127,6 +127,7 @@ test('two bots and one personal ghost show splits, frozen results and the newest
   const target = (await state(page)).personalGhost;
   expect((await state(page)).race.riders).toHaveLength(3);
   expect((await state(page)).ghosts).toHaveLength(1);
+  await expect.poll(async () => (await state(page)).ghosts[0].opacity).toBeCloseTo(0.1);
   await expect(page.locator('#ghost-comparison')).toHaveText('Sin parciales todavía');
   await page.keyboard.down('z');
   await expect.poll(async () => (await state(page)).race.riderLaps[0].length).toBeGreaterThanOrEqual(1);
@@ -139,7 +140,8 @@ test('two bots and one personal ghost show splits, frozen results and the newest
   await expect(page.locator('#ghost-comparison dd').nth(1)).toHaveText(splits[1]);
   await expect.poll(async () => ({
     real: (await state(page)).race.frame, ghost: (await state(page)).ghosts[0].frame,
-  })).toEqual({ real: paused.race.frame, ghost: paused.ghosts[0].frame });
+    opacity: (await state(page)).ghosts[0].opacity,
+  })).toEqual({ real: paused.race.frame, ghost: paused.ghosts[0].frame, opacity: paused.ghosts[0].opacity });
   // Close the pause dialog without resuming while inspecting the HUD.
   await page.evaluate(() => (document.querySelector('#modal') as HTMLDialogElement).close());
   for (const [width, height] of [[1440, 900], [640, 360]]) {
@@ -181,6 +183,7 @@ test('two bots and one personal ghost show splits, frozen results and the newest
   await action(page, 'retry');
   await expect.poll(async () => (await state(page)).personalGhost?.replayId).toBe(record.replayId);
   expect((await state(page)).ghosts).toHaveLength(1);
+  await expect.poll(async () => (await state(page)).ghosts[0].opacity).toBeCloseTo(0.1);
   await expect(page.locator('#ghost-comparison')).toHaveText('Sin parciales todavía');
   await leave(page);
   await expect(page.getByRole('checkbox', { name: 'Correr contra mi fantasma' })).toBeChecked();

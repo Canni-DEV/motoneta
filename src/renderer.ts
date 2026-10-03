@@ -25,6 +25,7 @@ import { VfxSystem } from './vfx/system';
 import { vfxSettings } from './vfx/config';
 import { StadiumFlags } from './vfx/flags';
 import { CinematicCamera } from './cinematic-camera';
+import { advanceGhostOpacity, ghostOverlapOpacity, projectGhostBounds } from './ghost-visibility';
 
 const SCALE = 0.052,
   LANE = 1.22;
@@ -125,6 +126,11 @@ export class World {
   pieces: { group: THREE.Group; base: number; bounds: THREE.Box3 }[] = [];
   bikes: Bike[] = [];
   ghostStart = Infinity;
+  private ghostVisibilityPending = true;
+  private readonly ghostWorldBounds = new THREE.Box3();
+  private readonly playerScreenBounds = new THREE.Box2();
+  private readonly ghostScreenBounds = new THREE.Box2();
+  private readonly ghostProjectionPoint = new THREE.Vector3();
   appearances: Appearance[] = [];
   private readonly garageScene = new THREE.Scene();
   private readonly garageCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 30);
@@ -446,6 +452,7 @@ export class World {
     this.last = 0;
     this.previous = [];
     this.bikes.forEach((bike) => bike.reset());
+    this.ghostVisibilityPending = true;
   }
   capture(r: Race) {
     this.previous = r.riders.map((p) => ({
@@ -458,6 +465,7 @@ export class World {
     }));
   }
   beginRace(race: Race) {
+    this.ghostVisibilityPending = true;
     this.vfx.reset(race.track, race.seed);
     this.weatherEffects.reset();
   }
@@ -647,6 +655,26 @@ export class World {
         ground,
         reducedMotion: this.reduced,
       });
+    }
+    if (!menu && !editor && race?.riders[0] && this.ghostStart < race.riders.length) {
+      activeCamera.updateWorldMatrix(true, false);
+      projectGhostBounds(
+        this.bikes[0].getVisualBounds(this.ghostWorldBounds), activeCamera,
+        this.playerScreenBounds, this.ghostProjectionPoint,
+      );
+      for (let i = this.ghostStart; i < race.riders.length; i++) {
+        const bike = this.bikes[i];
+        projectGhostBounds(
+          bike.getVisualBounds(this.ghostWorldBounds), activeCamera,
+          this.ghostScreenBounds, this.ghostProjectionPoint,
+        );
+        const target = ghostOverlapOpacity(this.playerScreenBounds, this.ghostScreenBounds);
+        if (this.ghostVisibilityPending) bike.setGhostOpacity(target);
+        else if (!paused) bike.setGhostOpacity(this.reduced
+          ? target
+          : advanceGhostOpacity(bike.ghostOpacity, target, visualDt));
+      }
+      this.ghostVisibilityPending = false;
     }
     for (const bike of this.bikes) bike.setLighting(this.environment.lampLevel);
     this.vfx.render(activeCamera, race, focus, this.environment.fog, this.environment.timeOfDay);

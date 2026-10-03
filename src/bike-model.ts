@@ -4,6 +4,7 @@ import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { BIKE, bikePose, crashPose, type GroundHeight } from './bike-pose';
 import rigDefinition from './bike-rig.json';
 import { appearanceKey, defaultAppearance, SLOTS, VARIANTS, type Appearance, type SlotId } from './appearance';
+import { GHOST_OPACITY, GHOST_OVERLAP_OPACITY } from './ghost-visibility';
 
 export type BikeQuality = 'high' | 'low';
 export type BikeAssets = Record<BikeQuality, THREE.Group>;
@@ -179,6 +180,9 @@ export class Bike {
   private readonly painted: { slot: SlotId; attribute: THREE.BufferAttribute; base: Float32Array }[] = [];
   private readonly contactPoint = new THREE.Vector3();
   private readonly inverseRoot = new THREE.Matrix4();
+  private readonly visualMeshes: Record<BikeQuality, { mesh: THREE.Mesh; bounds: THREE.Box3 }[]> = { high: [], low: [] };
+  private readonly visualBox = new THREE.Box3();
+  private readonly visualPoint = new THREE.Vector3();
   quality: BikeQuality;
   wheels: THREE.Object3D[] = [];
   rider!: THREE.Object3D;
@@ -194,6 +198,7 @@ export class Bike {
   private lastState: BikeVisualState | null = null;
   private appearance = '';
   private ghost = false;
+  private opacity = GHOST_OPACITY;
   private originals = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
   private ghostMaterials = new Map<THREE.Material, THREE.Material>();
 
@@ -204,6 +209,7 @@ export class Bike {
     const key = `${appearanceKey(appearance)}:${ghost}`;
     if (key === this.appearance) return;
     this.appearance = key;
+    if (ghost !== this.ghost) this.opacity = GHOST_OPACITY;
     this.ghost = ghost;
     for (const part of this.painted) {
       const colors = part.attribute.array as Float32Array;
@@ -224,11 +230,16 @@ export class Bike {
       if (!copy) {
         copy = material.clone();
         copy.transparent = true;
-        copy.opacity = 0.35;
+        copy.opacity = this.opacity;
         copy.depthWrite = false;
+        copy.depthTest = true;
+        copy.userData.ghost = true;
+        if (copy instanceof THREE.MeshStandardMaterial && /^Lamp(Front|Rear)$/.test(copy.name))
+          copy.emissiveIntensity = 0;
         this.ghostMaterials.set(material, copy);
         this.ownedMaterials.push(copy);
       }
+      copy.opacity = this.opacity;
       return copy;
     };
     for (const variant of [...Object.values(this.variants), ...Object.values(this.variantRiders)])
@@ -253,6 +264,43 @@ export class Bike {
         : appearance.paints[paint.slot][paint.role];
       (material as THREE.MeshStandardMaterial).color.set(color);
     }
+  }
+
+  get ghostOpacity() { return this.opacity; }
+
+  /** Update cached clones only; real bikes and shared asset materials remain untouched. */
+  setGhostOpacity(value: number) {
+    if (!this.ghost || !Number.isFinite(value)) return;
+    value = THREE.MathUtils.clamp(value, GHOST_OVERLAP_OPACITY, GHOST_OPACITY);
+    if (value === this.opacity) return;
+    this.opacity = value;
+    for (const material of this.ghostMaterials.values()) material.opacity = value;
+  }
+
+  /** Current world envelope without skinning vertices or following invulnerability blinks. */
+  getVisualBounds(target: THREE.Box3) {
+    target.makeEmpty();
+    this.root.updateWorldMatrix(true, false);
+    this.root.updateMatrixWorld(true);
+    for (const { mesh, bounds } of this.visualMeshes[this.quality]) {
+      let node: THREE.Object3D | null = mesh;
+      while (node !== this.variants[this.quality] && node?.visible) node = node!.parent;
+      if (node !== this.variants[this.quality]) continue;
+      target.union(this.visualBox.copy(bounds).applyMatrix4(mesh.matrixWorld));
+    }
+    // Bone heads and tails follow leaning, detached crash poses and mounting animations.
+    const scale = this.root.matrixWorld.getMaxScaleOnAxis();
+    for (const [name, radius] of RIDER_SUPPORTS) {
+      const matrix = this.nodes[name].matrixWorld;
+      const length = rest[name].head.distanceTo(rest[name].tail);
+      for (let end = 0; end < 2; end++) {
+        this.visualPoint.set(0, end * length, 0).applyMatrix4(matrix);
+        this.visualBox.min.copy(this.visualPoint).addScalar(-(radius + 0.052) * scale);
+        this.visualBox.max.copy(this.visualPoint).addScalar((radius + 0.052) * scale);
+        target.union(this.visualBox);
+      }
+    }
+    return target;
   }
 
   constructor(color: number, assets: BikeAssets, quality: BikeQuality = 'high') {
@@ -335,6 +383,12 @@ export class Bike {
       this.variantRiders[q] = nodes.RiderRig;
       this.riderLayer.add(nodes.RiderRig);
       this.body.add(scene);
+      // The rider has been detached, leaving only motorcycle meshes in this traversal.
+      scene.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
+        this.visualMeshes[q].push({ mesh: object, bounds: object.geometry.boundingBox! });
+      });
     }
     this.setQuality(quality);
     this.reset();
@@ -357,6 +411,7 @@ export class Bike {
   }
 
   reset() {
+    this.setGhostOpacity(GHOST_OPACITY);
     this.body.visible = true;
     this.riderLayer.visible = true;
     this.wheelAngle =
@@ -389,7 +444,7 @@ export class Bike {
     for (const material of this.ownedMaterials) {
       if (material.name === 'LampFront' || material.name === 'LampRear')
         (material as THREE.MeshStandardMaterial).emissiveIntensity =
-          level * (material.name === 'LampFront' ? 6 : 3);
+          material.userData.ghost ? 0 : level * (material.name === 'LampFront' ? 6 : 3);
     }
   }
 
