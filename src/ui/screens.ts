@@ -49,6 +49,7 @@ export function pageTitle(title: string, caption = '', actions = '') {
   return `<div class="page-heading"><div>${caption ? `<span class="eyebrow">${caption}</span>` : ''}<h1 tabindex="-1">${title}</h1></div><div class="actions">${actions}</div></div>`;
 }
 export function homeView(s: SaveState) {
+  const pending = [...Object.values(s.sessions), s.motonetaSessions[s.activeProfile]].filter((v) => v && v.phase !== 'complete');
   const descriptions = [
     'Una carrera, con o sin rivales.',
     'Puntos acumulados en varias pistas.',
@@ -69,15 +70,13 @@ export function homeView(s: SaveState) {
     )
     .join(
       '',
-    )}</nav><footer class="home-footer" ${Object.values(s.sessions).some((v) => v && v.phase !== 'complete') ? '' : 'hidden'}><div class="resume-list">${Object.values(
-    s.sessions,
-  )
+    )}</nav><footer class="home-footer" ${pending.length ? '' : 'hidden'}><div class="resume-list">${pending
     .filter((v) => v?.phase !== 'complete')
     .map((v) =>
       b(
         'resume-session',
-        `<span class="status-dot"></span>Continuar ${modeNames[v!.mode]}<small>${v!.courseIndex + 1}/${v!.courses.length}</small>`,
-        v!.mode,
+        `<span class="status-dot"></span>Continuar ${v!.presetId === 'motoneta' ? 'Torneo Motoneta' : modeNames[v!.mode]}<small>${v!.courseIndex + 1}/${v!.courses.length}</small>`,
+        v!.presetId === 'motoneta' ? 'motoneta' : v!.mode,
         'class="resume-card"',
       ),
     )

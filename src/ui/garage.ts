@@ -1,7 +1,8 @@
-import { BIKE_SLOTS, RIDER_SLOTS, SLOT_LABELS, VARIANTS, VARIANT_LABELS, type Appearance, type SlotId } from '../appearance';
+import { BIKE_SLOTS, RIDER_SLOTS, SLOT_LABELS, VARIANTS, VARIANT_LABELS, VEHICLES, VEHICLE_LABELS, type Appearance, type SlotId } from '../appearance';
 import { button, esc } from './widgets';
 
-export function garageView(name: string, draft: Appearance, selected: SlotId) {
+export function garageView(name: string, draft: Appearance, selected: SlotId, unlockedMotoneta = false) {
+  const locked = draft.vehicle === 'motoneta' && !unlockedMotoneta;
   const slotButton = (slot: SlotId) => button('garage-slot', SLOT_LABELS[slot], slot,
     `class="garage-slot" aria-pressed="${slot === selected}"`);
   const paint = draft.paints[selected];
@@ -19,9 +20,11 @@ export function garageView(name: string, draft: Appearance, selected: SlotId) {
     <aside class="garage-panel scroll-region">
       <p class="eyebrow">Personalización</p><h1 tabindex="-1">Garaje de ${esc(name)}</h1>
       <p>Combiná las piezas y elegí dos colores para cada una.</p>
+      <div class="garage-vehicles" aria-label="Vehículo">${VEHICLES.map((vehicle) => button('garage-vehicle', VEHICLE_LABELS[vehicle] + (vehicle === 'motoneta' && !unlockedMotoneta ? ' · Bloqueada' : ''), vehicle, `aria-pressed="${draft.vehicle === vehicle}"`)).join('')}</div>
+      ${locked ? '<p class="vehicle-lock" role="status">Ganá el Torneo Motoneta para equiparla y personalizarla.</p>' : ''}
       <h2>Moto</h2><div class="garage-slots">${BIKE_SLOTS.map(slotButton).join('')}</div>
       <h2>Piloto</h2><div class="garage-slots">${RIDER_SLOTS.map(slotButton).join('')}</div>
-      <fieldset><legend>${SLOT_LABELS[selected]}</legend>
+      <fieldset ${locked ? 'disabled' : ''}><legend>${SLOT_LABELS[selected]}</legend>
         <div class="garage-variants">${VARIANTS.map((variant) => button('garage-variant', VARIANT_LABELS[variant], variant,
           `aria-pressed="${draft.parts[selected] === variant}"`)).join('')}</div>
         <div class="garage-paints">
@@ -30,7 +33,7 @@ export function garageView(name: string, draft: Appearance, selected: SlotId) {
         </div>
         ${button('garage-reset-slot', 'Restaurar esta pieza')}
       </fieldset>
-      <div class="garage-actions">${button('garage-reset-all', 'Restaurar todo')}${button('garage-cancel', 'Cancelar')}${button('garage-save', 'Guardar', '', 'class="primary"')}</div>
+      <div class="garage-actions">${button('garage-reset-all', 'Restaurar todo', '', locked ? 'disabled' : '')}${button('garage-cancel', 'Cancelar')}${button('garage-save', 'Guardar', '', `class="primary" ${locked ? 'disabled' : ''}`)}</div>
     </aside>
   </main>`;
 }

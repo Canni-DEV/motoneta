@@ -1,13 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { validateBikeAsset, type BikeAssets } from '../src/bike-model';
+import type { VehicleId } from '../src/appearance';
 
-let pending: Promise<BikeAssets> | undefined;
-export function modelAssets() {
-  return (pending ??= Promise.all(
+const pending: Partial<Record<VehicleId, Promise<BikeAssets>>> = {};
+export function modelAssets(vehicle: VehicleId = 'motocross') {
+  return (pending[vehicle] ??= Promise.all(
     (['high', 'low'] as const).map(async (quality) => {
       const buffer = await readFile(
-        new URL(`../public/models/motocross-${quality}.glb`, import.meta.url),
+        new URL(`../public/models/${vehicle}-${quality}.glb`, import.meta.url),
       );
       const data = buffer.buffer.slice(
         buffer.byteOffset,

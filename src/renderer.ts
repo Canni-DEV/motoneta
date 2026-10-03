@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
 import { box, mat, roadTexture, soilNoise, disposeResources } from './rendering/scene-geometry';
 import { buildCourse, type CoursePiece } from './rendering/course';
-import type { Appearance } from './appearance';
+import type { Appearance, VehicleId } from './appearance';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -21,7 +21,7 @@ import { Environment } from './environment';
 import { WeatherSurfaces } from './weather-surfaces';
 import { WeatherEffects } from './weather-effects';
 import { type GroundHeight } from './bike-pose';
-import { Bike, type BikeAssets } from './bike-model';
+import { Bike, type BikeAssets, type VehicleAssets } from './bike-model';
 import { Stadium } from './stadium';
 import { type CrowdAssets } from './crowd-assets';
 import { VfxSystem } from './vfx/system';
@@ -87,8 +87,9 @@ export class World {
   constructor(
     public canvas: HTMLCanvasElement,
     public settings: Settings,
-    private readonly bikeAssets: BikeAssets,
+    private readonly bikeAssets: BikeAssets | VehicleAssets,
     crowdAssets: CrowdAssets,
+    deferBikes = false,
   ) {
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -138,7 +139,7 @@ export class World {
     this.stadium = new Stadium(crowdAssets, settings.quality);
     this.flags = new StadiumFlags(this.scene);
     this.scene.add(this.stadium.root, this.course);
-    this.ensureBikes(7);
+    if (!deferBikes) this.ensureBikes(7);
     this.garageScene.background = new THREE.Color('#202b31');
     this.garageScene.add(new THREE.HemisphereLight('#f7f3e9', '#526373', 2.5));
     const garageKey = new THREE.DirectionalLight('#ffffff', 3.2);
@@ -172,17 +173,43 @@ export class World {
   }
   field: THREE.Mesh;
   roadTop: THREE.Mesh;
+  private assetsFor(vehicle: VehicleId) {
+    return 'high' in this.bikeAssets ? this.bikeAssets : this.bikeAssets[vehicle];
+  }
+  async prepareBikes(count: number) {
+    while (this.bikes.length < count) {
+      this.ensureBikes(this.bikes.length + 1);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+  }
+  private ensureVehicle(index: number, vehicle: VehicleId) {
+    const previous = this.bikes[index];
+    if (previous.vehicle === vehicle) return;
+    const replacement = new Bike(0xc91c32, this.assetsFor(vehicle), this.settings.quality, vehicle);
+    replacement.root.position.copy(previous.root.position);
+    replacement.root.rotation.copy(previous.root.rotation);
+    replacement.root.scale.copy(previous.root.scale);
+    replacement.root.visible = previous.root.visible;
+    const parent = previous.root.parent;
+    parent?.remove(previous.root);
+    parent?.add(replacement.root);
+    previous.dispose();
+    this.bikes[index] = replacement;
+  }
   ensureBikes(count: number) {
     if (count > 11) throw new Error('Se admiten como máximo seis pilotos y cinco fantasmas.');
     const colors = [0xc91c32, 0x358aad, 0xe6b853, 0x729766, 0xba85df, 0xe184b8, 0xaabbcc];
     while (this.bikes.length < count) {
-      const bike = new Bike(colors[this.bikes.length % colors.length], this.bikeAssets, this.settings.quality);
+      const vehicle = this.appearances[this.bikes.length]?.vehicle ?? 'motocross';
+      const bike = new Bike(colors[this.bikes.length % colors.length], this.assetsFor(vehicle), this.settings.quality, vehicle);
       bike.root.visible = false;
       this.bikes.push(bike);
       this.scene.add(bike.root);
     }
+    for (let i = 0; i < count; i++) this.ensureVehicle(i, this.appearances[i]?.vehicle ?? 'motocross');
   }
   setGarage(appearance: Appearance | null) {
+    if (appearance) this.ensureVehicle(0, appearance.vehicle ?? 'motocross');
     if (appearance && !this.garageAppearance) this.garageScene.add(this.bikes[0].root);
     if (!appearance && this.garageAppearance) this.scene.add(this.bikes[0].root);
     this.garageAppearance = appearance;
