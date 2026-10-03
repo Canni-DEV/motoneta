@@ -17,6 +17,7 @@ import {
   type Difficulty,
   type RaceCourse,
   type PlayerProfile,
+  type PersonalRecord,
 } from '../core/game';
 import { placements, standings, turnPlayer } from '../core/competition';
 import { TIME_LABELS } from '../core/time-of-day';
@@ -33,6 +34,12 @@ export interface Setup {
   difficulty: Difficulty;
   players: string[];
   filter: 'all' | 'builtin' | 'custom';
+}
+export interface QuickRecordPresentation {
+  record?: PersonalRecord;
+  enabled: boolean;
+  available: boolean;
+  busy: boolean;
 }
 const lapOptions: [number, string][] = Array.from({ length: 9 }, (_, i) => [i + 1, String(i + 1)]);
 export const sceneHost = (id = 'preview-host') =>
@@ -109,10 +116,10 @@ function gallery(setup: Setup, catalog: RaceCourse[], view: SetupPresentation) {
     ],
   )}</div></div><div class="track-grid scroll-region" data-key="track-grid">${trackCards(options, setup.mode === 'quick' ? [setup.selected] : setup.courses.map((c) => c.ref.id))}</div><div class="panel-footer actions">${b('random', 'Al azar')}${b('generator', 'Generar mapa')}${b('copy-map', 'Editar una copia', setup.selected)}</div></section>`;
 }
-function participants(setup: Setup, profiles: PlayerProfile[]) {
+function participants(setup: Setup, profiles: PlayerProfile[], quick?: QuickRecordPresentation) {
   return setup.mode === 'versus'
     ? `<h2>¿Quién corre?</h2><p class="muted">Elegí de 2 a 6 jugadores. Un turno para cada uno.</p><div class="player-options">${profiles.map((p) => `<label class="check player-choice" data-key="player-${esc(p.id)}"><input type="checkbox" data-player="${esc(p.id)}" ${setup.players.includes(p.id) ? 'checked' : ''}><i class="color-dot" style="background:${p.color}"></i>${esc(p.name)}</label>`).join('')}</div>${b('profiles', 'Administrar perfiles')}`
-    : `<h2>Configuración de carrera</h2><p class="muted">${setup.mode === 'tournament' ? 'Sumá puntos en al menos tres pistas diferentes.' : 'Solo contra el reloj o con rivales en pista.'}</p><div class="form-grid">${select(
+    : `<h2>Configuración de carrera</h2>${setup.mode === 'quick' ? `<div class="quick-record-options"><label class="check quick-ghost-choice"><input id="quick-ghost" type="checkbox" aria-describedby="quick-record" ${quick?.enabled && quick.available ? 'checked' : ''} ${quick?.available ? '' : 'disabled'}>Correr contra mi fantasma</label><p id="quick-record" role="status" aria-live="polite">${quick?.record ? `Tu récord: <strong>${formatTime(ticksToTime(quick.record.ticks))}</strong>` : 'Sin récord para esta configuración'}</p></div>` : '<p class="muted">Sumá puntos en al menos tres pistas diferentes.</p>'}<div class="form-grid">${select(
         'bots',
         'Rivales',
         setup.bots,
@@ -131,13 +138,14 @@ export function setupView(
   profiles: PlayerProfile[],
   ready: boolean,
   view: SetupPresentation,
+  quick?: QuickRecordPresentation,
 ) {
   const current = setup.courses[0] ?? catalog[0],
     multi = setup.mode !== 'quick';
   const steps = `<div class="steps" aria-label="Preparación">${(['players', 'courses', 'review'] as const).map((step, i) => b('setup-step', `<span>0${i + 1}</span>${['Participantes', 'Pistas', 'Resumen'][i]}`, step, `aria-current="${view.step === step ? 'step' : 'false'}"`)).join('')}</div>`;
   let content: string;
   if (!multi) {
-    content = `<div class="compact-tabs tabs">${b('setup-tab', 'Pistas', 'maps', `aria-pressed="${view.tab === 'maps'}"`)}${b('setup-tab', 'Configuración', 'options', `aria-pressed="${view.tab === 'options'}"`)}</div><div class="setup-grid" data-tab="${view.tab}">${gallery(setup, catalog, view)}<section class="panel setup-options" data-key="setup-options"><div class="mini-preview">${sceneHost()}</div><div class="scroll-region options-body" data-key="options-body"><h2>${esc(current.track.name)}</h2>${participants(setup, profiles)}${select('laps', 'Vueltas', current.track.laps, lapOptions)}${environmentFields(current.timeOfDay, current.weather)}</div></section></div>`;
+    content = `<div class="compact-tabs tabs">${b('setup-tab', 'Pistas', 'maps', `aria-pressed="${view.tab === 'maps'}"`)}${b('setup-tab', 'Configuración', 'options', `aria-pressed="${view.tab === 'options'}"`)}</div><div class="setup-grid" data-tab="${view.tab}">${gallery(setup, catalog, view)}<section class="panel setup-options" data-key="setup-options"><div class="mini-preview">${sceneHost()}</div><div class="scroll-region options-body" data-key="options-body"><h2>${esc(current.track.name)}</h2>${participants(setup, profiles, quick)}${select('laps', 'Vueltas', current.track.laps, lapOptions)}${environmentFields(current.timeOfDay, current.weather)}</div></section></div>`;
   } else if (view.step === 'players') {
     content = `<div class="participants-layout"><section class="panel scroll-region">${participants(setup, profiles)}</section><div class="competition-preview">${sceneHost()}</div></div>`;
   } else if (view.step === 'courses') {
@@ -150,7 +158,8 @@ export function setupView(
     view.step === 'players'
       ? setup.mode !== 'versus' || (setup.players.length >= 2 && setup.players.length <= 6)
       : setup.courses.length >= (setup.mode === 'tournament' ? 3 : 1);
-  return `<main class="page setup-page" data-key="setup-${setup.mode}">${pageTitle(modeNames[setup.mode])}${multi ? steps : ''}${content}<footer class="screen-footer"><span class="selection-summary">${multi ? `${setup.courses.length} pistas seleccionadas` : esc(current.track.name)}</span><div class="actions">${multi && view.step !== 'players' ? b('setup-previous', 'Anterior') : ''}${multi && view.step !== 'review' ? b('setup-next', 'Continuar →', '', `class="primary" ${!canNext ? 'disabled' : ''}`) : b('start', multi ? 'Crear competición' : 'Comenzar', '', `class="primary start-button" ${!ready || (multi && !canNext) ? 'disabled' : ''}`)}</div></footer></main>`;
+  const startLabel = multi ? 'Crear competición' : quick?.busy ? 'Cargando fantasma…' : 'Comenzar';
+  return `<main class="page setup-page" data-key="setup-${setup.mode}">${pageTitle(modeNames[setup.mode])}${multi ? steps : ''}${content}<footer class="screen-footer"><span class="selection-summary">${multi ? `${setup.courses.length} pistas seleccionadas` : esc(current.track.name)}</span><div class="actions">${multi && view.step !== 'players' ? b('setup-previous', 'Anterior') : ''}${multi && view.step !== 'review' ? b('setup-next', 'Continuar →', '', `class="primary" ${!canNext ? 'disabled' : ''}`) : b('start', startLabel, '', `class="primary start-button" ${!ready || (multi && !canNext) ? 'disabled' : ''}`)}</div></footer></main>`;
 }
 export function generatorView(g: GeneratorOptions, generated: MapDesign | null = null) {
   return `<main class="page generator-page" data-key="generator">${pageTitle('Generar pista')}<div class="generator-layout"><section class="panel scroll-region"><h2>Parámetros</h2><div class="form-grid">${select(

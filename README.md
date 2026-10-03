@@ -21,6 +21,8 @@ Funciona como sitio estático: no necesita backend, cuentas ni servicios externo
 
 También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y las zonas claras enfrían el motor.
 
+Carrera rápida muestra tu récord para la pista, vueltas, cantidad de rivales y dificultad elegidas. Activá “Correr contra mi fantasma” para competir contra tu mejor carrera: al completar cada vuelta verás la diferencia de esa vuelta y la acumulada, con el detalle final en resultados. La elección se conserva mientras el juego está abierto y cada nuevo intento usa la mejor marca disponible.
+
 Las repeticiones pueden verse con cámaras cinematográficas y el tema de resultados. En Inicio, tras 60 segundos de inactividad en un equipo no móvil, se reproducen automáticamente las marcas del perfil activo; Escape vuelve al menú. Esta opción se puede desactivar en Ajustes → Interfaz.
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla. Al pasar a las reglas `motoneta-2`, los datos locales de la versión anterior se reinician (perfiles, pistas, marcas, sesiones, repeticiones y ajustes).
