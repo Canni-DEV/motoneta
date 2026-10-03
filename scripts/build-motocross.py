@@ -9,12 +9,14 @@ import bmesh
 import math
 import json
 import os
+import sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public' / 'models'
-SOURCE = ROOT / 'assets' / 'motocross'
+VEHICLE = 'motoneta' if '--vehicle=motoneta' in sys.argv else 'motocross'
+SOURCE = ROOT / 'assets' / VEHICLE
 OUT.mkdir(parents=True, exist_ok=True)
 SOURCE.mkdir(parents=True, exist_ok=True)
 
@@ -671,6 +673,239 @@ def rider_parts(variant='core'):
         part.verts=[tuple(HEAD[k]+(point[k]-(.10,1.255,0)[k])*.94 for k in range(3)) for point in part.verts]
     return parts
 
+def make_scooter():
+    """Approved classic scooter base with independent racing and touring slot families."""
+    make_bike()
+    def replace(name,builder,pivot=(0,0,0)):
+        old=bpy.data.objects.get(name)
+        parent=old.parent if old else None
+        children=list(old.children) if old else []
+        if old: bpy.data.objects.remove(old,do_unlink=True)
+        obj=builder.build(name,pivot,parent)
+        if parent: obj.location=(0,0,0)
+        for child in children: child.parent=obj
+        return obj
+    for name,x in [('RearWheel',-.53),('FrontWheel',.57)]:
+        bpy.data.objects[name].location=v((x,.22,0))
+        for variant in VARIANTS:
+            wheel=Builder();c=(x,.22,0)
+            wheel.torus(c,.174,.044,'Rubber',depth=1.25)
+            wheel.torus((x,.22,-.055),.139,.012,'TeamPaint',sides=4)
+            wheel.torus((x,.22,.055),.139,.012,'TeamAccent',sides=4)
+            wheel.rod((x,.22,-.048),(x,.22,.048),.052,'Alloy',seg=10 if HIGH else 6)
+            spokes=6 if variant=='core' else 5 if variant=='sprint' else 8
+            for i in range(spokes):
+                a=i*2*math.pi/spokes
+                if variant=='sprint':
+                    wheel.tube([(x+math.cos(a)*.041,.22+math.sin(a)*.041,0),
+                                (x+math.cos(a+.22)*.097,.22+math.sin(a+.22)*.097,0),
+                                (x+math.cos(a+.30)*.14,.22+math.sin(a+.30)*.14,0)],
+                               [.019,.017,.012],'TeamPaint',seg=6)
+                else:
+                    wheel.rod((x+math.cos(a)*.04,.22+math.sin(a)*.04,0),(x+math.cos(a)*.13,.22+math.sin(a)*.13,0),
+                              .013 if variant=='core' else .010,'Alloy',seg=5)
+            if variant=='trail':
+                blocks=28 if HIGH else 16
+                for i in range(blocks):
+                    a=i*2*math.pi/blocks
+                    wheel.block((x+math.cos(a)*.216,.22+math.sin(a)*.216,0),(.031,.006,.10),'Rubber',angle=a+math.pi/2)
+            if variant=='sprint':
+                wheel.torus((x,.22,.064),.124,.006,'TeamAccent',segments=SEG*2,sides=4)
+            replace(f'Slot_wheels_{variant}_{name}',wheel,c)
+    chassis=Builder()
+    chassis.ellipsoid((-.42,.385,0),(.20,.12,.14),'Engine')
+    # Compact engine cover beside the rear wheel, rather than an exposed dirt-bike engine.
+    chassis.block((-.49,.325,.095),(.32,.145,.065),'Alloy',angle=-.08)
+    for y in (.302,.331,.36):
+        chassis.block((-.51,y,.130),(.13,.010,.006),'Graphite',angle=-.08)
+    chassis.tube([(-.50,.46,0),(-.24,.35,0),(.12,.29,0),(.31,.45,0),(.32,.9,0)],[.022]*5,'Graphite',seg=6)
+    chassis.block((-.75,.656,0),(.055,.045,.12),'Graphite')
+    chassis.block((-.78,.656,0),(.014,.031,.098),'LampRear')
+    chassis.panel([(-.765,.63),(-.81,.50),(-.705,.50),(-.685,.60)],-.061,.061,'Graphite')
+    chassis.tube([(-.72,.66,-.12),(-.65,.717,-.165),(-.42,.73,-.177),(-.42,.73,.177),(-.65,.717,.165),(-.72,.66,.12)],
+                 [.012]*6,'Alloy',seg=6)
+    replace('Chassis',chassis)
+    bpy.data.objects['HeadlightAnchor'].location=v((.479,.973,0))
+    bpy.data.objects['HeadlightTarget'].location=v((4.479,.273,0))
+    bpy.data.objects['TaillightAnchor'].location=v((-.796,.656,0))
+    bar=Builder()
+    bar.authored_lod=True
+    # The headlamp and steering shell form a single broad, rounded scooter handlebar.
+    bar.loft([(.348,.965,z) for z in (-.209,-.174,-.105,0,.105,.174,.209)],
+             [(.023,.030),(.043,.072),(.055,.099),(.060,.108),(.055,.099),(.043,.072),(.023,.030)],
+             [{}]*7,'TeamPaint',seg=12 if HIGH else 8,tangents=[(0,0,1)]*7)
+    for side in (-1,1):
+        bar.rod((.32,.965,side*.192),(.32,.965,side*.272),.021,'Rubber',seg=8)
+        bar.rod((.371,.950,side*.179),(.375,.950,side*.268),.005,'Alloy',seg=5)
+        bar.block((.420,.968,side*.138),(.009,.020,.056),'Ceramic')
+        bar.tube([(.315,1.008,side*.173),(.310,1.062,side*.205),(.327,1.104,side*.236)],
+                 [.009,.009,.008],'Graphite',seg=6)
+        bar.ellipsoid((.330,1.137,side*.247),(.025,.046,.039),'Graphite',seg=8,rings=4)
+        bar.ellipsoid((.306,1.139,side*.247),(.003,.034,.027),'Alloy',seg=8,rings=4)
+    bar.rod((.449,.973,0),(.472,.973,0),.061,'Graphite',seg=16 if HIGH else 10)
+    bar.rod((.473,.973,0),(.481,.973,0),.050,'LampFront',seg=20 if HIGH else 12)
+    replace('Handlebar',bar,(.324,.94,0))
+    bpy.data.objects['FrontFender'].location=v((.324,.94,0))
+    # Scooter suspension retains the rig nodes, with mechanics concealed by the leg shield.
+    swing=Builder()
+    for side in (-1,1):
+        swing.tube([(-.53,.22,side*.084),(-.42,.285,side*.084),(-.26,.35,side*.084)],
+                   [.022,.029,.026],'Graphite',seg=6)
+    replace('Swingarm',swing,(-.26,.35,0))
+    for suffix in ('R','L'):
+        lower=Builder();lower.rod((0,0,0),(0,1,0),.021,'Alloy',seg=10 if HIGH else 6)
+        replace('ForkLower'+suffix,lower)
+        upper=Builder();upper.rod((0,0,0),(0,1,0),.025,'Graphite',seg=10 if HIGH else 6)
+        replace('ForkUpper'+suffix,upper)
+    for variant in VARIANTS:
+        fairing=Builder();fairing.authored_lod=True
+        # An elongated side cowl supports the saddle; its underside clears the rear tire.
+        sections=[(-.755,.50,.065,.078),(-.68,.515,.143,.177),(-.53,.550,.183,.211),
+                  (-.34,.547,.191,.218),(-.18,.509,.166,.183),(-.075,.442,.088,.102)]
+        count=16 if HIGH else 12;previous=None
+        for section,(x,y,height,width) in enumerate(sections):
+            if variant=='sprint': width-=.011 if 0<section<5 else 0
+            elif variant=='trail': width+=.014 if 0<section<5 else 0
+            points=[]
+            for i in range(count):
+                angle=2*math.pi*i/count;py=y+height*math.cos(angle);z=width*math.sin(angle)
+                if abs(x+.53)<.228 and abs(z)<.082:
+                    py=max(py,.22+math.sqrt(.228**2-(x+.53)**2))
+                points.append((x,py,z))
+            current=fairing.ring(points,{})
+            if previous:
+                for i in range(count):
+                    band=variant=='sprint' and i in (count//8,count-count//8-1) and 1<section<5
+                    fairing.face((previous[i],previous[(i+1)%count],current[(i+1)%count],current[i]),'TeamAccent' if band else 'TeamPaint')
+            else: fairing.face(reversed(current),'TeamPaint')
+            previous=current
+        fairing.face(previous,'TeamPaint')
+        # A thick wraparound leg shield conceals the fork, with a quiet bevel around its front.
+        previous=None
+        shield_sections=[(.315,.275,.070,.235),(.383,.355,.089,.248),(.430,.49,.105,.242),
+                         (.412,.64,.088,.224),(.347,.778,.077,.198),(.318,.863,.065,.155),
+                         (.318,.92,.065,.143),(.318,.945,.051,.128)]
+        for x,y,depth,width in shield_sections:
+            outline=[(1,0),(.95,.70),(.55,.94),(.10,1),(-.45,.95),(-.60,.70),
+                     (-.60,0),(-.60,-.70),(-.45,-.95),(.10,-1),(.55,-.94),(.95,-.70)]
+            current=fairing.ring([(x+dx*depth,y,dz*width) for dx,dz in outline],{})
+            if previous:
+                for i in range(12): fairing.face((previous[i],previous[(i+1)%12],current[(i+1)%12],current[i]),'TeamPaint')
+            else: fairing.face(reversed(current),'TeamPaint')
+            previous=current
+        fairing.face(previous,'TeamPaint')
+        fairing.block((-.005,.264,0),(.73,.04,.50),'TeamPaint')
+        fairing.loft([(-.30,.285,0),(-.32,.35,0),(-.33,.42,0),(-.32,.49,0)],
+                     [(.065,.23),(.070,.22),(.082,.21),(.09,.20)],[{}]*4,'TeamPaint',seg=12 if HIGH else 8,
+                     tangents=[(0,1,0)]*4)
+        for side in (-1,1):
+            fairing.block((-.013,.288,side*.165),(.54,.014,.166),'Textile')
+            fairing.tube([(-.68,.59,side*.160),(-.51,.706,side*.195),(-.29,.703,side*.193)],
+                         [.007]*3,'TeamAccent',seg=5)
+            if variant=='sprint':
+                fairing.tube([(-.28,.268,side*.255),(.035,.268,side*.255),(.34,.29,side*.236)],
+                             [.007]*3,'TeamAccent',seg=5)
+                for x,y,z in [(-.48,.52,.205),(-.44,.52,.207),(-.40,.52,.209)]:
+                    fairing.block((x,y,side*z),(.019,.065,.009),'Graphite',angle=-.3)
+            elif variant=='trail':
+                fairing.tube([(-.71,.53,side*.195),(-.57,.415,side*.230),(-.31,.397,side*.232),(-.15,.472,side*.177)],
+                             [.012]*4,'TeamAccent',seg=6)
+                fairing.tube([(.317,.294,side*.251),(.397,.40,side*.253),(.438,.545,side*.244),(.379,.731,side*.212)],
+                             [.011]*4,'TeamAccent',seg=6)
+        replace(f'Slot_fairing_{variant}',fairing)
+        seat=Builder();seat.authored_lod=True
+        seat_points=[(-.57,.758,0),(-.48,.780,0),(-.28,.788,0),(-.12,.784,0),(-.04,.768,0)]
+        seat_radii=[(.035,.075),(.05,.145),(.05,.147),(.039,.12),(.02,.06)]
+        if variant=='sprint':
+            seat_points[0]=(-.53,.770,0);seat_radii[1]=(.047,.134);seat_radii[2]=(.05,.138)
+        elif variant=='trail':
+            seat_points[0]=(-.64,.763,0);seat_points[1]=(-.51,.782,0)
+            seat_radii[0]=(.043,.09);seat_radii[1]=(.05,.158);seat_radii[2]=(.05,.155)
+        seat.loft(seat_points,seat_radii,[{}]*5,'Seat',seg=16 if HIGH else 10,
+                  tangents=[(1,0,0)]*5)
+        seat.tube([(-.55,.773,-.10),(-.38,.81,-.147),(-.17,.796,-.12)],[.007]*3,'TeamAccent',seg=5)
+        if variant=='sprint':
+            seat.block((-.46,.832,0),(.045,.010,.14),'TeamAccent')
+        elif variant=='trail':
+            for x in (-.55,-.49): seat.block((x,.829,0),(.013,.009,.20),'TeamAccent')
+            seat.tube([(-.615,.778,.11),(-.39,.816,.158),(-.17,.796,.12)],[.007]*3,'TeamAccent',seg=5)
+        replace(f'Slot_seat_{variant}',seat)
+        exhaust=Builder();exhaust.authored_lod=True
+        if variant=='sprint':
+            exhaust.tube([(-.35,.37,-.16),(-.44,.325,-.19),(-.68,.325,-.19),(-.72,.33,-.19)],
+                         [.022,.037,.037,.023],'Exhaust',seg=12 if HIGH else 8)
+            for x in (-.47,-.65): exhaust.rod((x-.012,.325,-.19),(x+.012,.325,-.19),.040,'TeamAccent',seg=10 if HIGH else 6)
+        else:
+            exhaust.tube([(-.35,.37,-.16),(-.49,.33,-.19),(-.63,.31,-.19),(-.72,.33,-.19)],[.027,.044,.044,.028],'Exhaust',seg=10 if HIGH else 6)
+            if variant=='trail':
+                exhaust.panel([(-.40,.35),(-.45,.387),(-.66,.37),(-.70,.338),(-.66,.296),(-.44,.307)],-.244,-.233,'TeamAccent')
+                for x in (-.47,-.53,-.59): exhaust.block((x,.338,-.250),(.027,.020,.008),'Graphite')
+        exhaust.rod((-.72,.33,-.19),(-.745,.33,-.19),.022,'Graphite',seg=8)
+        exhaust.block((-.53,.355,-.233),(.13,.016,.009),'TeamAccent')
+        replace(f'Slot_exhaust_{variant}',exhaust)
+        plate=Builder();plate.authored_lod=True
+        for side in (-1,1):
+            if variant=='sprint':
+                plate.loft([(.519,.536,side*.178),(.498,.618,side*.165),(.459,.723,side*.139)],
+                           [(.006,.024),(.006,.021),(.006,.009)],[{}]*3,'TeamAccent',seg=8,tangents=[(0,1,0)]*3)
+                plate.block((.455,.727,side*.127),(.013,.020,.038),'Graphite',angle=-.4)
+            else:
+                plate.loft([(.518,.53,side*.176),(.512,.565,side*.173),(.476,.68,side*.155)],
+                           [(.006,.016),(.006,.016),(.006,.012)],[{}]*3,'TeamAccent',seg=8,tangents=[(0,1,0)]*3)
+        if variant=='trail':
+            plate.loft([(.446,1.035,0),(.424,1.087,0),(.407,1.135,0)],
+                       [(.011,.15),(.010,.139),(.007,.115)],[{}]*3,'Graphite',seg=12 if HIGH else 8,tangents=[(0,1,0)]*3)
+            for side in (-1,1):
+                plate.tube([(.44,1.029,side*.148),(.42,1.092,side*.137),(.405,1.13,side*.112)],
+                           [.008]*3,'TeamPaint',seg=6)
+            plate.rod((.407,1.138,-.113),(.407,1.138,.113),.006,'TeamAccent',seg=6)
+        plate.block((.414,.794,0),(.009,.043,.060),'TeamPaint')
+        replace(f'Slot_plate_{variant}',plate)
+        for component,x in [('Rear',-.53),('Front',.57)]:
+            guard=Builder();guard.authored_lod=True
+            if variant=='sprint':
+                fender(guard,[(x-.181,.415,.087),(x-.11,.455,.111),(x,.477,.115),(x+.115,.454,.113),(x+.181,.415,.078)],'TeamPaint')
+                for side in (-1,1): guard.tube([(x-.10,.465,side*.040),(x,.489,side*.040),(x+.12,.463,side*.040)],[.008]*3,'TeamAccent',seg=5)
+            elif variant=='trail':
+                fender(guard,[(x-.249,.343,.096),(x-.165,.428,.126),(x,.477,.132),(x+.165,.43,.126),(x+.249,.349,.096)],'TeamPaint')
+                guard.block((x-.248,.320,0),(.018,.067,.144),'Graphite',angle=-.28)
+                for side in (-1,1): guard.tube([(x-.20,.402,side*.104),(x,.486,side*.121),(x+.20,.400,side*.104)],[.007]*3,'TeamAccent',seg=5)
+            else:
+                fender(guard,[(x-.215,.384,.091),(x-.14,.45,.118),(x,.477,.124),(x+.14,.447,.119),(x+.215,.380,.095)],'TeamPaint')
+            guard.block((x,.483,0),(.09,.009,.055),'TeamAccent')
+            replace(f'Slot_fender_{variant}_{component}',guard,(.324,.94,0) if component=='Front' else (0,0,0))
+
+def retarget_scooter_rider(specs):
+    """Rebind the approved garments to the scooter's seated visual skeleton."""
+    arm=bpy.data.objects['RiderRig']
+    old_matrices={bone.name:bone.matrix_local.copy() for bone in arm.data.bones}
+    old_lengths={bone.name:bone.length for bone in arm.data.bones}
+    targets={'Pelvis':((-.24,.94,0),(-.24,1.027,0)),
+             'Spine':((-.24,.94,0),(-.13,1.202,0)),
+             'Head':((-.03,1.297,0),(0,1.472,0))}
+    for side,suffix in [(-1,'R'),(1,'L')]:
+        shoulder=(-.13,1.174,side*.154);elbow=(.08,1.051,side*.245);hand=(.32,.965,side*.222)
+        hip=(-.24,.921,side*.115);knee=(.095,.644,side*.205);ankle=(.15,.348,side*.19)
+        targets.update({f'UpperArm{suffix}':(shoulder,elbow),f'Forearm{suffix}':(elbow,hand),f'Hand{suffix}':(hand,(.36,.955,side*.222)),
+                        f'Thigh{suffix}':(hip,knee),f'Shin{suffix}':(knee,ankle),f'Foot{suffix}':(ankle,(.259,.330,side*.19))})
+    bpy.context.view_layer.objects.active=arm;arm.select_set(True);bpy.ops.object.mode_set(mode='EDIT')
+    for name,(head,tail) in targets.items():
+        arm.data.edit_bones[name].head=v(head);arm.data.edit_bones[name].tail=v(tail)
+    bpy.ops.object.mode_set(mode='OBJECT');arm.select_set(False)
+    for name,(head,tail) in targets.items():
+        arm.data.bones[name]['restHead']=list(head);arm.data.bones[name]['restTail']=list(tail)
+    matrices={bone.name:bone.matrix_local @ Matrix.Diagonal((1,bone.length/old_lengths[bone.name],1,1)) @ old_matrices[bone.name].inverted() for bone in arm.data.bones}
+    for obj in list(arm.children):
+        if obj.type!='MESH': continue
+        for vert in obj.data.vertices:
+            original=vert.co.copy();result=Vector((0,0,0));total=0
+            for group in vert.groups:
+                name=obj.vertex_groups[group.group].name
+                result+=group.weight*(matrices[name] @ original);total+=group.weight
+            if total: vert.co=result/total
+        obj.data.update()
+    return [(name,*targets[name],parent) for name,a,b,parent in specs]
+
 def make_rider():
     data=bpy.data.armatures.new('RiderSkeleton')
     arm=bpy.data.objects.new('RiderRig',data);bpy.context.collection.objects.link(arm)
@@ -691,7 +926,7 @@ def make_rider():
     for name,a,tail,parent in specs:
         bone=arm.pose.bones[name]
         bone.bone['restHead']=list(a);bone.bone['restTail']=list(tail)
-    return specs
+    return retarget_scooter_rider(specs) if VEHICLE=='motoneta' else specs
 
 def position_studio_rig():
     def segment(name,a,b):
@@ -700,10 +935,13 @@ def position_studio_rig():
         o.rotation_mode='QUATERNION';o.rotation_quaternion=Vector((0,0,1)).rotation_difference(direction.normalized())
         o.scale=(1,1,direction.length)
     for s,suffix in [(-1,'R'),(1,'L')]:
-        a=(.57,.29,s*.089);top=(.324,.89,s*.089);join=mix(a,top,.47)
+        a=(.57,.22 if VEHICLE=='motoneta' else .29,s*.089);top=(.324,.94 if VEHICLE=='motoneta' else .89,s*.089);join=mix(a,top,.47)
         segment('ForkLower'+suffix,a,join);segment('ForkUpper'+suffix,join,top)
-        bpy.data.objects['ForkGuard'+suffix].location=v((.559,.322,s*.089))
-    segment('Shock',(-.32,.342,0),(-.245,.699,0));segment('Spring',(-.30,.432,0),(-.256,.639,0))
+        bpy.data.objects['ForkGuard'+suffix].location=v((.559,.252 if VEHICLE=='motoneta' else .322,s*.089))
+    if VEHICLE=='motoneta':
+        segment('Shock',(-.51,.27,0),(-.40,.61,0));segment('Spring',(-.482,.355,0),(-.42,.548,0))
+    else:
+        segment('Shock',(-.32,.342,0),(-.245,.699,0));segment('Spring',(-.30,.432,0),(-.256,.639,0))
 
 def studio(render=False,quality='high'):
     scene=bpy.context.scene
@@ -739,7 +977,7 @@ def studio(render=False,quality='high'):
     floor.data.materials.append(m)
     data=bpy.data.cameras.new('StudioCamera');cam=bpy.data.objects.new('StudioCamera',data);studio_collection.objects.link(cam)
     scene.camera=cam;data.type='ORTHO';data.ortho_scale=2.25
-    render_directory=SOURCE/'review'/'cadera-natural'/'blender'
+    render_directory=SOURCE/'review'/('essential' if VEHICLE=='motoneta' else 'cadera-natural')/'blender'
     if render: render_directory.mkdir(parents=True,exist_ok=True)
     presets=VARIANTS if '--render-all' in __import__('sys').argv else ('core',)
     for variant in presets:
@@ -800,7 +1038,7 @@ for HIGH in [False,True]:
     for slot,roughness,metallic in [('fairing',.4,.08),('seat',.87,0),('exhaust',.42,.68),('plate',.45,.04),('fender',.4,.08),
                                      ('helmet',.36,.06),('visor',.22,.18),('torso',.86,0),('pants',.88,0),('gloves',.78,0),('boots',.7,0)]:
         material(f'SlotSurface_{slot}','ffffff',roughness,metallic)
-    make_bike();specs=make_rider();position_studio_rig()
+    (make_scooter if VEHICLE=='motoneta' else make_bike)();specs=make_rider();position_studio_rig()
     quality='high' if HIGH else 'low'
     # Low detail uses planar decimation, keeping silhouettes, skin weights and material borders.
     if not HIGH:
@@ -832,7 +1070,7 @@ for HIGH in [False,True]:
     maximum=fixed+sum(max(sum(part['triangles'] for part in parts if part['id'].startswith(f'Slot_{slot}_{variant}') ) for variant in VARIANTS) for slot in SLOTS)
     limit=30000 if HIGH else 8000
     assert maximum<=limit,(quality,maximum,limit)
-    filepath=OUT/f'motocross-{quality}.glb'
+    filepath=OUT/f'{VEHICLE}-{quality}.glb'
     bpy.ops.export_scene.gltf(filepath=str(filepath),export_format='GLB',export_yup=True,export_skins=True,export_animations=False,export_extras=True,export_materials='EXPORT',export_vertex_color='ACTIVE')
     report[quality]={'trianglesSelected':triangles,'trianglesSelectedMax':maximum,'trianglesCatalog':all_triangles,'bytes':filepath.stat().st_size,'textures':0,'bones':len(specs),'parts':parts}
     if not HIGH and '--render' in __import__('sys').argv:
@@ -842,12 +1080,12 @@ for HIGH in [False,True]:
     if HIGH:
         rig_json=json.dumps({name:{'head':a,'tail':b,'parent':parent} for name,a,b,parent in specs},indent=2)+'\n'
         (SOURCE/'rig.json').write_text(rig_json)
-        (ROOT/'src'/'bike-rig.json').write_text(rig_json)
+        (ROOT/'src'/('motoneta-rig.json' if VEHICLE=='motoneta' else 'bike-rig.json')).write_text(rig_json)
         for o in bpy.context.scene.objects:
             if o.name.startswith('Slot_') and '_core' not in o.name:
                 o.hide_set(True);o.hide_render=True
         studio('--render' in __import__('sys').argv)
         bpy.context.preferences.filepaths.save_version=0
-        bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/'motocross.blend'))
-(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'assets':report},indent=2)+'\n')
-print('MOTOCROSS_ASSETS',json.dumps({quality:{key:value for key,value in stats.items() if key!='parts'} for quality,stats in report.items()}))
+        bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/f'{VEHICLE}.blend'))
+(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'classic-reference-v2; Essential approved; independent racing and touring families' if VEHICLE=='motoneta' else 'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'assets':report},indent=2)+'\n')
+print(f'{VEHICLE.upper()}_ASSETS',json.dumps({quality:{key:value for key,value in stats.items() if key!='parts'} for quality,stats in report.items()}))

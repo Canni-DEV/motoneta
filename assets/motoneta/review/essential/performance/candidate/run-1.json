@@ -1,0 +1,64 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "values": [
+      {
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "p95Ms": 6.699999999254942,
+        "medianMs": 5.699999999254942,
+        "drawCalls": 604
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "p95Ms": 8.900000000372529,
+        "medianMs": 8.099999999627471,
+        "drawCalls": 883
+      }
+    ],
+    "memory": {
+      "geometries": 408,
+      "textures": 153
+    },
+    "after": {
+      "geometries": 408,
+      "textures": 153
+    },
+    "renderer": "WebKit WebGL"
+  },
+  {
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "values": [
+      {
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "p95Ms": 5.800000000745058,
+        "medianMs": 5,
+        "drawCalls": 616
+      },
+      {
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "p95Ms": 8.599999999627471,
+        "medianMs": 7.599999999627471,
+        "drawCalls": 904
+      }
+    ],
+    "memory": {
+      "geometries": 419,
+      "textures": 153
+    },
+    "after": {
+      "geometries": 419,
+      "textures": 153
+    },
+    "renderer": "WebKit WebGL"
+  }
+]

@@ -1,25 +1,25 @@
 import { expect, test } from '@playwright/test';
 import { nav } from './ui-helpers';
 
-test('loading blocks race entry and a failed asset can be retried without reloading the page', async ({
+for(const vehicle of ['motocross','motoneta']) test(`loading blocks race entry and a failed ${vehicle} asset can be retried without reloading the page`, async ({
   page,
 }) => {
   let fail = true;
   let requests = 0;
-  await page.route('**/models/motocross-low.glb', async (route) => {
+  await page.route(`**/models/${vehicle}-low.glb`, async (route) => {
     requests++;
     if (fail) await route.abort('failed');
     else await route.continue();
   });
   await page.goto('/');
-  await nav(page, 'quick');
   await expect(page.getByRole('button', { name: 'Reintentar', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Comenzar/ })).toBeDisabled();
+  await expect(page.locator('#ui')).toHaveAttribute('inert', '');
   await page.keyboard.press('Enter');
   expect(await page.evaluate(() => (window as any).__motoneta.race)).toBeNull();
   fail = false;
   await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
   await expect(page.locator('#model-status')).toBeHidden();
+  await nav(page, 'quick');
   await expect(page.getByRole('button', { name: /Comenzar/ })).toBeEnabled();
   await page.getByRole('button', { name: /Comenzar/ }).click();
   await expect(page.locator('.race-identity')).toBeVisible();
@@ -49,6 +49,6 @@ test('both quality presets use the new model, with no extra asset requests on sw
   await page.getByRole('button', { name: /Comenzar/ }).click();
   await page.waitForFunction(() => (window as any).__motoneta.race?.phase === 'racing');
   expect(await page.evaluate(() => (window as any).__motoneta.race.riders.length)).toBe(4);
-  expect(requests.length).toBe(5);
+  expect(requests.length).toBe(7);
   expect(errors).toEqual([]);
 });

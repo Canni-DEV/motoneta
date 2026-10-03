@@ -1,9 +1,11 @@
-import { acceptResult } from './core/competition';
+import { acceptResult, advanceSession, standings } from './core/competition';
 import {
   recordKey,
+  localProfile,
+  raceProfile,
   type CompetitionSession,
   type PersonalRecord,
-  type PlayerProfile,
+  type LocalProfile,
   type Recording,
 } from './core/game';
 import { emptyDesign, type MapDesign } from './core/maps';
@@ -13,20 +15,22 @@ import { defaultAppearance } from './appearance';
 export interface SaveState {
   game: string;
   version: 2;
-  profiles: PlayerProfile[];
+  profiles: LocalProfile[];
   activeProfile: string;
   maps: MapDesign[];
   records: PersonalRecord[];
   sessions: Partial<Record<'tournament' | 'versus', CompetitionSession>>;
+  motonetaSessions: Record<string, CompetitionSession>;
   draft: MapDesign;
 }
 const initial = (): SaveState => ({
   ...FILE_HEADER,
-  profiles: [{ id: 'player-1', name: 'Jugador 1', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') }],
+  profiles: [localProfile({ id: 'player-1', name: 'Jugador 1', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') })],
   activeProfile: 'player-1',
   maps: [],
   records: [],
   sessions: {},
+  motonetaSessions: {},
   draft: emptyDesign(),
 });
 export class GameStore {
@@ -52,7 +56,11 @@ export class GameStore {
         reject(new Error('Cerrá otras pestañas del juego para actualizar el guardado.'));
     });
     const stored = await this.get<SaveState>('data', 'state');
-    if (stored) this.state = stored;
+    if (stored) {
+      this.state = stored;
+      this.state.profiles = stored.profiles.map(localProfile);
+      this.state.motonetaSessions ??= {};
+    }
     else {
       this.state = initial();
       await this.update(() => {});
@@ -70,7 +78,14 @@ export class GameStore {
     });
   }
   replay(id: string) {
-    return this.get<Recording>('replays', id);
+    return this.get<Recording>('replays', id).then((value) => {
+      if (!value) return value;
+      value.config.player = raceProfile(value.config.player);
+      value.config.bots = value.config.bots.map(raceProfile);
+      value.result.config.player = raceProfile(value.result.config.player);
+      value.result.config.bots = value.result.config.bots.map(raceProfile);
+      return value;
+    });
   }
   update(
     change: (state: SaveState) => void | boolean,
@@ -94,6 +109,7 @@ export class GameStore {
           const retained = new Set([
             ...next.records.flatMap((r) => [r.replayId, r.lapReplayId]),
             ...Object.values(next.sessions).flatMap((s) => s?.results.map((r) => r.replayId) ?? []),
+            ...Object.values(next.motonetaSessions).flatMap((s) => s.results.map((r) => r.replayId)),
           ]);
           const cursor = tx.objectStore('replays').openCursor();
           cursor.onsuccess = () => {
@@ -121,7 +137,8 @@ export class GameStore {
     await this.update(
       (s) => {
         if (session) {
-          const current = s.sessions[session.mode];
+          const ownerId = session.players[0].id;
+          const current = session.presetId === 'motoneta' ? s.motonetaSessions[ownerId] : s.sessions[session.mode];
           if (
             !current ||
             current.id !== session.id ||
@@ -130,7 +147,17 @@ export class GameStore {
             current.phase !== 'ready'
           )
             return false;
-          s.sessions[session.mode] = acceptResult(current, replay.result, replayId);
+          let accepted = acceptResult(current, replay.result, replayId);
+          if (current.presetId === 'motoneta') {
+            if (accepted.results.length === accepted.courses.length) {
+              accepted = advanceSession(accepted);
+              const owner = s.profiles.find((p) => p.id === ownerId);
+              const won = standings(accepted).some((row) => row.id === ownerId && row.rank === 1);
+              accepted.reward = won && owner ? owner.unlockedMotoneta ? 'already-unlocked' : 'unlocked' : 'not-earned';
+              if (won && owner) owner.unlockedMotoneta = true;
+            }
+            s.motonetaSessions[ownerId] = accepted;
+          } else s.sessions[session.mode] = accepted;
         }
         const own = replay.result.finishes.find((f) => f.id === replay.config.player.id);
         if (

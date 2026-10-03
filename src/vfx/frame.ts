@@ -1,4 +1,5 @@
-import { bikePose, crashPose, BIKE } from '../bike-pose';
+import { VEHICLE_VISUALS, type VehicleVisual } from '../vehicle-visual';
+import { bikePose, crashPose } from '../bike-pose';
 import { heightAt, segmentAt } from '../core/tracks';
 import type { Race, Rider, GameEvent, Track, Weather } from '../core/types';
 import { SCALE, LANE } from './config';
@@ -17,13 +18,13 @@ export const EXHAUST_POINT = [-0.649, 0.731, -0.174] as const;
 export const ENGINE_POINT = [0.06, 0.54, 0] as const;
 
 /** Uses the same support solver, wheel radius and rear-axle pivot as Bike.applyPose. */
-export function effectAnchors(p: Readonly<Rider>, track: Track): EffectAnchors {
+export function effectAnchors(p: Readonly<Rider>, track: Track, visual: VehicleVisual = VEHICLE_VISUALS.motocross): EffectAnchors {
   const x = p.x * SCALE,
     y = p.height * SCALE,
     z = (p.lane - 1.5) * LANE;
   const ground = (dx: number) => heightAt(track, (x + dx) / SCALE, p.lane) * SCALE - y;
   if (p.crashPhase !== 'none') {
-    const pose = crashPose(p, ground);
+    const pose = crashPose(p, ground, false, visual);
     const c = Math.cos(pose.pitch),
       s = Math.sin(pose.pitch),
       cr = Math.cos(pose.roll),
@@ -36,20 +37,20 @@ export function effectAnchors(p: Readonly<Rider>, track: Track): EffectAnchors {
         z: z + pose.z + sr * pitchedY + cr * pz,
       };
     };
-    const rearAxle = transform(BIKE.rearX, BIKE.axleY),
-      frontAxle = transform(BIKE.frontX, BIKE.axleY);
-    const rear = { ...rearAxle, y: rearAxle.y - BIKE.radius };
-    const front = { ...frontAxle, y: frontAxle.y - BIKE.radius };
+    const rearAxle = transform(visual.dimensions.rearX, visual.dimensions.axleY),
+      frontAxle = transform(visual.dimensions.frontX, visual.dimensions.axleY);
+    const rear = { ...rearAxle, y: rearAxle.y - visual.dimensions.radius };
+    const front = { ...frontAxle, y: frontAxle.y - visual.dimensions.radius };
     return {
       rear,
       front,
       rearContact: rear.y <= heightAt(track, rear.x / SCALE, p.lane) * SCALE + 0.07,
       frontContact: front.y <= heightAt(track, front.x / SCALE, p.lane) * SCALE + 0.07,
-      exhaust: transform(...EXHAUST_POINT),
-      engine: transform(...ENGINE_POINT),
+      exhaust: transform(...visual.exhaust),
+      engine: transform(...visual.engine),
     };
   }
-  const pose = bikePose(p.tilt, p.grounded, ground);
+  const pose = bikePose(p.tilt, p.grounded, ground, visual.dimensions);
   const c = Math.cos(p.tilt),
     s = Math.sin(p.tilt);
   const transform = (px: number, py: number, pz = 0): Point => ({
@@ -57,21 +58,21 @@ export function effectAnchors(p: Readonly<Rider>, track: Track): EffectAnchors {
     y: y + pose.y + s * px + c * py,
     z: z + pz,
   });
-  const rearAxle = transform(BIKE.rearX, BIKE.axleY),
-    frontAxle = transform(BIKE.frontX, BIKE.axleY);
+  const rearAxle = transform(visual.dimensions.rearX, visual.dimensions.axleY),
+    frontAxle = transform(visual.dimensions.frontX, visual.dimensions.axleY);
   const rear = pose.rear.touching
     ? { x: x + pose.rear.x, y: y + pose.rear.y, z }
-    : { ...rearAxle, y: rearAxle.y - BIKE.radius };
+    : { ...rearAxle, y: rearAxle.y - visual.dimensions.radius };
   const front = pose.front.touching
     ? { x: x + pose.front.x, y: y + pose.front.y, z }
-    : { ...frontAxle, y: frontAxle.y - BIKE.radius };
+    : { ...frontAxle, y: frontAxle.y - visual.dimensions.radius };
   return {
     rear,
     front,
     rearContact: pose.rear.touching,
     frontContact: pose.front.touching,
-    exhaust: transform(...EXHAUST_POINT),
-    engine: transform(...ENGINE_POINT),
+    exhaust: transform(...visual.exhaust),
+    engine: transform(...visual.engine),
   };
 }
 export interface VfxRider extends Readonly<Rider> {
@@ -93,9 +94,9 @@ export function captureVfxFrame(race: Race, weather: Weather): VfxFrame {
     frame: race.frame,
     phase: race.phase,
     weather,
-    riders: race.riders.map((p) => ({
+    riders: race.riders.map((p, index) => ({
       ...p,
-      anchors: effectAnchors(p, race.track),
+      anchors: effectAnchors(p, race.track, VEHICLE_VISUALS[(index === 0 ? race.config.player?.appearance?.vehicle : race.config.bots[index - 1]?.appearance?.vehicle) ?? 'motocross']),
       surface: segmentAt(race.track, p.x, p.lane)?.surface ?? 'dirt',
       clearance: p.height - heightAt(race.track, p.x, p.lane),
     })),

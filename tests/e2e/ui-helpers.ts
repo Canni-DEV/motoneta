@@ -25,6 +25,7 @@ export async function nav(page: Page, mode: string) {
     }
   }
   if (mode !== 'home') await page.locator(`.home-modes [data-value="${mode}"]`).click();
+  if (mode === 'tournament') await page.getByRole('button', { name: 'Torneo personalizado', exact: true }).click();
 }
 export async function ready(page: Page) {
   await page.addInitScript(() => {

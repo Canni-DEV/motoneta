@@ -1,0 +1,96 @@
+{
+  "reviewStage": "classic-approved-variants",
+  "baselineCommit": "99c7a94932fa628139a0976d26bc8d2994bc51fe",
+  "method": "Same Chromium/SwiftShader software renderer; old visual runtime and GLBs from baseline commit, candidate uses the approved scooter with its full catalog. Six riders and five ghosts, desktop and mobile landscape viewports; three sequential runs per version, 40 warm frames and 20 gl.finish samples per quality; median of run p95 values. Resource counts are compared over 20 track resets after 3 warm resets settle camera visibility. Mobile is emulated. This is not a physical-device GPU benchmark.",
+  "stableResources": true,
+  "samples": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "quality": "low",
+      "baselineP95Ms": 6.5,
+      "candidateP95Ms": 6.699999999254942,
+      "baselineRunsP95Ms": [
+        4.800000000745058,
+        6.5,
+        6.800000000745058
+      ],
+      "candidateRunsP95Ms": [
+        6.699999999254942,
+        6.5,
+        7.099999999627471
+      ],
+      "changePercent": 3.076923065460635,
+      "limitPercent": 10,
+      "passes": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "quality": "high",
+      "baselineP95Ms": 8.599999999627471,
+      "candidateP95Ms": 8.400000000372529,
+      "baselineRunsP95Ms": [
+        7.400000000372529,
+        8.599999999627471,
+        8.599999999627471
+      ],
+      "candidateRunsP95Ms": [
+        8.900000000372529,
+        7.899999998509884,
+        8.400000000372529
+      ],
+      "changePercent": -2.325581386786113,
+      "limitPercent": 20,
+      "passes": true
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "quality": "low",
+      "baselineP95Ms": 5.300000000745058,
+      "candidateP95Ms": 5.800000000745058,
+      "baselineRunsP95Ms": [
+        5.5,
+        5.300000000745058,
+        5.199999999254942
+      ],
+      "candidateRunsP95Ms": [
+        5.800000000745058,
+        6.299999998882413,
+        5.199999999254942
+      ],
+      "changePercent": 9.433962262824735,
+      "limitPercent": 10,
+      "passes": true
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "quality": "high",
+      "baselineP95Ms": 9,
+      "candidateP95Ms": 8.599999999627471,
+      "baselineRunsP95Ms": [
+        8.800000000745058,
+        10,
+        9
+      ],
+      "candidateRunsP95Ms": [
+        8.599999999627471,
+        8.400000000372529,
+        10.599999999627471
+      ],
+      "changePercent": -4.444444448583651,
+      "limitPercent": 20,
+      "passes": true
+    }
+  ]
+}

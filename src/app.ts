@@ -1,13 +1,15 @@
 import { GameAudio } from './audio';
-import { defaultAppearance, type Appearance, type SlotId, type VariantId } from './appearance';
+import { defaultAppearance, editGarage, garageAppearance, initialGarage, type GarageState, type VehicleId, type Appearance, type SlotId, type VariantId } from './appearance';
 import { CinematicCamera } from './cinematic-camera';
 import { analyzeRecording, type CinematicTimeline } from './cinematic-timeline';
 import { audioCreditsView } from './audio/credits';
-import { loadBikeAssets } from './bike-model';
+import { loadVehicleAssets } from './bike-model';
 import { advanceSession, sessionConfig } from './core/competition';
 import {
   COLORS,
   makeBots,
+  localProfile,
+  raceProfile,
   recordKey,
   ticksToTime,
   type CompetitionSession,
@@ -46,6 +48,7 @@ import {
   type Weather,
 } from './core/types';
 import { WEATHER_LABELS } from './core/weather';
+import { motonetaTournament } from './core/motoneta-tournament';
 import { loadCrowdAssets } from './crowd-assets';
 import { DEBUG_KEY, GAME_ID, mapFilename } from './identity';
 import { Controls } from './input';
@@ -57,6 +60,7 @@ import { patch } from './ui/dom';
 import { Editor } from './ui/editor';
 import { FocusedField } from './ui/focused-field';
 import { garageView } from './ui/garage';
+import { motonetaTournamentView, tournamentMenu } from './ui/tournament-view';
 import { profilesDialog } from './ui/profile-view';
 import { applyImageSetting } from './ui/settings-input';
 import { modeSetup } from './ui/setup-state';
@@ -163,7 +167,7 @@ export async function startApp() {
   const setupCache: Partial<Record<Setup['mode'], Setup>> = {};
   let settingsTab: SettingsTab = 'audio';
   let selectedProfile = store.state.activeProfile;
-  let garage: { profileId: string; draft: Appearance; selected: SlotId } | null = null;
+  let garage: { profileId: string; draft: Appearance; state: GarageState; selected: SlotId; profilesOnReturn: boolean; returnSession: CompetitionSession | null } | null = null;
   let recordSelection = '';
   let generatorOrigin: Screen = 'quick';
   const libraryState: LibraryPresentation = {
@@ -208,8 +212,9 @@ export async function startApp() {
   } catch (e) {
     error(e);
   }
-  const profile = () =>
+  const currentLocalProfile = () =>
     store.state.profiles.find((p) => p.id === store.state.activeProfile) ?? store.state.profiles[0];
+  const profile = () => raceProfile(currentLocalProfile());
   const quickConfig = () => quickRaceConfig(setup.courses[0], profile(), setup.bots, setup.difficulty);
   const editor = new Editor(
     store.state.draft,
@@ -263,8 +268,10 @@ export async function startApp() {
     let course = BUILTINS[0];
     if (screen === 'garage' && garage) {
       const owner = store.state.profiles.find((p) => p.id === garage!.profileId);
-      content = garageView(owner?.name ?? 'Jugador', garage.draft, garage.selected);
+      content = garageView(owner?.name ?? 'Jugador', garage.draft, garage.selected, owner?.unlockedMotoneta);
     } else if (screen === 'home') content = homeView(store.state);
+    else if (screen === 'tournament') content = tournamentMenu();
+    else if (screen === 'motoneta-tournament') content = motonetaTournamentView(store.state, models === 'ready' && !startBusy);
     else if (screen === 'editor') {
       content = editor.html();
       course = mapCourse(editor.design);
@@ -374,8 +381,8 @@ export async function startApp() {
       if (next === 'editor') world.zoomTarget = editor.cameraZoom;
       else world.resetZoom();
     }
-    if (['quick', 'tournament', 'versus'].includes(next)) {
-      const mode = next as Setup['mode'];
+    if (['quick', 'tournament-custom', 'versus'].includes(next)) {
+      const mode = next === 'tournament-custom' ? 'tournament' : next as Setup['mode'];
       if (setup.mode !== mode)
         setup = setupCache[mode] ?? modeSetup(mode, store.state.profiles);
       if (mode === 'quick' && setup.courses.length && !setupCache[mode]) {
@@ -390,8 +397,11 @@ export async function startApp() {
     navigation.restoreFocus(ui);
     window.scrollTo(0, 0);
   }
-  function refreshSession(mode: 'tournament' | 'versus') {
-    session = store.state.sessions[mode] ?? null;
+  function savedSession(value: CompetitionSession) {
+    return value.presetId === 'motoneta' ? store.state.motonetaSessions[value.players[0].id] : store.state.sessions[value.mode];
+  }
+  function refreshSession(mode: 'tournament' | 'versus' | 'motoneta', ownerId = store.state.activeProfile) {
+    session = mode === 'motoneta' ? store.state.motonetaSessions[ownerId] ?? null : store.state.sessions[mode] ?? null;
     navigation.enter('session');
     screen = 'session';
     closeModal();
@@ -406,12 +416,21 @@ export async function startApp() {
     if (world || modelBusy) return;
     modelBusy = true;
     models = 'loading';
+    ui.inert = true;
+    ui.setAttribute('aria-busy', 'true');
     $('#model-status').hidden = false;
-    $('#model-status').textContent = 'Cargando pilotos y estadio…';
+    $('#model-status').innerHTML = '<div class="loading-spinner" aria-hidden="true"></div><h2>Cargando MotoNeta</h2><p>Motos, pilotos y estadio…</p>';
     try {
-      const [assets, crowd] = await Promise.all([loadBikeAssets(), loadCrowdAssets()]);
-      world = new World(canvas, settings, assets, crowd);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      const [assets, crowd] = await Promise.all([loadVehicleAssets(), loadCrowdAssets()]);
+      $('#model-status').querySelector('p')!.textContent = 'Preparando la vista 3D…';
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      const prepared = new World(canvas, settings, assets, crowd, true);
+      try { await prepared.prepareBikes(7); } catch (error) { prepared.dispose(); throw error; }
+      world = prepared;
       models = 'ready';
+      ui.inert = false;
+      ui.removeAttribute('aria-busy');
       $('#model-status').hidden = true;
       previewKey = '';
       render();
@@ -700,7 +719,7 @@ export async function startApp() {
       lastRecording = recording;
       try {
         await store.commit(recording!, session ?? undefined);
-        if (session) session = store.state.sessions[session.mode]!;
+        if (session) session = savedSession(session)!;
         activity = 'results';
         showResult();
       } catch (e) {
@@ -792,7 +811,7 @@ export async function startApp() {
         players: structuredClone(
           setup.mode === 'tournament'
             ? [profile()]
-            : setup.players.map((id) => store.state.profiles.find((p) => p.id === id)!),
+            : setup.players.map((id) => raceProfile(store.state.profiles.find((p) => p.id === id)!)),
         ),
         bots: setup.mode === 'tournament' ? makeBots(setup.bots) : [],
         difficulty: setup.difficulty,
@@ -825,7 +844,7 @@ export async function startApp() {
       returnScreen = 'session';
       const config = sessionConfig(session);
       const current = store.state.profiles.find((p) => p.id === config.player.id);
-      if (current) config.player.appearance = structuredClone(current.appearance);
+      if (current) config.player = raceProfile(current);
       run(config, null, recordings);
     } finally {
       startBusy = false;
@@ -839,15 +858,28 @@ export async function startApp() {
   async function leaveGarage(save: boolean) {
     if (!garage) return;
     if (save) {
-      const { profileId, draft } = garage;
+      const { profileId, draft, state: garageState } = garage;
       await store.update((state) => {
         const owner = state.profiles.find((p) => p.id === profileId);
-        if (owner) owner.appearance = structuredClone(draft);
+        if (owner && (draft.vehicle !== 'motoneta' || owner.unlockedMotoneta)) {
+          editGarage(garageState, draft);
+          garageState.vehicle = draft.vehicle;
+          owner.garage = structuredClone(garageState);
+          owner.appearance = garageAppearance(owner.garage);
+        }
       });
     }
+    const profilesOnReturn = garage.profilesOnReturn;
+    const returnSession = garage.returnSession;
     garage = null;
-    navigate(navigation.back(), false);
-    profilesView();
+    const previousScreen = navigation.back();
+    if (previousScreen === 'session' && returnSession) {
+      world?.setGarage(null);
+      session = savedSession(returnSession)!;
+      screen = 'session';
+      render();
+    } else navigate(previousScreen, false);
+    if (profilesOnReturn) profilesView();
   }
   function library() {
     if (screen !== 'library') navigate('library');
@@ -929,7 +961,7 @@ export async function startApp() {
     controls.clear();
     controls.enabled = false;
     if (session) {
-      refreshSession(session.mode);
+      refreshSession(session.presetId === 'motoneta' ? 'motoneta' : session.mode, session.players[0].id);
       race = null;
     } else navigate((returnScreen === 'session' ? 'home' : returnScreen) as Screen, false);
   }
@@ -950,7 +982,8 @@ export async function startApp() {
         if (screen === 'editor' && editor.action(action, value)) return;
         switch (action) {
           case 'back':
-            navigate(navigation.back(), false);
+            if (screen === 'garage' && garage) await leaveGarage(false);
+            else navigate(navigation.back(), false);
             break;
           case 'editor-file':
             showModal(
@@ -1058,22 +1091,40 @@ export async function startApp() {
           case 'start':
             await startSetup();
             break;
+          case 'start-motoneta':
+          case 'replace-motoneta': {
+            if (startBusy || models !== 'ready') break;
+            const old = store.state.motonetaSessions[store.state.activeProfile];
+            if (old && old.phase !== 'complete' && action !== 'replace-motoneta') {
+              showModal(`<h2>Empezar un nuevo Torneo Motoneta</h2><p>Se reemplazará el progreso de este intento. Tu desbloqueo se conserva.</p><div class="actions">${b('replace-motoneta', 'Reemplazar intento', '', 'class="primary"')}${b('close-modal', 'Cancelar')}</div>`);
+              break;
+            }
+            startBusy = true;
+            try {
+              const created = motonetaTournament(profile());
+              await store.update((state) => { state.motonetaSessions[created.players[0].id] = created; });
+              refreshSession('motoneta');
+            } finally { startBusy = false; }
+            break;
+          }
           case 'replace-session':
             await startSetup(true);
             break;
           case 'resume-session':
-            refreshSession(value as 'tournament' | 'versus');
+            refreshSession(value as 'tournament' | 'versus' | 'motoneta');
             break;
           case 'begin-turn':
             await beginTurn();
             break;
           case 'advance':
             if (session) {
-              const mode = session.mode;
+              const mode = session.presetId === 'motoneta' ? 'motoneta' : session.mode;
+              const ownerId = session.players[0].id;
               await store.update((s) => {
-                s.sessions[mode] = advanceSession(s.sessions[mode]!);
+                if (mode === 'motoneta') s.motonetaSessions[ownerId] = advanceSession(s.motonetaSessions[ownerId]);
+                else s.sessions[mode] = advanceSession(s.sessions[mode]!);
               });
-              refreshSession(mode);
+              refreshSession(mode, ownerId);
             }
             break;
           case 'track': {
@@ -1259,14 +1310,23 @@ export async function startApp() {
           case 'profiles':
             profilesView();
             break;
+          case 'reward-garage':
           case 'garage-open': {
             const owner = store.state.profiles.find((p) => p.id === value);
             if (!owner) break;
             selectedProfile = owner.id;
-            garage = { profileId: owner.id, draft: structuredClone(owner.appearance), selected: 'fairing' };
+            garage = { profileId: owner.id, draft: raceProfile(owner).appearance, state: structuredClone(owner.garage), selected: 'fairing', profilesOnReturn: action === 'garage-open', returnSession: session };
             navigate('garage');
             break;
           }
+          case 'garage-vehicle':
+            if (garage) {
+              const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
+              if (garage.draft.vehicle !== 'motoneta' || owner.unlockedMotoneta) editGarage(garage.state, garage.draft);
+              garage.draft = garageAppearance(garage.state, value as VehicleId);
+              render();
+            }
+            break;
           case 'garage-slot':
             if (garage) { garage.selected = value as SlotId; render(); }
             break;
@@ -1292,7 +1352,9 @@ export async function startApp() {
           case 'garage-reset-all':
             if (garage) {
               const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
+              const vehicle = garage.draft.vehicle;
               garage.draft = defaultAppearance(owner.color);
+              garage.draft.vehicle = vehicle;
               render();
             }
             break;
@@ -1304,19 +1366,19 @@ export async function startApp() {
             break;
           case 'add-profile':
             await store.update((s) => {
-              s.profiles.push({
+              s.profiles.push(localProfile({
                 id: crypto.randomUUID(),
                 name: `Jugador ${s.profiles.length + 1}`,
                 color: COLORS[s.profiles.length % COLORS.length],
                 appearance: defaultAppearance(COLORS[s.profiles.length % COLORS.length]),
-              });
+              }));
             });
             selectedProfile = store.state.profiles.at(-1)!.id;
             profilesView();
             break;
           case 'delete-profile':
             showModal(
-              `<h2>Eliminar perfil</h2><p>Se eliminarán sus marcas personales. Las competiciones iniciadas conservarán el participante.</p>${b('confirm-delete-profile', 'Eliminar', value)}${b('profiles', 'Cancelar')}`,
+              `<h2>Eliminar perfil</h2><p>Se eliminarán sus marcas personales, la Motoneta desbloqueada y su intento de Torneo Motoneta. Las otras competiciones iniciadas conservarán el participante.</p>${b('confirm-delete-profile', 'Eliminar', value)}${b('profiles', 'Cancelar')}`,
             );
             break;
           case 'confirm-delete-profile':
@@ -1324,9 +1386,13 @@ export async function startApp() {
               if (s.profiles.length <= 1) return;
               s.profiles = s.profiles.filter((p) => p.id !== value);
               s.records = s.records.filter((r) => r.profileId !== value);
+              delete s.motonetaSessions[value];
               if (s.activeProfile === value) s.activeProfile = s.profiles[0].id;
             });
             setup.players = setup.players.filter((id) => id !== value);
+            if (!store.state.profiles.some((p) => p.id === value) &&
+                (garage?.profileId === value || (session?.presetId === 'motoneta' && session.players[0].id === value)))
+              navigate('home', false);
             profilesView();
             break;
           case 'record-watch':
@@ -1452,7 +1518,7 @@ export async function startApp() {
           case 'retry-save':
             if (recording) {
               await store.commit(recording, session ?? undefined);
-              if (session) session = store.state.sessions[session.mode]!;
+              if (session) session = savedSession(session)!;
               showResult();
             }
             break;
@@ -1551,7 +1617,10 @@ export async function startApp() {
           await store.update((s) => {
             const p = s.profiles.find((p) => p.id === id)!;
             if (el.dataset.profileName) p.name = el.value.trim() || 'Jugador';
-            else p.color = el.value;
+            else {
+              p.color = el.value;
+              if (!p.unlockedMotoneta) p.garage.bikes.motoneta = initialGarage(p.appearance, p.color).bikes.motoneta;
+            }
           });
           profilesView();
           render();
@@ -1916,10 +1985,12 @@ export async function startApp() {
           frame: g.race.frame,
           done: g.done,
           rider: structuredClone(g.race.riders[0]),
+          vehicle: g.recording.config.player.appearance.vehicle,
           opacity: world?.bikes[(race?.riders.length ?? 0) + i]?.ghostOpacity,
         })),
         models,
         quality: world?.bikes[0]?.quality,
+        vehicles: world?.bikes.map((bike) => bike.vehicle),
         camera: world ? { zoom: world.camera.zoom, target: world.zoomTarget } : null,
         cinematic: world?.cinematic?.diagnostics() ?? null,
         renderer: world?.renderer.info.render,

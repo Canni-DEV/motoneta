@@ -2,6 +2,8 @@ export type Screen =
   | 'home'
   | 'quick'
   | 'tournament'
+  | 'tournament-custom'
+  | 'motoneta-tournament'
   | 'versus'
   | 'records'
   | 'editor'

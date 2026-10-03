@@ -1,5 +1,5 @@
 import { GAME_ID, RULESET } from '../identity';
-import { botAppearance, type Appearance } from '../appearance';
+import { botAppearance, garageAppearance, initialGarage, normalizeAppearance, type Appearance, type GarageState } from '../appearance';
 import type { TimeOfDay, Track, Weather } from './types';
 export type { Race } from './types';
 
@@ -10,6 +10,22 @@ export interface PlayerProfile {
   name: string;
   color: string;
   appearance: Appearance;
+}
+/** Local customization and progression never travel with a race participant. */
+export interface LocalProfile extends PlayerProfile {
+  garage: GarageState;
+  unlockedMotoneta: boolean;
+}
+export function localProfile(value: PlayerProfile & Partial<LocalProfile>): LocalProfile {
+  const appearance = normalizeAppearance(value.appearance);
+  const garage = value.garage ? structuredClone(value.garage) : initialGarage(appearance, value.color);
+  const unlockedMotoneta = value.unlockedMotoneta === true;
+  if (!unlockedMotoneta) garage.vehicle = 'motocross';
+  return { id: value.id, name: value.name, color: value.color, garage, unlockedMotoneta, appearance: garageAppearance(garage) };
+}
+export function raceProfile(value: PlayerProfile | LocalProfile): PlayerProfile {
+  return { id: value.id, name: value.name, color: value.color,
+    appearance: 'garage' in value ? garageAppearance(value.garage) : normalizeAppearance(value.appearance) };
 }
 export interface TrackRef {
   id: string;
@@ -50,6 +66,8 @@ export interface Recording {
   termination?: 'finished' | 'abandoned';
 }
 export interface CompetitionSession {
+  presetId?: 'motoneta';
+  reward?: 'unlocked' | 'already-unlocked' | 'not-earned';
   id: string;
   mode: 'tournament' | 'versus';
   players: PlayerProfile[];

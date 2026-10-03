@@ -46,3 +46,6 @@ body[data-screen='garage'] .scene-shade { display: none; }
   .garage-camera span { display: none; }
   .garage-slots button { font-size: 11px; }
 }
+.garage-vehicles { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.garage-vehicles [aria-pressed='true'] { border-color: var(--accent); }
+.vehicle-lock { color: var(--accent); }

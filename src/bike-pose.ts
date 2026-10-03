@@ -1,4 +1,5 @@
 /** Model-space dimensions shared by the model and the ground-contact solver. */
+import { VEHICLE_VISUALS, type WheelDimensions, type VehicleVisual } from './vehicle-visual';
 export const BIKE = { rearX: -0.53, frontX: 0.57, axleY: 0.29, radius: 0.306 } as const;
 export type GroundHeight = (modelX: number) => number;
 export interface CrashPoseState {
@@ -16,7 +17,7 @@ const smooth = (n: number) => {
 };
 
 /** Shared analytic crash envelope for the rendered model and particle anchors. */
-export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced = false) {
+export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced = false, visual: VehicleVisual = VEHICLE_VISUALS.motocross) {
   const side = state.lane < 1.5 ? -1 : 1;
   const phase = state.crashPhase;
   const rolling = phase === 'rolling';
@@ -41,12 +42,9 @@ export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced =
     cr = Math.cos(roll),
     sr = Math.sin(roll);
   const points = [
-    [-0.53, 0.29, 0, 0.306],
-    [0.57, 0.29, 0, 0.306],
-    [-0.76, 0.75, -0.12, 0],
-    [0.81, 0.65, 0.12, 0],
-    [0.06, 0.4, -0.19, 0],
-    [0.32, 0.95, 0.2, 0],
+    [visual.dimensions.rearX, visual.dimensions.axleY, 0, visual.dimensions.radius],
+    [visual.dimensions.frontX, visual.dimensions.axleY, 0, visual.dimensions.radius],
+    ...visual.crashEnvelope,
   ];
   let y = 0;
   for (const [px, py, pz, radius] of points) {
@@ -89,15 +87,15 @@ export function crashPose(state: CrashPoseState, ground: GroundHeight, reduced =
   };
 }
 
-function supportAt(x: number, ground: GroundHeight) {
+function supportAt(x: number, ground: GroundHeight, dimensions: WheelDimensions) {
   let y = -Infinity,
     contactX = x,
     contactY = 0;
   // Sample the lower semicircle, including both extremities at discontinuous terrain edges.
   for (let i = 0; i <= 32; i++) {
-    const dx = BIKE.radius * (i / 16 - 1);
+    const dx = dimensions.radius * (i / 16 - 1);
     const surface = ground(x + dx);
-    const support = surface + Math.sqrt(Math.max(0, BIKE.radius ** 2 - dx ** 2));
+    const support = surface + Math.sqrt(Math.max(0, dimensions.radius ** 2 - dx ** 2));
     if (support > y) {
       y = support;
       contactX = x + dx;
@@ -107,20 +105,20 @@ function supportAt(x: number, ground: GroundHeight) {
   return { axleY: y + 0.003, x: contactX, y: contactY };
 }
 
-export function bikePose(tilt: number, grounded: boolean, ground: GroundHeight) {
+export function bikePose(tilt: number, grounded: boolean, ground: GroundHeight, dimensions: WheelDimensions = BIKE) {
   const c = Math.cos(tilt),
     s = Math.sin(tilt),
-    wheelbase = BIKE.frontX - BIKE.rearX;
-  const frontX = BIKE.rearX + wheelbase * c;
-  const rear = supportAt(BIKE.rearX, ground),
-    front = supportAt(frontX, ground);
+    wheelbase = dimensions.frontX - dimensions.rearX;
+  const frontX = dimensions.rearX + wheelbase * c;
+  const rear = supportAt(dimensions.rearX, ground, dimensions),
+    front = supportAt(frontX, ground, dimensions);
   const contact = Math.max(rear.axleY, front.axleY - wheelbase * s);
   // On the ground the rear axle is the pivot. In flight retain clearance and only
   // constrain the rig when a tire approaches the surface, never the airborne tilt itself.
-  const rearY = grounded ? contact : Math.max(BIKE.radius, contact);
+  const rearY = grounded ? contact : Math.max(dimensions.radius, contact);
   return {
-    x: BIKE.rearX - (c * BIKE.rearX - s * BIKE.axleY),
-    y: rearY - (s * BIKE.rearX + c * BIKE.axleY),
+    x: dimensions.rearX - (c * dimensions.rearX - s * dimensions.axleY),
+    y: rearY - (s * dimensions.rearX + c * dimensions.axleY),
     rear: { x: rear.x, y: rear.y, touching: grounded && Math.abs(rearY - rear.axleY) < 0.055 },
     front: {
       x: front.x,

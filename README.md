@@ -23,6 +23,10 @@ También hay controles táctiles, gamepad y teclas reasignables. Las rampas prod
 
 Carrera rápida muestra tu récord para la pista, vueltas, cantidad de rivales y dificultad elegidas. Activá “Correr contra mi fantasma” para competir contra tu mejor carrera: al completar cada vuelta verás la diferencia de esa vuelta y la acumulada, con el detalle final en resultados. La elección se conserva mientras el juego está abierto y cada nuevo intento usa la mejor marca disponible.
 
+Dentro de Torneo podés elegir el Torneo personalizado o el **Torneo Motoneta**: cinco pistas oficiales, dos vueltas y tres bots en Difícil, con horarios y climas fijos. Ganar la clasificación general (también con un empate exacto en el primer puesto) desbloquea la scooter clásica para ese perfil. El intento se guarda después de cada carrera y puede continuarse desde Inicio; empezar otro intento conserva la recompensa obtenida. Abandonar una carrera suma cero puntos.
+
+El garaje permite equipar Motocross o Motoneta al guardar, con seis piezas y dos colores por pieza. Las configuraciones de cada moto son independientes y el piloto es compartido; Cancelar descarta la edición. La Motoneta bloqueada permite verla en 3D y muestra el requisito. Ambos vehículos tienen la misma física y sonido, comparten marcas y conservan su apariencia original en repeticiones y fantasmas. Esta incorporación conserva los datos v2 y las reglas `motoneta-2` existentes.
+
 Las repeticiones pueden verse con cámaras cinematográficas y el tema de resultados. En Inicio, tras 60 segundos de inactividad en un equipo no móvil, se reproducen automáticamente las marcas del perfil activo; Escape vuelve al menú. Esta opción se puede desactivar en Ajustes → Interfaz.
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla. Al pasar a las reglas `motoneta-2`, los datos locales de la versión anterior se reinician (perfiles, pistas, marcas, sesiones, repeticiones y ajustes).
@@ -90,6 +94,18 @@ La fuente reproducible es `scripts/build-motocross.py`, para Blender 5.2.2 LTS. 
 # Añadir -- --render --render-all para las vistas de estudio de las tres familias y ambas calidades.
 npm run models:validate
 ```
+
+La scooter usa el mismo generador con un objetivo separado, después de aprobar Esencial a partir de la referencia del usuario. Sus archivos editables, rig y manifiesto están en `assets/motoneta/`, y el juego carga `motoneta-high.glb` y `motoneta-low.glb` junto con los dos modelos de motocross y el estadio antes de habilitar el menú.
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python-exit-code 1 --python scripts/build-motocross.py -- --vehicle=motoneta
+# Con Vite activo:
+npm run models:review:motoneta
+npm run models:benchmark:motoneta -- <commit-de-referencia>
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup assets/motoneta/motoneta.blend --python-exit-code 1 --python scripts/check-motoneta-model.py
+```
+
+Las capturas de Esencial, Competición, Travesía, ambas calidades, saltos y recuperación quedan en `assets/motoneta/review/essential/index.html`. `assets/motoneta/performance-comparison.json` registra tres corridas comparables con seis pilotos y cinco fantasmas, escritorio y móvil horizontal emulado, usando Chromium/SwiftShader; mide el p95 de render y la estabilidad de recursos y no reemplaza una medición en teléfonos físicos.
 
 El rediseño incluye **Esencial**, **Competición** y **Travesía**, con uniones comunes y diferencias locales de volumen, protección y pintura. Incorpora la devolución sobre Esencial: visera más corta, casco más compacto y mayor volumen corporal. Con Vite activo, abrir `/assets/motocross/review/index.html` para comparar los modelos, sus calidades, poses y combinaciones. `node scripts/review-model-quality.mjs catalogo --families --mixed` regenera las capturas del juego. Las evidencias nuevas se guardan en `assets/motocross/review/catalogo/`, preservando la primera revisión y las históricas.
 

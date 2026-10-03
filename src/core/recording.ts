@@ -1,5 +1,5 @@
 import { FILE_HEADER, FORMAT_VERSION, GAME_ID, RULESET } from '../identity';
-import { isAppearance } from '../appearance';
+import { isAppearance, normalizeAppearance } from '../appearance';
 import type { Race, RaceConfig, Recording } from './game';
 import { designFromTrack, mapTrack, validateMap } from './maps';
 import {
@@ -117,8 +117,8 @@ export function validateRecording(value: unknown): Recording {
     track,
     ref: { id: c.ref.id, revision: checked.revision, name: track.name },
     mode: c.mode,
-    player: { ...c.player },
-    bots: c.bots.map((p) => ({ ...p })),
+    player: { id: c.player.id, name: c.player.name, color: c.player.color, appearance: normalizeAppearance(c.player.appearance) },
+    bots: c.bots.map((p) => ({ id: p.id, name: p.name, color: p.color, appearance: normalizeAppearance(p.appearance) })),
     difficulty: c.difficulty,
     seed: c.seed,
     timeOfDay: c.timeOfDay,

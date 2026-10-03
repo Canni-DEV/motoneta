@@ -1020,3 +1020,10 @@ td {
     max-height: 150px;
   }
 }
+.tournament-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.tournament-choices .panel { display: flex; flex-direction: column; align-items: start; gap: 16px; }
+.preset-calendar { margin: 16px 0; padding-left: 26px; }
+.preset-calendar li { padding: 12px 0; }
+.preset-calendar li span { display: block; color: var(--muted); margin-top: 6px; }
+.tournament-reward { padding: 16px; border: 1px solid var(--accent); border-radius: 8px; }
+@media (max-width: 700px) { .tournament-choices { grid-template-columns: 1fr; } }

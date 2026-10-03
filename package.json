@@ -16,6 +16,8 @@
     "test:compat": "playwright test --config=playwright.compat.config.ts",
     "benchmark:runtime": "node scripts/benchmark-runtime.mjs",
     "models:validate": "node scripts/validate-motocross.mjs",
+    "models:review:motoneta": "node scripts/review-motoneta.mjs",
+    "models:benchmark:motoneta": "node scripts/benchmark-motoneta.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
