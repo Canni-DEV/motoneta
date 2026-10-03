@@ -1,9 +1,23 @@
 import { expect, test } from '@playwright/test';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 test('six riders and five ghosts in both qualities retain stable rendering resources', async ({
   page,
 }, info) => {
   test.setTimeout(180000);
+  if (process.env.MODEL_BENCHMARK_RUNTIME) {
+    const snapshot = process.env.MODEL_BENCHMARK_RUNTIME;
+    await page.route('**/src/bike-model.ts*', async (route) => {
+      const response = await route.fetch({ url: new URL(snapshot, route.request().url()).href });
+      await route.fulfill({ response });
+    });
+  }
+  if (process.env.MODEL_BENCHMARK_MODELS) {
+    await page.route('**/models/motocross-*.glb', async (route) => route.fulfill({
+      contentType: 'model/gltf-binary',
+      body: await readFile(join(process.env.MODEL_BENCHMARK_MODELS!, new URL(route.request().url()).pathname.split('/').at(-1)!)),
+    }));
+  }
   await page.route('http://127.0.0.1:5173/', (route) =>
     route.fulfill({
       contentType: 'text/html',
@@ -21,7 +35,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
       const source = (p: string) => import(/* @vite-ignore */ p);
       const [
         { World },
-        { loadBikeAssets },
+        { Bike, loadBikeAssets },
         { loadCrowdAssets },
         { defaultSettings },
         { createRace },
@@ -36,6 +50,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
         source('/src/core/game.ts'),
         source('/src/core/maps.ts'),
       ]);
+      const bikeAssets = await loadBikeAssets();
       const world =
         (window as any).benchmarkWorld ??
         new World(
@@ -45,7 +60,7 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
             quality: 'low',
             vfx: { race: false, tracks: false, ambient: false, intensity: 'balanced' },
           },
-          await loadBikeAssets(),
+          bikeAssets,
           await loadCrowdAssets(),
         );
       (window as any).benchmarkWorld = world;
@@ -101,6 +116,39 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
             drawCalls: world.renderer.info.render.calls,
           });
         }
+      // The production build allocates these lazily. The reference build has
+      // seven fixed bikes, so extend it with the same Bike type for this stress case.
+      if (typeof (world as any).ensureBikes === 'function') (world as any).ensureBikes(11);
+      else while (world.bikes.length < 11) {
+        const bike = new Bike(0xaabbcc, bikeAssets, world.settings.quality);
+        world.bikes.push(bike);
+        world.scene.add(bike.root);
+      }
+      const ghosts = r.riders.slice(1, 6).map((rider: any, i: number) => ({
+        ...structuredClone(rider), id: `ghost-${i}`,
+      }));
+      r.riders.push(...ghosts);
+      world.ghostStart = 6;
+      for (const q of ['low', 'high']) {
+        world.settings.quality = q;
+        world.applySettings();
+        render();
+        const times = [];
+        for (let n = 0; n < 20; n++) {
+          await new Promise(requestAnimationFrame);
+          const start = performance.now();
+          render();
+          times.push(performance.now() - start);
+        }
+        times.sort((a, b) => a - b);
+        values.push({
+          quality: q,
+          scenario: 'six-riders-five-ghosts',
+          medianMs: times[10],
+          p95Ms: times[18],
+          drawCalls: world.renderer.info.render.calls,
+        });
+      }
       const allocations = [];
       for (let i = 0; i < 20; i++) {
         world.setTrack(structuredClone(r.track));
@@ -126,4 +174,8 @@ test('six riders and five ghosts in both qualities retain stable rendering resou
     contentType: 'application/json',
   });
   await writeFile('test-results/new-modes-performance.json', JSON.stringify(measurements, null, 2));
+  if (process.env.MODEL_BENCHMARK_OUTPUT) {
+    await mkdir(process.env.MODEL_BENCHMARK_OUTPUT, { recursive: true });
+    await writeFile(join(process.env.MODEL_BENCHMARK_OUTPUT, `run-${info.repeatEachIndex}.json`), JSON.stringify(measurements, null, 2));
+  }
 });

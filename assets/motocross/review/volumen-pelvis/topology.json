@@ -1,0 +1,227 @@
+{
+  "rigMatchesRuntime": true,
+  "normalizedWeights": true,
+  "interfaces": {
+    "torso/waist": {
+      "matchingVariants": 3,
+      "vertices": 16,
+      "identicalWeights": true
+    },
+    "torso/neck": {
+      "matchingVariants": 3,
+      "vertices": 16,
+      "identicalWeights": true
+    },
+    "pants/waist": {
+      "matchingVariants": 3,
+      "vertices": 16,
+      "identicalWeights": true
+    },
+    "boots/cuff--1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "pants/cuff--1": {
+      "matchingVariants": 3,
+      "vertices": 10,
+      "identicalWeights": true
+    },
+    "torso/wrist--1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "gloves/wrist--1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "boots/cuff-1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "pants/cuff-1": {
+      "matchingVariants": 3,
+      "vertices": 10,
+      "identicalWeights": true
+    },
+    "torso/wrist-1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "gloves/wrist-1": {
+      "matchingVariants": 3,
+      "vertices": 12,
+      "identicalWeights": true
+    },
+    "helmet/eye-port-1.318": {
+      "matchingVariants": 3,
+      "vertices": 24,
+      "identicalWeights": true
+    },
+    "helmet/eye-port-1.357": {
+      "matchingVariants": 3,
+      "vertices": 17,
+      "identicalWeights": true
+    },
+    "helmet/eye-port-1.395": {
+      "matchingVariants": 3,
+      "vertices": 24,
+      "identicalWeights": true
+    },
+    "visor/peak-root": {
+      "matchingVariants": 3,
+      "vertices": 10,
+      "identicalWeights": true
+    }
+  },
+  "parts": {
+    "Slot_torso_core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    },
+    "Slot_pants_core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "Slot_helmet_core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 466,
+      "selfIntersections": 0
+    },
+    "Slot_torso_sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    },
+    "Slot_pants_sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "Slot_helmet_sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 466,
+      "selfIntersections": 0
+    },
+    "Slot_torso_trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    },
+    "Slot_pants_trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "Slot_helmet_trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 466,
+      "selfIntersections": 0
+    },
+    "low/pants/sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "low/helmet/sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 234,
+      "selfIntersections": 0
+    },
+    "low/pants/trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "low/helmet/trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 234,
+      "selfIntersections": 0
+    },
+    "low/torso/sprint": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    },
+    "low/torso/core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    },
+    "low/helmet/core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 234,
+      "selfIntersections": 0
+    },
+    "low/pants/core": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 221,
+      "selfIntersections": 0
+    },
+    "low/torso/trail": {
+      "components": 1,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "looseVertices": 0,
+      "vertices": 362,
+      "selfIntersections": 0
+    }
+  }
+}

@@ -197,9 +197,9 @@ test('surface detail persists independently of quality and effects and resets to
   page,
 }) => {
   await page.addInitScript(() => {
-    if (!localStorage.getItem('motoneta.settings.v2'))
+    if (!localStorage.getItem('motoneta.settings.v3'))
       localStorage.setItem(
-        'motoneta.settings.v2',
+        'motoneta.settings.v3',
         JSON.stringify({
           quality: 'low',
           vfx: { race: true, tracks: true, ambient: true, intensity: 'balanced' },
@@ -212,7 +212,7 @@ test('surface detail persists independently of quality and effects and resets to
     await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
     await page.locator('[data-action="settings-tab"][data-value="image"]').click();
   };
-  const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('motoneta.settings.v2')!));
+  const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('motoneta.settings.v3')!));
   await openSettings();
   await expect(page.locator('#surface-detail')).toHaveValue('detailed');
   await page.locator('#surface-detail').selectOption('light');

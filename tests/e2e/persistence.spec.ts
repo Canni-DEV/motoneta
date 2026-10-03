@@ -3,7 +3,7 @@ test('initialization is repeatable; failed result writes roll back atomically an
   page,
 }) => {
   await page.addInitScript(() => {
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 }));
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0 }));
   });
   await page.goto('/');
   await expect(page.locator('#model-status')).toBeHidden();

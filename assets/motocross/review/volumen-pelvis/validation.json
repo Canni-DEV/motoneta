@@ -1,0 +1,84 @@
+{
+  "stage": "pelvis-volume-v4",
+  "createdAt": "2026-10-03T03:20:11.255Z",
+  "scope": "Only pants geometry changed. Approved seat, height, rig, runtime and other meshes preserved. Rounded posterior pelvis sections, larger oblique thighs and a saddle contact bridge.",
+  "preserved": {
+    "rig": true,
+    "runtime": true,
+    "nonPantsMeshes": 100,
+    "allNonPantsMeshesIdentical": true
+  },
+  "tests": {
+    "unit": {
+      "passed": 181,
+      "files": 14
+    },
+    "gltf": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "build": "passed",
+    "browser": {
+      "functionalTests": 5
+    },
+    "volume": {
+      "qualities": [
+        "high",
+        "low"
+      ],
+      "sides": [
+        "left",
+        "right"
+      ],
+      "minimumSagittalThickness": {
+        "glute": 0.22,
+        "thigh": 0.145
+      }
+    },
+    "performance": {
+      "runsPerVersion": 3,
+      "passes": true,
+      "stableResources": true,
+      "renderer": "Playwright Chromium SwiftShader, mobile viewport emulated"
+    }
+  },
+  "geometry": {
+    "samples": 142,
+    "pairs": 7668,
+    "crossings": 0,
+    "containedVertices": 0,
+    "supportGap": {
+      "min": 0.003009268082678318,
+      "max": 0.003118690103292465,
+      "limit": 0.014
+    },
+    "connectedSurfaces": 18,
+    "coverage": "pants/torso/boots against seat/fairing; all three-by-three choices; High and Low; riding, steering, wheelie, flight, landing, rolling, down, mounting plus integer rolling frames 0–40 and mounting frames 0–21, lane 2, flat track. Ground-support unit tests also cover slopes. Not an exhaustive interpenetration test against all mechanics."
+  },
+  "assets": {
+    "low": {
+      "trianglesSelected": 7598,
+      "trianglesSelectedMax": 7976,
+      "trianglesCatalog": 20480,
+      "bytes": 761640,
+      "textures": 0,
+      "bones": 15
+    },
+    "high": {
+      "trianglesSelected": 14680,
+      "trianglesSelectedMax": 15616,
+      "trianglesCatalog": 39892,
+      "bytes": 1346172,
+      "textures": 0,
+      "bones": 15
+    }
+  },
+  "hashes": {
+    "scripts/build-motocross.py": "31b850d3fd0cebfe950d53d12b74b38c3b1d09aa7b88b25e7a304e51c00bcebb",
+    "src/bike-model.ts": "09bf22a33646d71c8726641c36251d7c9ff0a2bddb4dea047590aed99d530155",
+    "src/bike-rig.json": "c6f9333b2f3863f837b982e353e2b5b5f8da1e61d8573baf95bcce11a270a040",
+    "assets/motocross/motocross.blend": "ffc56c704b82e90403170f68294e80b0ae70d5a6f793d6cd79133ec94b36f33d",
+    "public/models/motocross-low.glb": "a51a7e9b5aefb686f1d574d0ced77afc2a8a82ab9b77930cf74158fb80967dac",
+    "public/models/motocross-high.glb": "e1de1294392d055642ccade07d40353848a699ad58c93677619ebe2abac6a530"
+  }
+}

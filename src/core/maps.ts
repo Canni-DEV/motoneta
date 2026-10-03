@@ -10,7 +10,7 @@ export interface PlacedPiece extends Segment {
 }
 export interface MapDesign {
   game: typeof GAME_ID;
-  version: 1;
+  version: 2;
   id: string;
   revision: string;
   name: string;

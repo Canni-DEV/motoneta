@@ -1,0 +1,551 @@
+{
+  "errors": [],
+  "report": [
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "three-quarter",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "side",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "front",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "rear",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "helmet",
+      "triangles": 5714,
+      "draws": 17
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "view": "body",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "steering",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "wheelie",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "flight",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "landing",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "rolling",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "down",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "core",
+      "pose": "mounting",
+      "triangles": 14640,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "three-quarter",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "side",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "front",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "rear",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "helmet",
+      "triangles": 5658,
+      "draws": 17
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "view": "body",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "steering",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "wheelie",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "flight",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "landing",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "rolling",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "down",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "sprint",
+      "pose": "mounting",
+      "triangles": 14824,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "three-quarter",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "side",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "front",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "rear",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "helmet",
+      "triangles": 5770,
+      "draws": 17
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "view": "body",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "steering",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "wheelie",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "flight",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "landing",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "rolling",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "down",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "variant": "trail",
+      "pose": "mounting",
+      "triangles": 15576,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "three-quarter",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "side",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "front",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "rear",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "helmet",
+      "triangles": 3992,
+      "draws": 17
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "view": "body",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "steering",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "wheelie",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "flight",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "landing",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "rolling",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "down",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "core",
+      "pose": "mounting",
+      "triangles": 7558,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "three-quarter",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "side",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "front",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "rear",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "helmet",
+      "triangles": 3936,
+      "draws": 17
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "view": "body",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "steering",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "wheelie",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "flight",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "landing",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "rolling",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "down",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "sprint",
+      "pose": "mounting",
+      "triangles": 7634,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "three-quarter",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "side",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "front",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "rear",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "helmet",
+      "triangles": 4048,
+      "draws": 17
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "view": "body",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "steering",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "wheelie",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "flight",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "landing",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "rolling",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "down",
+      "triangles": 7936,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "variant": "trail",
+      "pose": "mounting",
+      "triangles": 7936,
+      "draws": 33
+    }
+  ]
+}

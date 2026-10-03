@@ -4,10 +4,10 @@ export const GAME_ID = identity.id;
 export const GAME_NAME = identity.name;
 export const GAME_TITLE = identity.words.join('');
 export const GAME_LOGO = `<img class="brand-mark" src="${import.meta.env?.BASE_URL ?? './'}branding/motoneta-on-dark.svg" alt="" aria-hidden="true"><span class="sr-only">${GAME_TITLE}</span>`;
-export const SETTINGS_KEY = `${GAME_ID}.settings.v2`;
+export const SETTINGS_KEY = `${GAME_ID}.settings.v3`;
 export const DATABASE_NAME = `${GAME_ID}-game`;
 export const DEBUG_KEY = `__${GAME_ID}`;
-export const FORMAT_VERSION = 1;
+export const FORMAT_VERSION = 2;
 export const RULESET = `${GAME_ID}-2`;
 export const FILE_HEADER = { game: GAME_ID, version: FORMAT_VERSION } as const;
 export function mapFilename(name: string) {

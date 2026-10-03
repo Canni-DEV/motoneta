@@ -1,0 +1,20 @@
+{
+  "version": "5.2.2 LTS",
+  "file": "C:\\Code\\ExciteBike\\assets\\motocross\\motocross.blend",
+  "bones": 15,
+  "new_parts": [
+    "Slot_boots_core",
+    "Slot_exhaust_core",
+    "Slot_fairing_core",
+    "Slot_fender_core_Front",
+    "Slot_fender_core_Rear",
+    "Slot_gloves_core",
+    "Slot_helmet_core",
+    "Slot_pants_core",
+    "Slot_plate_core",
+    "Slot_seat_core",
+    "Slot_torso_core",
+    "Slot_visor_core"
+  ],
+  "source_script": "scripts/build-motocross.py"
+}

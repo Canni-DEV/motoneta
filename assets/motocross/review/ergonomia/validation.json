@@ -1,0 +1,117 @@
+{
+  "stage": "ergonomics-v3-neutral-essential",
+  "createdAt": "2026-10-03T02:52:37.033Z",
+  "visualApproval": "pending",
+  "scope": "Shared anatomical base and padded seat; Esencial neutral review before final family finishing. Names, hierarchy, hand/foot anchors and physics preserved; rest bone positions recalibrated.",
+  "tests": {
+    "unit": {
+      "passed": 179,
+      "files": 14
+    },
+    "gltf": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "build": "passed",
+    "browser": {
+      "functionalTests": 5,
+      "finalAnimationRerun": "passed"
+    },
+    "performance": {
+      "runsPerVersion": 3,
+      "passes": true,
+      "stableResources": true,
+      "renderer": "Chromium SwiftShader; mobile viewport emulated"
+    }
+  },
+  "geometry": {
+    "samples": 142,
+    "pairs": 7668,
+    "crossings": 0,
+    "containedVertices": 0,
+    "supportGap": {
+      "min": 0.003009268082678318,
+      "max": 0.003118690103292465,
+      "limit": 0.014
+    },
+    "coverage": "pants/torso/boots against seat/fairing, all 3x3 combinations, High and Low; eight key poses and every integer frame of rolling 0–40 and mounting 0–21, lane 2, flat track; no claim of exhaustive mesh collision against all mechanical pieces or all slopes.",
+    "connectedSurfaces": 18,
+    "rigMatchesRuntime": true
+  },
+  "assets": {
+    "low": {
+      "trianglesSelected": 7494,
+      "trianglesSelectedMax": 7872,
+      "trianglesCatalog": 20168,
+      "bytes": 751656,
+      "textures": 0,
+      "bones": 15
+    },
+    "high": {
+      "trianglesSelected": 14576,
+      "trianglesSelectedMax": 15512,
+      "trianglesCatalog": 39580,
+      "bytes": 1336184,
+      "textures": 0,
+      "bones": 15
+    }
+  },
+  "baseline": {
+    "reference": "connected-families-v2-snapshot",
+    "directory": "assets/motocross/review/ergonomia/baseline",
+    "restHip": [
+      -0.19,
+      0.863,
+      0
+    ],
+    "preview": {
+      "quality": "high",
+      "variant": "core",
+      "view": "three-quarter",
+      "triangles": 14640,
+      "draws": 33,
+      "pelvis": [
+        -0.19,
+        0.8700509748793559,
+        0
+      ],
+      "head": [
+        0.10000000000385817,
+        1.2620509748748645,
+        5.720636811479274e-11
+      ]
+    }
+  },
+  "candidate": {
+    "restHip": [
+      -0.21,
+      0.968,
+      0
+    ],
+    "preview": {
+      "quality": "high",
+      "variant": "core",
+      "view": "three-quarter",
+      "triangles": 14640,
+      "draws": 33,
+      "pelvis": [
+        -0.21,
+        0.9750509748793559,
+        0
+      ],
+      "head": [
+        0.08499999999783062,
+        1.332050974881314,
+        -1.936509633204686e-11
+      ]
+    }
+  },
+  "hashes": {
+    "scripts/build-motocross.py": "63fd7c48286f60d18d39a938186a0296f6ba5d7cf6d700205056945f305d525c",
+    "src/bike-model.ts": "09bf22a33646d71c8726641c36251d7c9ff0a2bddb4dea047590aed99d530155",
+    "src/bike-rig.json": "c6f9333b2f3863f837b982e353e2b5b5f8da1e61d8573baf95bcce11a270a040",
+    "assets/motocross/motocross.blend": "2b4057fbe8998aa8add60bed1659b88b4d5282e58d4805fdc3a81524e2137650",
+    "public/models/motocross-low.glb": "72e4df1663cf1bac278dab8250f62c706faea83a1bfcf51a4d4693eac589e4fd",
+    "public/models/motocross-high.glb": "7ad059cd2d3eda6d6dd82a49cde43e49c2f22d79248d4bc8deafffe03099d3b1"
+  }
+}

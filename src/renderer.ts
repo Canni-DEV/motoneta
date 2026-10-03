@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { Appearance } from './appearance';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -124,6 +125,12 @@ export class World {
   pieces: { group: THREE.Group; base: number; bounds: THREE.Box3 }[] = [];
   bikes: Bike[] = [];
   ghostStart = Infinity;
+  appearances: Appearance[] = [];
+  private readonly garageScene = new THREE.Scene();
+  private readonly garageCamera = new THREE.PerspectiveCamera(35, 1, 0.1, 30);
+  private garageAppearance: Appearance | null = null;
+  garageYaw = 0.45;
+  garageZoom = 3.6;
   track: Track | null = null;
   road: THREE.Mesh;
   sun: THREE.DirectionalLight;
@@ -155,7 +162,7 @@ export class World {
   constructor(
     public canvas: HTMLCanvasElement,
     public settings: Settings,
-    assets: BikeAssets,
+    private readonly bikeAssets: BikeAssets,
     crowdAssets: CrowdAssets,
   ) {
     this.renderer = new THREE.WebGLRenderer({
@@ -206,12 +213,20 @@ export class World {
     this.stadium = new Stadium(crowdAssets, settings.quality);
     this.flags = new StadiumFlags(this.scene);
     this.scene.add(this.stadium.root, this.course);
-    for (const color of [0xc91c32, 0x358aad, 0xe6b853, 0x729766, 0xba85df, 0xe184b8, 0xaabbcc]) {
-      const b = new Bike(color, assets, settings.quality);
-      b.root.visible = false;
-      this.bikes.push(b);
-      this.scene.add(b.root);
-    }
+    this.ensureBikes(7);
+    this.garageScene.background = new THREE.Color('#202b31');
+    this.garageScene.add(new THREE.HemisphereLight('#f7f3e9', '#526373', 2.5));
+    const garageKey = new THREE.DirectionalLight('#ffffff', 3.2);
+    garageKey.position.set(2, 5, 4);
+    this.garageScene.add(garageKey);
+    const garageRim = new THREE.DirectionalLight('#8dc9df', 1.5);
+    garageRim.position.set(-3, 2, -3);
+    this.garageScene.add(garageRim);
+    const garageFloor = new THREE.Mesh(new THREE.CylinderGeometry(1.32, 1.38, 0.09, 48), mat('#41515c', 0.62));
+    garageFloor.position.y = -0.08;
+    garageFloor.receiveShadow = true;
+    this.garageScene.add(garageFloor);
+    this.disposables.push(garageFloor.geometry, garageFloor.material as THREE.Material);
     this.composer = new EffectComposer(this.renderer);
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
@@ -232,6 +247,42 @@ export class World {
   }
   field: THREE.Mesh;
   roadTop: THREE.Mesh;
+  ensureBikes(count: number) {
+    if (count > 11) throw new Error('Se admiten como máximo seis pilotos y cinco fantasmas.');
+    const colors = [0xc91c32, 0x358aad, 0xe6b853, 0x729766, 0xba85df, 0xe184b8, 0xaabbcc];
+    while (this.bikes.length < count) {
+      const bike = new Bike(colors[this.bikes.length % colors.length], this.bikeAssets, this.settings.quality);
+      bike.root.visible = false;
+      this.bikes.push(bike);
+      this.scene.add(bike.root);
+    }
+  }
+  setGarage(appearance: Appearance | null) {
+    if (appearance && !this.garageAppearance) this.garageScene.add(this.bikes[0].root);
+    if (!appearance && this.garageAppearance) this.scene.add(this.bikes[0].root);
+    this.garageAppearance = appearance;
+    if (appearance) {
+      this.bikes[0].root.visible = true;
+      this.bikes[0].root.position.set(0, 0, 0);
+      this.bikes[0].root.rotation.set(0, 0, 0);
+      this.bikes[0].setAppearance(appearance);
+      this.bikes[0].reset();
+    }
+  }
+  private renderGarage(time: number) {
+    const bike = this.bikes[0];
+    bike.setAppearance(this.garageAppearance!);
+    bike.update({ time, paused: true, speed: 0, tilt: 0, grounded: true, recovery: false, ground: () => 0 });
+    const radius = this.garageZoom;
+    this.garageCamera.aspect = this.width / this.height;
+    this.garageCamera.position.set(radius * Math.sin(this.garageYaw), 1.65, radius * Math.cos(this.garageYaw));
+    this.garageCamera.lookAt(0, 0.75, 0);
+    this.garageCamera.updateProjectionMatrix();
+    this.renderPass.scene = this.garageScene;
+    this.renderPass.camera = this.garageCamera;
+    this.renderer.info.reset();
+    this.composer.render();
+  }
   setTimeOfDay(timeOfDay: TimeOfDay, animate = false) {
     this.environment.setTimeOfDay(timeOfDay, animate && !this.reduced);
   }
@@ -415,6 +466,8 @@ export class World {
     this.stadium.onSimulationStep(race);
   }
   render(time: number, race: Race | null, paused = false, alpha = 1, results = false) {
+    if (this.garageAppearance) { this.renderGarage(time); return; }
+    this.renderPass.scene = this.scene;
     const visualDt = Math.max(0, time - this.last || 0.016);
     const dt = Math.min(0.04, visualDt);
     this.last = time;
@@ -560,7 +613,7 @@ export class World {
         p = race?.riders[i];
       b.root.visible = !menu && !editor && !!p;
       if (!p) continue;
-      b.setAppearance(p.color, i >= this.ghostStart);
+      b.setAppearance(this.appearances[i] ?? p.color, i >= this.ghostStart);
       const prev = this.previous[i];
       b.root.position.set(
         (lerp(prev?.x, p.x) +

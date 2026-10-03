@@ -9,7 +9,30 @@
 !/vite.config.ts
 !/src/
 !/public/
+!/scripts/
+!/tests/
 !/.github/
+!/.agents/
+!/assets/
+
+# Keep only the model authoring source and concepts from local asset work.
+/assets/*
+!/assets/motocross/
+/scripts/*
+!/scripts/validate-motocross.mjs
+!/scripts/review-model-quality.mjs
+!/scripts/check-motocross-topology.py
+!/scripts/compare-model-performance.mjs
+!/scripts/check-rider-clearance.py
+# Large runtime snapshots are reproducible from the review script; retain the diagnostic report.
+/assets/motocross/review/**/posed-geometry.json
+/assets/motocross/review/**/posed-geometry.json.gz
+/assets/motocross/review/**/.last-run.json
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/motoneta-3d/
+!/.agents/skills/motoneta-3d/SKILL.md
 
 /.github/*
 !/.github/workflows/
@@ -19,6 +42,7 @@
 # Other local documentation and working files stay outside the repository.
 docs/
 *.md
+!/.agents/skills/motoneta-3d/SKILL.md
 *.mdx
 *.rst
 *.pdf
@@ -29,6 +53,7 @@ docs/
 .env.*
 .DS_Store
 node_modules/
+/.blender-mcp-venv/
 dist/
 tmp/
 test-results/

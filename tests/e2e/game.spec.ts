@@ -59,7 +59,7 @@ test('touch controls accelerate and pause at narrow sizes', async ({ browser }) 
   });
   const page = await context.newPage();
   await page.addInitScript(() =>
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 })),
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0 })),
   );
   await page.goto('http://127.0.0.1:5173');
   await expect(page.locator('#model-status')).toBeHidden();
@@ -84,7 +84,7 @@ test('touch controls accelerate and pause at narrow sizes', async ({ browser }) 
 
 test('gamepad drives, pauses and resumes; text fields never start races', async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 }));
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0 }));
     const buttons = Array.from({ length: 16 }, () => ({
       pressed: false,
       touched: false,

@@ -4,8 +4,8 @@ import { editorTab, nav } from './ui-helpers';
 const state = (page: Page) => page.evaluate(() => (window as any).__motoneta);
 async function ready(page: Page) {
   await page.addInitScript(() => {
-    if (!localStorage.getItem('motoneta.settings.v2'))
-      localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low', volume: 0 }));
+    if (!localStorage.getItem('motoneta.settings.v3'))
+      localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0 }));
   });
   await page.goto('/');
   await expect(page.locator('#model-status')).toBeHidden();

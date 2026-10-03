@@ -1,0 +1,77 @@
+{
+  "errors": [],
+  "report": [
+    {
+      "quality": "high",
+      "view": "three-quarter",
+      "triangles": 14848,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "view": "side",
+      "triangles": 14848,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "view": "front",
+      "triangles": 14848,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "view": "rear",
+      "triangles": 14848,
+      "draws": 33
+    },
+    {
+      "quality": "high",
+      "view": "helmet",
+      "triangles": 5922,
+      "draws": 17
+    },
+    {
+      "quality": "high",
+      "view": "body",
+      "triangles": 14848,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "view": "three-quarter",
+      "triangles": 7338,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "view": "side",
+      "triangles": 7338,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "view": "front",
+      "triangles": 7338,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "view": "rear",
+      "triangles": 7338,
+      "draws": 33
+    },
+    {
+      "quality": "low",
+      "view": "helmet",
+      "triangles": 3772,
+      "draws": 17
+    },
+    {
+      "quality": "low",
+      "view": "body",
+      "triangles": 7338,
+      "draws": 33
+    }
+  ]
+}

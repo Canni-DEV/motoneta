@@ -10,15 +10,19 @@
     "audio:engines": "node scripts/build-audio.mjs --engines-only",
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
+    "models:validate": "node scripts/validate-motocross.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
     "three": "0.180.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "24.19.0",
     "@types/three": "0.180.0",
+    "gltf-validator": "^2.0.0-dev.3.10",
     "typescript": "5.9.3",
-    "vite": "7.1.7"
+    "vite": "7.1.7",
+    "vitest": "^3.2.4"
   }
 }

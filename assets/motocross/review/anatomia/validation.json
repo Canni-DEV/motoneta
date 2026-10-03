@@ -1,0 +1,58 @@
+{
+  "stage": "anatomy-v5",
+  "date": "2026-10-03T04:09:54.085Z",
+  "changes": [
+    "Continuous remeshed pelvis and thighs with a medial saddle recess",
+    "Common waist/cuff planes and normalized skin weights",
+    "Knees moved 0.02 model units inward on each side; approved seat and rider height retained",
+    "Recovery distributes lift between pelvis and a lateral leg swing",
+    "Low omits fine tire bead relief and reserves more geometry for the trousers"
+  ],
+  "preservedMeshes": 88,
+  "seatVariantsPreserved": 6,
+  "checks": {
+    "unitTests": 181,
+    "browserTests": 5,
+    "build": true,
+    "glb": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "topologySurfaces": 18,
+    "poseSamples": 142,
+    "riderMotorcyclePairs": 7668,
+    "crossings": 0,
+    "containedVertices": 0,
+    "posedPantsSurfaces": 426,
+    "selfIntersections": 0,
+    "sixSupportProbesThroughSuspensionAndLanding": true,
+    "supportGapRange": [
+      0.0033131183590739965,
+      0.003638332011178136
+    ],
+    "performance": true
+  },
+  "assets": {
+    "low": {
+      "trianglesSelected": 7614,
+      "trianglesSelectedMax": 7974,
+      "trianglesCatalog": 20504,
+      "bytes": 783008
+    },
+    "high": {
+      "trianglesSelected": 16506,
+      "trianglesSelectedMax": 17442,
+      "trianglesCatalog": 45370,
+      "bytes": 1541504
+    }
+  },
+  "coverage": "Actual runtime-skinned meshes on flat ground, lane 2, including every integer rolling and mounting frame. All pants/torso/boots versus all seat/fairing variants in both qualities. Does not cover every mechanical component or every terrain configuration. Browser performance uses Chromium SwiftShader and an emulated mobile viewport.",
+  "hashes": {
+    "scripts/build-motocross.py": "53d0601355eeb542347d00c7195934fc957ae292c7e21d4b47fcea0ec5a24850",
+    "src/bike-model.ts": "1a75d3b3d19355080241574b4c058a4482935472371257db8b1b512f054d7e5f",
+    "src/bike-rig.json": "98bf81f4219d8d0238c864bb6b011a9e2509284cef248cb79453cf7fd6557250",
+    "public/models/motocross-high.glb": "62dcb4948161acb467a85013ba09cdc2a0f76618ac9a3cdc23b7546ae4de88ac",
+    "public/models/motocross-low.glb": "12f66d7ef0b6d8ea3a0040aecf7b0b6746f5cef43006bb0a8bf04a92d79c66c1",
+    "assets/motocross/motocross.blend": "35af16e6181c08c141eb85b60f231b450cb537e8c01b6ca659dbfccd4d67367c"
+  }
+}

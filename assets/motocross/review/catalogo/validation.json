@@ -1,0 +1,185 @@
+{
+  "stage": "connected-families-v2",
+  "generatedAt": "2026-10-03T00:02:09.853Z",
+  "feedbackApplied": [
+    "Shorter and narrower helmet peak",
+    "Helmet scaled down 6% around the unchanged Head bone",
+    "Fuller torso, shoulders, hips and thighs"
+  ],
+  "families": [
+    "core",
+    "sprint",
+    "trail"
+  ],
+  "slots": [
+    "fairing",
+    "fender",
+    "seat",
+    "exhaust",
+    "plate",
+    "wheels",
+    "helmet",
+    "visor",
+    "torso",
+    "gloves",
+    "pants",
+    "boots"
+  ],
+  "assets": {
+    "low": {
+      "trianglesSelected": 7494,
+      "trianglesSelectedMax": 7872,
+      "trianglesCatalog": 20168,
+      "bytes": 751728,
+      "bones": 15,
+      "textures": 0,
+      "sha256": "72a3d6449412dad39ce79c2090b42fcd1b2d5fa15dd897eb2e41b5b02a1331bb"
+    },
+    "high": {
+      "trianglesSelected": 14576,
+      "trianglesSelectedMax": 15512,
+      "trianglesCatalog": 39580,
+      "bytes": 1336260,
+      "bones": 15,
+      "textures": 0,
+      "sha256": "0a01e4b3b18050fac7c82b24aa9982861afb46ff5a6ff0506dccbcc667607bb8"
+    }
+  },
+  "geometry": {
+    "restRigUnchanged": true,
+    "normalizedWeights": true,
+    "connectedMainSurfacesChecked": 18,
+    "sharedInterfacesChecked": 15,
+    "selfIntersectionsAtRest": 0
+  },
+  "checks": {
+    "gltfErrors": 0,
+    "gltfWarnings": 0,
+    "unitTestsPassed": 177,
+    "functionalBrowserTestsPassed": 5,
+    "buildPassed": true,
+    "pairCombinationsCheckedPerQuality": 594,
+    "qualityLevels": 2,
+    "fallingRiderPresetsChecked": 6
+  },
+  "evidence": {
+    "comparisonImagesVerified": 156,
+    "linkedSheetsAndStudioViewsVerified": 42,
+    "runtimeViewsAndPoses": 78,
+    "blenderViews": 30,
+    "mixedVariantSheets": 12,
+    "gameplayImages": 24,
+    "earlierEsencialReviewPreserved": true
+  },
+  "performance": {
+    "reviewStage": "catalogo",
+    "baselineCommit": "ee4aa0db86e0fcb3d8f86941f4d598fa03994917",
+    "method": "Same Playwright Chromium/SwiftShader configuration; original GLBs routed from baseline commit; three sequential runs per model, 20 warmed gl.finish render samples per scenario, median of run p95 values. Mobile viewport is emulated.",
+    "lowLimitPercent": 10,
+    "highLimitPercent": 20,
+    "stableResources": true,
+    "samples": [
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "baselineP95Ms": 6.2000000001862645,
+        "candidateP95Ms": 6,
+        "baselineRunsP95Ms": [
+          5.7000000001862645,
+          6.2000000001862645,
+          6.3999999994412065
+        ],
+        "candidateRunsP95Ms": [
+          5.2000000001862645,
+          6.2999999998137355,
+          6
+        ],
+        "changePercent": -3.2,
+        "limitPercent": 10,
+        "passes": true,
+        "baselineDrawCalls": 588,
+        "candidateDrawCalls": 588
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "baselineP95Ms": 7.2000000001862645,
+        "candidateP95Ms": 6.7000000001862645,
+        "baselineRunsP95Ms": [
+          5.5,
+          7.3999999994412065,
+          7.2000000001862645
+        ],
+        "candidateRunsP95Ms": [
+          6.2999999998137355,
+          6.7000000001862645,
+          8.099999999627471
+        ],
+        "changePercent": -6.9,
+        "limitPercent": 20,
+        "passes": true,
+        "baselineDrawCalls": 861,
+        "candidateDrawCalls": 861
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "quality": "low",
+        "scenario": "six-riders-five-ghosts",
+        "baselineP95Ms": 6,
+        "candidateP95Ms": 6.2000000001862645,
+        "baselineRunsP95Ms": [
+          5.900000000372529,
+          6,
+          6
+        ],
+        "candidateRunsP95Ms": [
+          6.2000000001862645,
+          6.099999999627471,
+          6.5
+        ],
+        "changePercent": 3.3,
+        "limitPercent": 10,
+        "passes": true,
+        "baselineDrawCalls": 551,
+        "candidateDrawCalls": 551
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "quality": "high",
+        "scenario": "six-riders-five-ghosts",
+        "baselineP95Ms": 7,
+        "candidateP95Ms": 7,
+        "baselineRunsP95Ms": [
+          7.2000000001862645,
+          7,
+          6.900000000372529
+        ],
+        "candidateRunsP95Ms": [
+          6.900000000372529,
+          7,
+          7.2000000001862645
+        ],
+        "changePercent": 0,
+        "limitPercent": 20,
+        "passes": true,
+        "baselineDrawCalls": 809,
+        "candidateDrawCalls": 809
+      }
+    ]
+  },
+  "publication": "Outside this delivery"
+}

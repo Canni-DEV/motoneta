@@ -88,7 +88,7 @@ test('the game selects menu and editor music and keeps races and pause music-fre
   page,
 }) => {
   await page.addInitScript(() =>
-    localStorage.setItem('motoneta.settings.v2', JSON.stringify({ quality: 'low' })),
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low' })),
   );
   await page.goto('/');
   await expect(page.locator('#model-status')).toBeHidden();

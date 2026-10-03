@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { makeBots } from '../src/core/game';
 import { createRace, stepRace } from '../src/core/racing';
 import { getTrack } from '../src/core/tracks';
+import { defaultAppearance } from '../src/appearance';
 
 export function physicsTrace(trackIndex: number, bots: number) {
   const track = getTrack(trackIndex);
@@ -9,7 +10,7 @@ export function physicsTrace(trackIndex: number, bots: number) {
     track,
     ref: { id: track.id, revision: 'baseline', name: track.name },
     mode: 'quick',
-    player: { id: 'player', name: 'Player', color: '#e05a3b' },
+    player: { id: 'player', name: 'Player', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') },
     bots: makeBots(bots),
     difficulty: 'normal',
     seed: 1984,

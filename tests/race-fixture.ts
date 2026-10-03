@@ -3,13 +3,14 @@ import { emptyDesign, mapTrack, validateMap, type MapDesign } from '../src/core/
 import { createRace, stepRace } from '../src/core/racing';
 import { getTrack } from '../src/core/tracks';
 import type { Track } from '../src/core/types';
+import { defaultAppearance } from '../src/appearance';
 
 export function testRace(track: Track = getTrack(0), bots = 0) {
   return createRace({
     track,
     ref: { id: track.id, revision: 'test', name: track.name },
     mode: 'quick',
-    player: { id: 'player', name: 'Player', color: '#e05a3b' },
+    player: { id: 'player', name: 'Player', color: '#e05a3b', appearance: defaultAppearance('#e05a3b') },
     bots: makeBots(bots),
     difficulty: 'normal',
     seed: 1984,

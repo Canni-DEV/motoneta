@@ -32,9 +32,9 @@ test('audio review activates by gesture, loads local bank and stops every previe
 });
 test('six independent levels persist, race and pause use bounded audio', async ({ page }) => {
   await page.addInitScript(() => {
-    if (!localStorage.getItem('motoneta.settings.v2'))
+    if (!localStorage.getItem('motoneta.settings.v3'))
       localStorage.setItem(
-        'motoneta.settings.v2',
+        'motoneta.settings.v3',
         JSON.stringify({ quality: 'low', volume: 0.2, audioLevels: { ui: 0 } }),
       );
   });

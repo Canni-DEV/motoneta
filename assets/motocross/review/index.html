@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MotoNeta · Piloto y moto</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#101920;color:#e9eff1;font:16px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:32px}h1{font-size:32px;line-height:1.2;margin:0 0 8px}p{color:#abbfc7;margin:0 0 24px}.toolbar{display:flex;gap:16px;flex-wrap:wrap;padding:18px 0;border-block:1px solid #31444e;margin-bottom:24px}label{display:grid;gap:6px;font-size:13px;color:#abc0c9}select{font:inherit;color:#fff;background:#24343d;border:1px solid #50626b;border-radius:8px;padding:10px 14px;min-width:175px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}figure{margin:0;background:#17232b;border-radius:12px;overflow:hidden}figcaption{padding:12px 18px;font-weight:650;border-bottom:1px solid #35454e}img{display:block;width:100%;height:auto}a{color:#ffa587}details{margin-top:24px;border:1px solid #31444e;border-radius:10px;padding:18px}summary{cursor:pointer}details a{display:inline-block;padding:10px 16px}footer{margin-top:24px;color:#abc0c9;font-size:14px}@media(max-width:750px){main{padding:18px}.pair{grid-template-columns:1fr}h1{font-size:25px}}
+</style>
+<main>
+  <h1>Piloto y moto: tres familias</h1>
+  <p>Visera más corta, casco más compacto y cuerpo con mayor presencia. Esencial mantiene el equilibrio; Competición ajusta la silueta y Travesía suma volumen y protección.</p>
+  <div class="toolbar">
+    <label>Familia<select id="variant"><option value="core">Esencial</option><option value="sprint">Competición</option><option value="trail">Travesía</option></select></label>
+    <label>Calidad<select id="quality"><option value="high">Alta</option><option value="low">Rendimiento</option></select></label>
+    <label>Vista<select id="view"><option value="three-quarter">Tres cuartos</option><option value="side">Lateral</option><option value="front">Frontal</option><option value="rear">Posterior</option><option value="helmet">Casco y antiparras</option><option value="body">Ropa y uniones</option></select></label>
+    <label>Postura<select id="pose"><option value="ground">Conducción</option><option value="steering">Giro</option><option value="wheelie">Caballito</option><option value="flight">Vuelo</option><option value="landing">Aterrizaje</option><option value="rolling">Rodado</option><option value="down">Caída</option><option value="mounting">Volver a montar</option></select></label>
+  </div>
+  <div class="pair"><figure><figcaption>Antes</figcaption><img id="before" alt="Modelo anterior"></figure><figure><figcaption id="caption">Esencial · actualizado</figcaption><img id="after" alt="Nuevo modelo"></figure></div>
+  <details><summary>Vistas de Blender</summary><nav id="studio"></nav></details>
+  <details><summary>Combinaciones de piezas</summary><p>Cada lámina muestra las nueve parejas de variantes de dos categorías contiguas.</p><nav id="mixed"></nav></details>
+  <footer>Los colores son configurables. Las comparaciones utilizan la misma paleta, cámara e iluminación. Las imágenes de la primera revisión se conservan en <a href="esencial/high-three-quarter.png">Esencial inicial</a>.</footer>
+</main>
+<script>
+  const quality=document.querySelector('#quality'),variant=document.querySelector('#variant'),view=document.querySelector('#view'),pose=document.querySelector('#pose');
+  const link=(href,text)=>{const a=document.createElement('a');a.href=href;a.textContent=text;a.target='_blank';return a};
+  const update=()=>{const suffix=pose.value==='ground'?view.value:pose.value;const prefix=`${quality.value}-${variant.value}`;document.querySelector('#before').src=`catalogo-antes/${prefix}-${suffix}.png`;document.querySelector('#after').src=`catalogo/${prefix}-${suffix}.png`;document.querySelector('#caption').textContent=`${variant.selectedOptions[0].textContent} · actualizado`;view.disabled=pose.value!=='ground';document.querySelector('#studio').replaceChildren(...['three-quarter','side','front','rear','helmet'].map((name)=>link(`catalogo/blender/${prefix}-${name}.png`,({'three-quarter':'Tres cuartos',side:'Lateral',front:'Frontal',rear:'Posterior',helmet:'Casco'})[name])));document.querySelector('#mixed').replaceChildren(...[['helmet-visor','Casco y antiparras'],['torso-pants','Torso y pantalón'],['torso-gloves','Mangas y guantes'],['pants-boots','Pantalón y botas'],['fairing-seat','Carenado y asiento'],['fairing-fender','Carenado y guardabarros']].map(([name,text])=>link(`catalogo/${quality.value}-mixed-${name}.png`,text)));};
+  for(const control of[quality,variant,view,pose])control.addEventListener('change',update);update();
+</script>
+</html>

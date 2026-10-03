@@ -1,0 +1,56 @@
+{
+  "stage": "natural-hip-v6",
+  "date": "2026-10-03T07:25:49.303Z",
+  "changes": [
+    "Single hip envelope replaces the two glute lobes",
+    "Proportional taper from hip through quadriceps to knee",
+    "Rig, recovery, seat and all non-pants meshes unchanged"
+  ],
+  "preservedMeshes": 100,
+  "seatVariantsPreserved": 6,
+  "checks": {
+    "unitTests": 183,
+    "browserTests": 5,
+    "build": true,
+    "glb": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "topologySurfaces": 18,
+    "poseSamples": 142,
+    "riderMotorcyclePairs": 7668,
+    "crossings": 0,
+    "containedVertices": 0,
+    "posedPantsSurfaces": 426,
+    "selfIntersections": 0,
+    "sixSupportProbesThroughSuspensionAndLanding": true,
+    "supportGapRange": [
+      0.005552757065743208,
+      0.006652000825852156
+    ],
+    "performance": true
+  },
+  "assets": {
+    "low": {
+      "trianglesSelected": 7636,
+      "trianglesSelectedMax": 7996,
+      "trianglesCatalog": 20570,
+      "bytes": 778028
+    },
+    "high": {
+      "trianglesSelected": 16542,
+      "trianglesSelectedMax": 17478,
+      "trianglesCatalog": 45478,
+      "bytes": 1544912
+    }
+  },
+  "coverage": "Actual runtime-skinned meshes on flat ground, lane 2, including every integer rolling and mounting frame. All pants/torso/boots versus all seat/fairing variants in both qualities. Does not cover every mechanical component or every terrain configuration. Browser performance uses Chromium SwiftShader and an emulated mobile viewport.",
+  "hashes": {
+    "scripts/build-motocross.py": "4d654fa38d15be8d87f66b4c888da0fbe3f7bae8ea4624dc68f5c79b2052f6ad",
+    "src/bike-model.ts": "1a75d3b3d19355080241574b4c058a4482935472371257db8b1b512f054d7e5f",
+    "src/bike-rig.json": "98bf81f4219d8d0238c864bb6b011a9e2509284cef248cb79453cf7fd6557250",
+    "public/models/motocross-high.glb": "d33bf6bf05251cff3101209607f34d3f759a477b64124b09f6472efac7b936f7",
+    "public/models/motocross-low.glb": "93793661768d861bf49be58798dc271bfb20a6e3f3c4478dcbc6e665be0aeea5",
+    "assets/motocross/motocross.blend": "2846e23adf912c3587179310649d03dd5b60f552ffc0c8d9aec035f7929c4e27"
+  }
+}
