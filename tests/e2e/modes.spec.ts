@@ -132,6 +132,7 @@ test('six-player versus keeps all ghosts, resumes, rotates and ends on a podium'
   for (let i = 0; i < 6; i++) {
     await action(page, 'begin-turn');
     await expect.poll(async () => (await state(page)).ghosts.length).toBe(i);
+    if (i) await expect.poll(async () => (await state(page)).ghosts.every((g: any) => Math.abs(g.opacity - 0.1) < 0.00001)).toBe(true);
     // One real bike remains three engine layers even with five visible ghosts.
     await expect.poll(async () => (await state(page)).audio.engineVoices).toBe(3);
     await drive(page);

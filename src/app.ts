@@ -1983,10 +1983,11 @@ export async function startApp() {
         profiles: structuredClone(store.state.profiles),
         records: structuredClone(store.state.records),
         personalGhost: quickAttempt?.reference ? structuredClone(quickAttempt.reference) : null,
-        ghosts: ghosts.map((g) => ({
+        ghosts: ghosts.map((g, i) => ({
           frame: g.race.frame,
           done: g.done,
           rider: structuredClone(g.race.riders[0]),
+          opacity: world?.bikes[(race?.riders.length ?? 0) + i]?.ghostOpacity,
         })),
         models,
         quality: world?.bikes[0]?.quality,
