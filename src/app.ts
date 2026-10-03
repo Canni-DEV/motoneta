@@ -42,7 +42,6 @@ import {
   STEP_MS,
   type AudioBus,
   type Race,
-  type Settings,
   type TimeOfDay,
   type Weather,
 } from './core/types';
@@ -58,6 +57,9 @@ import { patch } from './ui/dom';
 import { Editor } from './ui/editor';
 import { FocusedField } from './ui/focused-field';
 import { garageView } from './ui/garage';
+import { profilesDialog } from './ui/profile-view';
+import { applyImageSetting } from './ui/settings-input';
+import { modeSetup } from './ui/setup-state';
 import {
   Navigation,
   setupPresentation,
@@ -375,15 +377,7 @@ export async function startApp() {
     if (['quick', 'tournament', 'versus'].includes(next)) {
       const mode = next as Setup['mode'];
       if (setup.mode !== mode)
-        setup = setupCache[mode] ?? {
-          mode,
-          selected: BUILTINS[0].ref.id,
-          courses: mode === 'quick' ? [structuredClone(BUILTINS[0])] : [],
-          bots: mode === 'tournament' ? 3 : 0,
-          difficulty: 'normal',
-          players: store.state.profiles.slice(0, 2).map((p) => p.id),
-          filter: 'all',
-        };
+        setup = setupCache[mode] ?? modeSetup(mode, store.state.profiles);
       if (mode === 'quick' && setup.courses.length && !setupCache[mode]) {
         setup.courses[0].timeOfDay = settings.timeOfDay;
         setup.courses[0].weather = settings.weather;
@@ -431,9 +425,9 @@ export async function startApp() {
     }
   }
   function viewRace(): Race | null {
-    return race
+    return race && ghosts.length
       ? { ...race, riders: [...race.riders, ...ghosts.map((g) => g.race.riders[0])] }
-      : null;
+      : race;
   }
   function run(
     config: RaceConfig | null,
@@ -840,49 +834,7 @@ export async function startApp() {
   function profilesView() {
     const p = store.state.profiles.find((p) => p.id === selectedProfile) ?? profile();
     selectedProfile = p.id;
-    showModal(
-      '<h2>Perfiles locales</h2><div class="profile-layout"><div class="profile-list">' +
-        store.state.profiles
-          .map((v) =>
-            b(
-              'profile-select',
-              '<i class="color-dot" style="background:' +
-                v.color +
-                '"></i><span>' +
-                esc(v.name) +
-                '</span>',
-              v.id,
-              'aria-pressed="' + (v.id === p.id) + '"',
-            ),
-          )
-          .join('') +
-        '</div><div class="profile-row"><label>Nombre<input data-profile-name="' +
-        esc(p.id) +
-        '" maxlength="40" value="' +
-        esc(p.name) +
-        '"></label><label>Color<input type="color" data-profile-color="' +
-        esc(p.id) +
-        '" value="' +
-        p.color +
-        '"></label><div class="actions">' +
-        b(
-          'activate-profile',
-          p.id === store.state.activeProfile ? 'Perfil activo' : 'Usar perfil',
-          p.id,
-          p.id === store.state.activeProfile ? 'disabled' : 'class="primary"',
-        ) +
-        b(
-          'delete-profile',
-          'Eliminar',
-          p.id,
-          store.state.profiles.length === 1 ? 'disabled' : 'class="danger"',
-        ) +
-        b('garage-open', 'Personalizar moto y piloto', p.id, 'class="primary"') +
-        '</div></div></div><div class="actions">' +
-        b('add-profile', 'Añadir perfil') +
-        b('close-modal', 'Listo', '', 'class="primary"') +
-        '</div><p class="muted">Los perfiles y sus marcas se guardan en este navegador.</p>',
-    );
+    showModal(profilesDialog(store.state.profiles, p, store.state.activeProfile));
   }
   async function leaveGarage(save: boolean) {
     if (!garage) return;
@@ -1645,30 +1597,7 @@ export async function startApp() {
           libraryState.filter = el.value as LibraryPresentation['filter'];
           render();
         }
-        if (el.id === 'quality') settings.quality = el.value as 'high' | 'low';
-        if (el.id === 'surface-detail')
-          settings.surfaceDetail = el.value as Settings['surfaceDetail'];
-        if (el.dataset.vfx && ['race', 'tracks', 'ambient'].includes(el.dataset.vfx)) {
-          settings.vfx[el.dataset.vfx as 'race' | 'tracks' | 'ambient'] = el.checked;
-        }
-        if (el.id === 'vfx-intensity')
-          settings.vfx.intensity = el.value as Settings['vfx']['intensity'];
-        if (['bloom', 'cameraShake', 'reducedMotion', 'attractReplays'].includes(el.id))
-          (settings as unknown as Record<string, unknown>)[el.id] = el.checked;
-        if (
-          [
-            'quality',
-            'surface-detail',
-            'bloom',
-            'vfx-race',
-            'vfx-tracks',
-            'vfx-ambient',
-            'vfx-intensity',
-            'cameraShake',
-            'reducedMotion',
-            'attractReplays',
-          ].includes(el.id)
-        ) {
+        if (applyImageSetting(el, settings)) {
           document.body.dataset.reducedMotion = String(settings.reducedMotion);
           world?.applySettings();
           if (!storage.writeSettings(settings)) toast('No se pudieron guardar los ajustes.');

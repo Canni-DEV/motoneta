@@ -1,4 +1,5 @@
 import { type Settings } from '../core/types';
+export { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from '../world-space';
 
 export const VFX_LIMITS = {
   high: { particles: 1536, tracks: 512 },
@@ -6,8 +7,6 @@ export const VFX_LIMITS = {
 } as const;
 export const VFX_INTENSITY = { subtle: 0.65, balanced: 1, strong: 1.3 } as const;
 export const TRACK_LIFE = 8;
-export const SCALE = 0.052;
-export const LANE = 1.22;
 export const vfxSettings = (s: Settings) => s.vfx;
 
 /** Analytic integral and derivative: shared wind, no frame-rate-dependent integration. */

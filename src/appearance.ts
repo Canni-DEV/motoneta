@@ -56,3 +56,13 @@ export function appearanceKey(value: Appearance): string {
     return `${value.parts[slot]}:${paint.primary}:${paint.accent}`;
   }).join('|');
 }
+
+/** Compare the actual fields so callers can still edit an appearance in place. */
+export function sameAppearance(a: Appearance, b: Appearance): boolean {
+  for (const slot of SLOTS) {
+    if (a.parts[slot] !== b.parts[slot] ||
+      a.paints[slot].primary !== b.paints[slot].primary ||
+      a.paints[slot].accent !== b.paints[slot].accent) return false;
+  }
+  return true;
+}

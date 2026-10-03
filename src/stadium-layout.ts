@@ -1,7 +1,8 @@
 import { HZ, type Race, type Track } from './core/types';
 import { heightAt } from './core/tracks';
 
-export const WORLD_SCALE = 0.052;
+import { WORLD_SCALE } from './world-space';
+export { WORLD_SCALE } from './world-space';
 export const ROWS = 10;
 export const ROW_DEPTH = 0.76;
 export const ROW_RISE = 0.37;

@@ -49,8 +49,9 @@ export class Controls {
   padStart = false;
   sample() {
     let bits = this.touch;
-    for (const [name, code] of Object.entries(this.settings.bindings))
-      if (this.keys.has(code)) bits |= Input[name as keyof typeof Input] ?? 0;
+    for (const name in this.settings.bindings)
+      if (Object.hasOwn(this.settings.bindings, name) && this.keys.has(this.settings.bindings[name]))
+        bits |= Input[name as keyof typeof Input] ?? 0;
     const pad = navigator.getGamepads?.().find((g) => g?.connected);
     this.gamepadConnected = !!pad;
     if (pad) {

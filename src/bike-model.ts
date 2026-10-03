@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { BIKE, bikePose, crashPose, type GroundHeight } from './bike-pose';
 import rigDefinition from './bike-rig.json';
-import { appearanceKey, defaultAppearance, SLOTS, VARIANTS, type Appearance, type SlotId } from './appearance';
+import { sameAppearance, defaultAppearance, SLOTS, VARIANTS, type Appearance, type SlotId } from './appearance';
 import { GHOST_OPACITY, GHOST_OVERLAP_OPACITY } from './ghost-visibility';
 
 export type BikeQuality = 'high' | 'low';
@@ -176,6 +176,7 @@ export class Bike {
   private readonly variantNodes: Record<BikeQuality, Record<string, THREE.Object3D>>;
   private readonly variantRiders: Record<BikeQuality, THREE.Object3D>;
   private readonly ownedMaterials: THREE.Material[] = [];
+  private readonly lampMaterials: THREE.MeshStandardMaterial[] = [];
   private readonly ownedGeometries: THREE.BufferGeometry[] = [];
   private readonly painted: { slot: SlotId; attribute: THREE.BufferAttribute; base: Float32Array }[] = [];
   private readonly contactPoint = new THREE.Vector3();
@@ -196,19 +197,21 @@ export class Bike {
   private acceleration = 0;
   private steering = 0;
   private lastState: BikeVisualState | null = null;
-  private appearance = '';
+  private appearance: Appearance | null = null;
+  private appearanceColor: number | null = null;
   private ghost = false;
   private opacity = GHOST_OPACITY;
   private originals = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
   private ghostMaterials = new Map<THREE.Material, THREE.Material>();
 
   setAppearance(value: Appearance | number, ghost = false) {
+    if (typeof value === 'number' && value === this.appearanceColor && ghost === this.ghost) return;
     const appearance = typeof value === 'number'
       ? defaultAppearance(`#${value.toString(16).padStart(6, '0')}`)
       : value;
-    const key = `${appearanceKey(appearance)}:${ghost}`;
-    if (key === this.appearance) return;
-    this.appearance = key;
+    if (this.appearance && ghost === this.ghost && sameAppearance(appearance, this.appearance)) return;
+    this.appearance = structuredClone(appearance);
+    this.appearanceColor = typeof value === 'number' ? value : null;
     if (ghost !== this.ghost) this.opacity = GHOST_OPACITY;
     this.ghost = ghost;
     for (const part of this.painted) {
@@ -237,7 +240,7 @@ export class Bike {
         if (copy instanceof THREE.MeshStandardMaterial && /^Lamp(Front|Rear)$/.test(copy.name))
           copy.emissiveIntensity = 0;
         this.ghostMaterials.set(material, copy);
-        this.ownedMaterials.push(copy);
+        this.ownMaterial(copy);
       }
       copy.opacity = this.opacity;
       return copy;
@@ -358,7 +361,7 @@ export class Bike {
               instance.color.setHex(color);
             } else instance.emissive.set(material.name === 'LampFront' ? '#fff4d8' : '#ff1935');
             colored.set(key, instance);
-            this.ownedMaterials.push(instance);
+            this.ownMaterial(instance);
           }
           return colored.get(key)!;
         };
@@ -436,16 +439,20 @@ export class Bike {
     });
   }
 
+  private ownMaterial(material: THREE.Material) {
+    this.ownedMaterials.push(material);
+    if (material.name === 'LampFront' || material.name === 'LampRear')
+      this.lampMaterials.push(material as THREE.MeshStandardMaterial);
+  }
+
   setLighting(level: number) {
     const lit = this.root.visible && level > 0 && !this.ghost;
     this.headlight.visible = lit;
     this.headlight.intensity = lit ? level * 28 * this.root.scale.x ** 2 : 0;
     this.headlight.distance = 10 * this.root.scale.x;
-    for (const material of this.ownedMaterials) {
-      if (material.name === 'LampFront' || material.name === 'LampRear')
-        (material as THREE.MeshStandardMaterial).emissiveIntensity =
-          material.userData.ghost ? 0 : level * (material.name === 'LampFront' ? 6 : 3);
-    }
+    for (const material of this.lampMaterials)
+      material.emissiveIntensity =
+        material.userData.ghost ? 0 : level * (material.name === 'LampFront' ? 6 : 3);
   }
 
   update(state: BikeVisualState) {

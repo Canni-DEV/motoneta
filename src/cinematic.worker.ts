@@ -3,9 +3,9 @@ import { heightAt } from './core/tracks';
 import { Playback, validateRecording } from './core/recording';
 import type { Recording } from './core/game';
 import type { CinematicEvent, CinematicMoment, CinematicPose, CinematicTimeline, SlowMotionWindow } from './cinematic-timeline';
+import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
 
 type Candidate = { lap: number; frame: number; score: number };
-const SCALE = 0.052;
 
 export function analyzeCinematicRecording(source: Recording): CinematicTimeline {
   const recording = validateRecording(source);
@@ -48,7 +48,7 @@ export function analyzeCinematicRecording(source: Recording): CinematicTimeline 
     const player = race.riders[0];
     const lap = Math.min(recording.config.track.laps - 1, race.laps.length);
     if (race.frame % 6 === 0 || playback.done)
-      poses.push({ frame: race.frame, x: player.x * SCALE, y: player.height * SCALE, z: (player.lane - 1.5) * 1.22 });
+      poses.push({ frame: race.frame, x: player.x * SCALE, y: player.height * SCALE, z: (player.lane - 1.5) * LANE });
     for (const event of race.events) {
       if (event.rider !== 0 || !['start', 'jump', 'land', 'crash', 'lap', 'finish'].includes(event.type)) continue;
       events.push({ frame: race.frame, type: event.type as CinematicEvent['type'], lap });
