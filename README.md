@@ -47,6 +47,40 @@ npm run preview
 
 Abrir la dirección de preview, normalmente `http://127.0.0.1:4173/`. El resultado está en `dist/`; debe servirse por HTTP, no abrirse como archivo.
 
+## Validación local y rendimiento
+
+```sh
+npm run typecheck
+npm test
+npm run build
+```
+
+`typecheck` comprueba también las pruebas y sus configuraciones. TypeScript detecta símbolos sin uso; se mantienen las dependencias y el workflow de publicación actuales.
+
+Las pruebas de navegador pueden seleccionarse según el cambio. Por ejemplo, `npm run test:e2e -- tests/e2e/game.spec.ts tests/e2e/persistence.spec.ts` comprueba controles, editor y guardado. `npm run test:compat -- tests/e2e/ui-compat.spec.ts` realiza una comprobación breve con Firefox y WebKit; este último aproxima Safari, sin sustituir una prueba en iPhone.
+
+Si faltan los navegadores, preparar sus versiones con Playwright. Para conservar los binarios de compatibilidad dentro del proyecto, en PowerShell:
+
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\tmp\playwright-browsers"
+node node_modules/playwright/cli.js install firefox webkit
+npm run test:compat -- tests/e2e/ui-compat.spec.ts
+Remove-Item Env:\PLAYWRIGHT_BROWSERS_PATH
+```
+
+El ensayo de rendimiento usa la compilación de producción, FullHD, cinco rivales y los efectos predeterminados. Compara High/Low de día despejado y de noche con lluvia, con cinco segundos de calentamiento y tres muestras de treinta segundos por escenario:
+
+```sh
+npm run build
+npm run benchmark:runtime -- --label=candidate
+```
+
+El script sirve `dist/` temporalmente en el puerto 4174, abre un contexto limpio por muestra y guarda los resultados en `tmp/refactor/candidate-gpu.json`. Registra el equipo, la GPU, los tiempos de cuadro, los cuadros largos y el tiempo de CPU de los callbacks de animación; este último incluye la presentación de comandos gráficos, pero no mide el tiempo de ejecución de la GPU. Rechaza el renderizado por software y las GPU que no puede identificar. La configuración D3D11 está destinada a Windows.
+
+Para comparar otra compilación, usar `--directory=RUTA --label=baseline`. Ejecutar referencia y candidato secuencialmente, evitando otros ensayos gráficos simultáneos. En una pantalla limitada a 60 Hz puede bajar el trabajo de CPU sin aumentar los FPS. El benchmark existente de `tests/e2e/performance.spec.ts` se conserva por separado como control de estabilidad de recursos con renderizado por software.
+
+La refactorización del 3 de octubre de 2026 se comparó con `b556637` en un Core Ultra 7 265 y una RTX 5070 Ti. La mediana de los tres p95 de CPU pasó de 3,2 a 3,0 ms en Low despejado; de 4,5 a 3,6 ms en Low con lluvia nocturna; de 4,7 a 3,5 ms en High despejado; y de 5,2 a 3,6 ms en High con lluvia nocturna. Ambos grupos sostuvieron aproximadamente 60 FPS, sin cuadros de más de 33,4 ms en las muestras. Son mediciones locales con variación entre corridas: la mediana de CPU de Low con lluvia subió de 2,2 a 2,4 ms aunque mejoró su p95. No se midió la notebook Ryzen 5 ni un teléfono físico. Los resultados por muestra y la metodología se conservan en [el informe de rendimiento](tests/benchmarks/refactor-performance.json).
+
 ## Modelos 3D
 
 La fuente reproducible es `scripts/build-motocross.py`, para Blender 5.2.2 LTS. Reconstruye el archivo editable, ambos GLB y el manifiesto; las ediciones manuales del `.blend` deben trasladarse al generador antes de regenerarlo.

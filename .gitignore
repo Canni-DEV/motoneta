@@ -6,6 +6,8 @@
 !/package.json
 !/package-lock.json
 !/tsconfig.json
+!/tsconfig.tests.json
+!/playwright.compat.config.ts
 !/vite.config.ts
 !/src/
 !/public/
@@ -24,6 +26,7 @@
 !/scripts/check-motocross-topology.py
 !/scripts/compare-model-performance.mjs
 !/scripts/check-rider-clearance.py
+!/scripts/benchmark-runtime.mjs
 # Large runtime snapshots are reproducible from the review script; retain the diagnostic report.
 /assets/motocross/review/**/posed-geometry.json
 /assets/motocross/review/**/posed-geometry.json.gz

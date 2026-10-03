@@ -1,0 +1,660 @@
+{
+  "date": "2026-10-03",
+  "baselineCommit": "b5566376782ce6cf4da57d132fa081439be41001",
+  "candidate": "Working tree refactor relative to baselineCommit; not a published build.",
+  "hardware": {
+    "cpu": "Intel(R) Core(TM) Ultra 7 265",
+    "graphics": {
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "vendor": "Google Inc. (NVIDIA)",
+      "hardwareConfirmed": true
+    },
+    "platform": "win32 10.0.26200",
+    "browser": "153.0.8010.12"
+  },
+  "methodology": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "deviceScaleFactor": 1,
+    "configuration": {
+      "track": 1,
+      "laps": 9,
+      "bots": 5,
+      "difficulty": "normal",
+      "seed": 1984,
+      "input": "KeyZ",
+      "volume": 0,
+      "effects": "defaults"
+    },
+    "warmupSeconds": 5,
+    "secondsPerSample": 30,
+    "samplesPerScenario": 3,
+    "cpuMetric": "Wall time of requestAnimationFrame callbacks, including command submission, excluding asynchronous GPU execution.",
+    "aggregation": "Median of the three per-run p95 values; three samples do not establish statistical significance.",
+    "limitations": "All scenarios were vsync-limited near 60 FPS. No Ryzen 5 notebook or physical phone was measured. Unit/build checks briefly ran during sampling; no concurrent browser performance test ran.",
+    "compatibility": "Chromium, Firefox and WebKit smoke tests; WebKit is not a physical Safari/iPhone test.",
+    "finalCleanup": "The final disposal helper retains the original forEach iteration; this change is outside the measured frame loop."
+  },
+  "stages": [
+    "Unused-symbol checks, test typing and shared visual coordinate constants.",
+    "Small presentation/navigation/settings extractions and course/resource helpers.",
+    "Allocation reduction, appearance comparison, indexed lights, cached HUD and conditional projection updates."
+  ],
+  "scenarios": [
+    {
+      "quality": "low",
+      "timeOfDay": "morning",
+      "weather": "clear",
+      "cpuP95MedianMs": {
+        "baseline": 3.2,
+        "candidate": 3
+      },
+      "cpuP95ReductionPercent": 6.25,
+      "cpuMedianMs": {
+        "baseline": 1.9,
+        "candidate": 1.4
+      },
+      "samples": {
+        "baseline": [
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999995634,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.5,
+              "p95Ms": 3.2000000029802322,
+              "p99Ms": 4.5999999940395355
+            },
+            "averageFps": 60.00240009600384,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 1,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.3000000044703484,
+              "p95Ms": 2.899999998509884,
+              "p99Ms": 4
+            },
+            "averageFps": 60.00220008066963,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 2,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 4.199999995529652,
+              "p99Ms": 7
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ],
+        "candidate": [
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.5999999940395355,
+              "p95Ms": 3.6999999955296516,
+              "p99Ms": 4.600000001490116
+            },
+            "averageFps": 60.002200080669624,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 1,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 1.3999999985098839,
+              "p95Ms": 2.899999998509884,
+              "p99Ms": 4
+            },
+            "averageFps": 60.00246813932312,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 2,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 1.3999999985098839,
+              "p95Ms": 3,
+              "p99Ms": 4.600000001490116
+            },
+            "averageFps": 60.00226801235399,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ]
+      }
+    },
+    {
+      "quality": "low",
+      "timeOfDay": "night",
+      "weather": "rain",
+      "cpuP95MedianMs": {
+        "baseline": 4.5,
+        "candidate": 3.6
+      },
+      "cpuP95ReductionPercent": 20,
+      "cpuMedianMs": {
+        "baseline": 2.2,
+        "candidate": 2.4
+      },
+      "samples": {
+        "baseline": [
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.100000001490116,
+              "p95Ms": 4.5,
+              "p99Ms": 7.600000001490116
+            },
+            "averageFps": 60.00260011267156,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 1,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.1999999955296516,
+              "p95Ms": 4.5,
+              "p99Ms": 7.5
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 2,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 2.2000000029802322,
+              "p95Ms": 4.4000000059604645,
+              "p99Ms": 7.699999995529652
+            },
+            "averageFps": 60.002268012353994,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ],
+        "candidate": [
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.3999999985098839,
+              "p95Ms": 3,
+              "p99Ms": 4.399999998509884
+            },
+            "averageFps": 60.00240009600384,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 1,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999995634,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 2.5,
+              "p95Ms": 3.5999999940395355,
+              "p99Ms": 4.799999997019768
+            },
+            "averageFps": 60.00246813932313,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "low",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 2,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.4000000059604645,
+              "p95Ms": 3.9000000059604645,
+              "p99Ms": 4.899999998509884
+            },
+            "averageFps": 60.00240009600384,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ]
+      }
+    },
+    {
+      "quality": "high",
+      "timeOfDay": "morning",
+      "weather": "clear",
+      "cpuP95MedianMs": {
+        "baseline": 4.7,
+        "candidate": 3.5
+      },
+      "cpuP95ReductionPercent": 25.532,
+      "cpuMedianMs": {
+        "baseline": 2.4,
+        "candidate": 1.9
+      },
+      "samples": {
+        "baseline": [
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 0,
+            "frames": {
+              "count": 1801,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1802,
+              "medianMs": 2.399999998509884,
+              "p95Ms": 4.799999997019768,
+              "p99Ms": 8.5
+            },
+            "averageFps": 60.002332128400326,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 1,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 2,
+              "p95Ms": 3.600000001490116,
+              "p99Ms": 5.199999995529652
+            },
+            "averageFps": 60.002268012354,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 2,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.7999999970197678,
+              "p95Ms": 4.699999995529652,
+              "p99Ms": 6.100000001490116
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ],
+        "candidate": [
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 3.4000000059604645,
+              "p99Ms": 4.600000001490116
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 1,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.800000000000182
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.8000000044703484,
+              "p95Ms": 3.5,
+              "p99Ms": 5.0999999940395355
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "morning",
+            "weather": "clear",
+            "sample": 2,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 3.5,
+              "p99Ms": 4.9000000059604645
+            },
+            "averageFps": 60.002600112671544,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ]
+      }
+    },
+    {
+      "quality": "high",
+      "timeOfDay": "night",
+      "weather": "rain",
+      "cpuP95MedianMs": {
+        "baseline": 5.2,
+        "candidate": 3.6
+      },
+      "cpuP95ReductionPercent": 30.769,
+      "cpuMedianMs": {
+        "baseline": 2.9,
+        "candidate": 1.9
+      },
+      "samples": {
+        "baseline": [
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 2.899999998509884,
+              "p95Ms": 5,
+              "p99Ms": 8.200000002980232
+            },
+            "averageFps": 60.00220008066963,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 1,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 2.899999998509884,
+              "p95Ms": 5.200000002980232,
+              "p99Ms": 8.200000002980232
+            },
+            "averageFps": 60.002268012354,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 2,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 2.899999998509884,
+              "p95Ms": 5.700000002980232,
+              "p99Ms": 8.800000004470348
+            },
+            "averageFps": 60.002268012354,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ],
+        "candidate": [
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 0,
+            "frames": {
+              "count": 1800,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1801,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 3.5999999940395355,
+              "p99Ms": 4.9000000059604645
+            },
+            "averageFps": 60.00240009600383,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 1,
+            "frames": {
+              "count": 1799,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "p99Ms": 16.80000000000109
+            },
+            "cpuSubmission": {
+              "count": 1800,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 3.600000001490116,
+              "p99Ms": 4.899999998509884
+            },
+            "averageFps": 60.00226801235399,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          },
+          {
+            "quality": "high",
+            "timeOfDay": "night",
+            "weather": "rain",
+            "sample": 2,
+            "frames": {
+              "count": 1801,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.700000000004366,
+              "p99Ms": 16.80000000000291
+            },
+            "cpuSubmission": {
+              "count": 1802,
+              "medianMs": 1.8999999985098839,
+              "p95Ms": 3.5,
+              "p99Ms": 4.899999998509884
+            },
+            "averageFps": 60.00253203355611,
+            "framesOver33Ms": 0,
+            "framesOver50Ms": 0
+          }
+        ]
+      }
+    }
+  ],
+  "validation": {
+    "typecheck": "passed: source, tests and configurations with unused-symbol checks",
+    "build": "passed",
+    "unitTests": {
+      "passed": 212,
+      "files": 17
+    },
+    "browserTests": {
+      "chromium": 22,
+      "firefox": 1,
+      "webkit": 1,
+      "status": "all selected cases passed; three ghost-injection cases rerun after fixing HMR module identity in the test harness"
+    },
+    "environmentNotes": [
+      "Firefox launch timed out under the execution sandbox, then passed outside it without game changes.",
+      "Compatibility browser binaries were installed under tmp/playwright-browsers; npm dependencies and publication workflow were preserved."
+    ],
+    "gpuResources": {
+      "desktop": {
+        "geometries": 406,
+        "textures": 153
+      },
+      "compact": {
+        "geometries": 404,
+        "textures": 153
+      },
+      "status": "stable across repeated track/quality/ghost transitions"
+    }
+  }
+}

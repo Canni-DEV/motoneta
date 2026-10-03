@@ -3,8 +3,7 @@ import { heightAt } from './core/tracks';
 import { HZ, type Race } from './core/types';
 import type { CinematicMoment, CinematicPose, CinematicTimeline } from './cinematic-timeline';
 
-const SCALE = 0.052;
-const LANE = 1.22;
+import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
 const clamp = THREE.MathUtils.clamp;
 const MIN_SHOT = 2.5;
 type Shot = 'opening' | 'chase' | 'front' | 'ground' | 'drone' | 'helmet' | 'mounted' | 'tripod' | 'crowd' | 'safe';

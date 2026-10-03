@@ -107,7 +107,7 @@ function ai(r: Race, p: Rider): number {
   if (p.wheelie > 0.2) input |= Input.RIGHT;
   return input;
 }
-const identity = (r: Race, id: number) => [r.config.player, ...r.config.bots][id].id;
+const identity = (r: Race, id: number) => (id === 0 ? r.config.player : r.config.bots[id - 1]).id;
 export const isFinished = (r: Race, id: number) => r.finishes.some((f) => f.id === identity(r, id));
 export function abandonPlayer(r: Race) {
   if (!isFinished(r, 0))

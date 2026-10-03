@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Settings } from './core/types';
+import { WORLD_SCALE } from './world-space';
 
 export type SurfaceProfile = 'track' | 'dirt' | 'field' | 'mud' | 'grass' | 'cool' | 'bump';
 
@@ -92,7 +93,7 @@ export class WeatherSurfaces {
 
   /** An integer number of repeats makes both sides of every lap meet exactly. */
   setTrack(length: number) {
-    const worldLength = Math.max(0.052, length * 0.052);
+    const worldLength = Math.max(WORLD_SCALE, length * WORLD_SCALE);
     this.coordinates.value.x = Math.max(1, Math.round(worldLength / 15)) / worldLength;
   }
 

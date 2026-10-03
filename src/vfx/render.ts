@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { Settings } from '../core/types';
-import { TRACK_LIFE, VFX_LIMITS, vfxSettings } from './config';
+import { TRACK_LIFE, VFX_LIMITS, vfxSettings, SCALE } from './config';
 import { VfxModel } from './model';
 
 /** Original 3x3 atlas, regenerated identically on load; no network resources. */
@@ -200,7 +200,7 @@ export class VfxRenderer {
       groups = vfxSettings(settings);
     u.time.value = time;
     u.focus.value = focus;
-    u.loop.value = this.model.track.length * 0.052;
+    u.loop.value = this.model.track.length * SCALE;
     u.light.value.copy(light);
     u.fogColor.value.copy(fog.color);
     u.fogRange.value.set(fog.near, fog.far);

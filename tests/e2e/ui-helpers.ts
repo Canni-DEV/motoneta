@@ -1,4 +1,15 @@
 import { expect, type Page } from '@playwright/test';
+
+/** Match the running module, including Vite's HMR query, before patching its prototype. */
+export async function runtimeModuleUrl(page: Page, path: string): Promise<string> {
+  return page.evaluate((path) => {
+    const loaded = performance.getEntriesByType('resource')
+      .find((entry) => new URL(entry.name).pathname === path);
+    if (!loaded) throw new Error(`El módulo ${path} no está cargado en la página.`);
+    return loaded.name;
+  }, path);
+}
+
 export async function nav(page: Page, mode: string) {
   if (await page.locator('#modal').isVisible()) {
     const close = page.locator('#modal [data-action="close-modal"]');

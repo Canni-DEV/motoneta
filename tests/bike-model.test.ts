@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { Box3, DoubleSide, Group, Mesh, MeshStandardMaterial, Raycaster, SkinnedMesh, Vector3 } from 'three';
+import { Box3, DoubleSide, Group, Mesh, MeshStandardMaterial, Object3D, Raycaster, SkinnedMesh, Vector3 } from 'three';
 import {
   Bike,
   createBikeAssetLoader,
@@ -25,18 +25,18 @@ const state = (overrides: Partial<BikeVisualState> = {}): BikeVisualState => ({
   ground: () => 0,
   ...overrides,
 });
-const meshes = (root: Group) => {
+const meshes = (root: Object3D) => {
   const result: Mesh[] = [];
   root.traverse((o) => {
     if (o instanceof Mesh) result.push(o);
   });
   return result;
 };
-const visibleMeshes = (root: Group) => meshes(root).filter((mesh) => {
-  let node: typeof mesh | null = mesh;
+const visibleMeshes = (root: Object3D) => meshes(root).filter((mesh) => {
+  let node: Object3D | null = mesh;
   while (node && node !== root) {
     if (!node.visible) return false;
-    node = node.parent as typeof mesh | null;
+    node = node.parent;
   }
   return true;
 });
@@ -176,6 +176,26 @@ describe('exported model resources and lifecycle', () => {
     bike.setAppearance(appearance);
     bike.setAppearance(appearance, true);
     expect((bike as any).ownedMaterials.length).toBe(count);
+    bike.dispose();
+  });
+  it('detects in-place paint edits and returning from custom appearance to a numeric color', () => {
+    const bike = new Bike(0xc91c32, assets);
+    const appearance = defaultAppearance('#c91c32');
+    const material = meshes(bike.variants.high)
+      .flatMap((mesh) => Array.isArray(mesh.material) ? mesh.material : [mesh.material])
+      .find((material) => material.name === 'TeamPaint') as MeshStandardMaterial;
+    bike.setAppearance(appearance);
+    for (const slot of SLOTS) appearance.paints[slot].primary = '#00ff00';
+    bike.setAppearance(appearance);
+    expect(material.color.getHex()).toBe(0x00ff00);
+    bike.setAppearance(0xc91c32);
+    expect(material.color.getHex()).toBe(0xc91c32);
+    bike.setAppearance(appearance, true);
+    bike.setLighting(1);
+    expect(bike.headlight.intensity).toBe(0);
+    bike.setAppearance(0xc91c32);
+    bike.setLighting(1);
+    expect(bike.headlight.intensity).toBeGreaterThan(0);
     bike.dispose();
   });
   it.each(['high', 'low'] as const)('%s ghosts preserve paint and reuse independent faded materials', (quality) => {

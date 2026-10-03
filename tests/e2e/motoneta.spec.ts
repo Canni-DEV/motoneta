@@ -42,7 +42,9 @@ test('first launch of ruleset 2 clears old local game data and settings', async 
       get.onsuccess = () => resolve(get.result);
     });
     db.close();
-    const currentSettings = (await import('/src/storage.ts')).settings();
+    const storagePath = '/src/storage.ts';
+    const storageModule: typeof import('../../src/storage') = await import(/* @vite-ignore */ storagePath);
+    const currentSettings = storageModule.settings();
     return { state, count, oldSettings: localStorage.getItem('motoneta.settings'),
       oldSettingsV2: localStorage.getItem('motoneta.settings.v2'),
       settings: currentSettings };

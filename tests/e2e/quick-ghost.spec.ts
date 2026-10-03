@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { nav, ready } from './ui-helpers';
+import { nav, ready, runtimeModuleUrl } from './ui-helpers';
 
 const state = (page: Page) => page.evaluate(() => (window as any).__motoneta);
 const action = (page: Page, name: string) => page.locator(`[data-action="${name}"]`).click();
@@ -218,9 +218,8 @@ test('unchecked attempts have no ghost, while solo and five bots each add exactl
 test('missing or invalid ghost replays keep configuration usable and allow a race without the ghost', async ({ page }) => {
   await fixture(page);
   await page.getByRole('checkbox', { name: 'Correr contra mi fantasma' }).check();
-  await page.evaluate(async () => {
-    const source = (path: string) => import(/* @vite-ignore */ path);
-    const { GameStore } = await source('/src/persistence.ts');
+  await page.evaluate(async (moduleUrl) => {
+    const { GameStore } = await import(/* @vite-ignore */ moduleUrl);
     const original = GameStore.prototype.replay;
     (window as any).ghostReadMode = 'missing';
     GameStore.prototype.replay = async function (id: string) {
@@ -229,7 +228,7 @@ test('missing or invalid ghost replays keep configuration usable and allow a rac
       const replay = await original.call(this, id);
       return { ...replay, ruleset: 'incompatible' };
     };
-  });
+  }, await runtimeModuleUrl(page, '/src/persistence.ts'));
   for (const [mode, message] of [
     ['missing', 'No se encontró la repetición de tu récord'],
     ['invalid', 'Repetición incompatible o dañada'],
@@ -250,9 +249,8 @@ test('missing or invalid ghost replays keep configuration usable and allow a rac
 test('pending ghost reads cannot launch duplicate races or a stale configuration after navigation', async ({ page }) => {
   await fixture(page);
   await page.getByRole('checkbox', { name: 'Correr contra mi fantasma' }).check();
-  await page.evaluate(async () => {
-    const source = (path: string) => import(/* @vite-ignore */ path);
-    const { GameStore } = await source('/src/persistence.ts');
+  await page.evaluate(async (moduleUrl) => {
+    const { GameStore } = await import(/* @vite-ignore */ moduleUrl);
     const original = GameStore.prototype.replay;
     (window as any).ghostReadCount = 0;
     GameStore.prototype.replay = function (id: string) {
@@ -261,7 +259,7 @@ test('pending ghost reads cannot launch duplicate races or a stale configuration
         (window as any).releaseGhostRead = () => original.call(this, id).then(resolve, reject);
       });
     };
-  });
+  }, await runtimeModuleUrl(page, '/src/persistence.ts'));
   await action(page, 'start');
   await expect(page.locator('[data-action="start"]')).toBeDisabled();
   await page.keyboard.press('Enter');
@@ -328,16 +326,15 @@ test('watching the finished replay cancels a pending retry on the same race scre
   await page.keyboard.down('z');
   await expect(page.getByRole('heading', { name: 'Resultado', exact: true })).toBeVisible({ timeout: 45000 });
   await page.keyboard.up('z');
-  await page.evaluate(async () => {
-    const source = (path: string) => import(/* @vite-ignore */ path);
-    const { GameStore } = await source('/src/persistence.ts');
+  await page.evaluate(async (moduleUrl) => {
+    const { GameStore } = await import(/* @vite-ignore */ moduleUrl);
     const original = GameStore.prototype.replay;
     GameStore.prototype.replay = function (id: string) {
       return new Promise((resolve, reject) => {
         (window as any).releaseGhostRead = () => original.call(this, id).then(resolve, reject);
       });
     };
-  });
+  }, await runtimeModuleUrl(page, '/src/persistence.ts'));
   await action(page, 'retry');
   await expect(page.locator('[data-action="retry"]')).toBeDisabled();
   await action(page, 'watch');

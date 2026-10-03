@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
+import { box, mat, roadTexture, soilNoise, disposeResources } from './rendering/scene-geometry';
+import { buildCourse, type CoursePiece } from './rendering/course';
 import type { Appearance } from './appearance';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -27,91 +30,6 @@ import { StadiumFlags } from './vfx/flags';
 import { CinematicCamera } from './cinematic-camera';
 import { advanceGhostOpacity, ghostOverlapOpacity, projectGhostBounds } from './ghost-visibility';
 
-const SCALE = 0.052,
-  LANE = 1.22;
-const mat = (color: THREE.ColorRepresentation, roughness = 0.82, metalness = 0) =>
-  new THREE.MeshStandardMaterial({ color, roughness, metalness });
-const black = mat('#293731'),
-  white = mat('#ebe9d8');
-const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-function box(
-  parent: THREE.Object3D,
-  x: number,
-  y: number,
-  z: number,
-  w: number,
-  h: number,
-  d: number,
-  m: THREE.Material,
-  rot = 0,
-) {
-  const o = new THREE.Mesh(boxGeo, m);
-  o.position.set(x, y, z);
-  o.scale.set(w, h, d);
-  o.rotation.z = rot;
-  o.castShadow = true;
-  o.receiveShadow = true;
-  parent.add(o);
-  return o;
-}
-function roadTexture() {
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 256;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#9c673d';
-  ctx.fillRect(0, 0, 512, 256);
-  let seed = 421;
-  const random = () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-  for (let i = 0; i < 15000; i++) {
-    const v = random();
-    ctx.fillStyle = v > 0.5 ? 'rgba(233,181,119,.10)' : 'rgba(42,30,17,.10)';
-    ctx.fillRect(random() * 512, random() * 256, random() * 4 + 1, random() * 2 + 1);
-  }
-  for (let lane = 0; lane < 4; lane++)
-    for (let j = 0; j < 3; j++) {
-      ctx.strokeStyle = 'rgba(54,36,21,.15)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, lane * 64 + 20 + j * 9);
-      ctx.lineTo(512, lane * 64 + 20 + j * 9);
-      ctx.stroke();
-    }
-  ctx.setLineDash([25, 29]);
-  ctx.lineWidth = 1.6;
-  ctx.strokeStyle = 'rgba(247,222,169,.5)';
-  for (const y of [64, 128, 192]) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(512, y);
-    ctx.stroke();
-  }
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(10, 1);
-  t.anisotropy = 8;
-  return t;
-}
-function soilNoise() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 128;
-  const ctx = c.getContext('2d')!,
-    data = ctx.createImageData(128, 128);
-  for (let i = 0; i < data.data.length; i += 4) {
-    const n = 120 + Math.sin(i * 23.193) * 34;
-    data.data[i] = data.data[i + 1] = data.data[i + 2] = n;
-    data.data[i + 3] = 255;
-  }
-  ctx.putImageData(data, 0, 0);
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(1.3, 1.3);
-  return t;
-}
 export class World {
   scene = new THREE.Scene();
   camera = new THREE.OrthographicCamera();
@@ -123,7 +41,7 @@ export class World {
   bloom: UnrealBloomPass;
   grade: ShaderPass;
   course = new THREE.Group();
-  pieces: { group: THREE.Group; base: number; bounds: THREE.Box3 }[] = [];
+  pieces: CoursePiece[] = [];
   bikes: Bike[] = [];
   ghostStart = Infinity;
   private ghostVisibilityPending = true;
@@ -164,6 +82,7 @@ export class World {
     crashPhase: Race['riders'][number]['crashPhase'];
     crashPhaseAge: number;
   }[] = [];
+  private projectionZoom = NaN;
   private readonly onResize = () => this.resize();
   constructor(
     public canvas: HTMLCanvasElement,
@@ -280,10 +199,13 @@ export class World {
     bike.setAppearance(this.garageAppearance!);
     bike.update({ time, paused: true, speed: 0, tilt: 0, grounded: true, recovery: false, ground: () => 0 });
     const radius = this.garageZoom;
-    this.garageCamera.aspect = this.width / this.height;
+    const aspect = this.width / this.height;
+    if (this.garageCamera.aspect !== aspect) {
+      this.garageCamera.aspect = aspect;
+      this.garageCamera.updateProjectionMatrix();
+    }
     this.garageCamera.position.set(radius * Math.sin(this.garageYaw), 1.65, radius * Math.cos(this.garageYaw));
     this.garageCamera.lookAt(0, 0.75, 0);
-    this.garageCamera.updateProjectionMatrix();
     this.renderPass.scene = this.garageScene;
     this.renderPass.camera = this.garageCamera;
     this.renderer.info.reset();
@@ -341,113 +263,10 @@ export class World {
     this.course.clear();
     this.surfaces.clearTrack();
     this.surfaces.setTrack(track.length);
-    this.disposables.forEach((d) => d.dispose());
+    disposeResources(this.disposables);
     this.disposables = [];
     this.pieces = [];
-    const mud = this.surfaces.register(mat('#473e2a'), { profile: 'mud', temporary: true }),
-      grass = this.surfaces.register(mat('#76805a'), { profile: 'grass', temporary: true }),
-      cool = this.surfaces.register(mat('#8fc3ba', 0.45), { profile: 'cool', temporary: true }),
-      bump = this.surfaces.register(mat('#cda574'), { profile: 'bump', temporary: true });
-    this.disposables.push(mud, grass, cool, bump);
-    for (const s of track.segments) {
-      if (s.piece === 'flat') continue;
-      const group = new THREE.Group(),
-        length = s.length * SCALE,
-        hasHeight = s.profile.some((p) => p[1] > 0);
-      for (let lane = 0; lane < 4; lane++) {
-        if (!(s.lanes & (1 << lane))) continue;
-        const z = (lane - 1.5) * LANE;
-        if (hasHeight) {
-          const shape = new THREE.Shape();
-          shape.moveTo(0, -0.02);
-          for (const [t, h] of s.profile) shape.lineTo(t * length, h * SCALE);
-          shape.lineTo(length, -0.02);
-          shape.closePath();
-          const geo = new THREE.ExtrudeGeometry(shape, {
-            depth: LANE - 0.012,
-            bevelEnabled: false,
-            steps: 1,
-          });
-          geo.computeVertexNormals();
-          this.disposables.push(geo);
-          const mesh = new THREE.Mesh(geo, s.surface === 'bump' ? bump : this.dirt);
-          mesh.position.z = z - LANE / 2;
-          mesh.receiveShadow = true;
-          mesh.castShadow = true;
-          group.add(mesh);
-          const pts = s.profile.map(
-            ([t, h]) => new THREE.Vector3(t * length, h * SCALE + 0.015, z - LANE / 2 + 0.03),
-          );
-          const lg = new THREE.BufferGeometry().setFromPoints(pts);
-          this.disposables.push(lg);
-          const lm = new THREE.LineBasicMaterial({
-            color: '#f5d9ad',
-            transparent: true,
-            opacity: 0.7,
-          });
-          this.disposables.push(lm);
-          group.add(new THREE.Line(lg, lm));
-        } else if (s.surface !== 'dirt') {
-          box(
-            group,
-            length / 2,
-            0.012,
-            z,
-            length,
-            0.028,
-            LANE - 0.04,
-            s.surface === 'mud' ? mud : s.surface === 'cool' ? cool : grass,
-          );
-          if (s.surface === 'cool')
-            for (let j = 0; j < 3; j++)
-              box(group, length * (0.25 + j * 0.22), 0.035, z, 0.05, 0.01, 0.64, white, 0.2);
-          if (s.surface === 'grass')
-            for (let j = 0; j < Math.min(10, Math.floor(length * 2)); j++)
-              box(group, j * 0.45 + 0.1, 0.07, z + Math.sin(j) * 0.35, 0.035, 0.13, 0.04, grass);
-        }
-      }
-      const bounds = new THREE.Box3().setFromObject(group);
-      group.position.x = s.x * SCALE;
-      this.course.add(group);
-      this.pieces.push({ group, base: s.x * SCALE, bounds });
-    }
-    // Start and finish share a line, offset to the same logical origin as the timing system.
-    const gate = new THREE.Group();
-    for (const z of [-2.85, 2.85]) {
-      box(gate, 0, 1.9, z, 0.14, 3.8, 0.15, white);
-      box(gate, 0, 0.65, z, 0.22, 1.3, 0.23, black);
-    }
-    box(gate, 0, 3.7, 0, 0.26, 0.58, 5.95, black);
-    for (let i = 0; i < 14; i++)
-      for (let j = 0; j < 2; j++)
-        box(
-          gate,
-          0.14,
-          3.51 + j * 0.19,
-          -2.66 + i * 0.4,
-          0.018,
-          0.18,
-          0.38,
-          (i + j) % 2 ? black : white,
-        );
-    for (let i = 0; i < 10; i++)
-      for (let j = 0; j < 2; j++)
-        box(
-          gate,
-          -0.1 + j * 0.22,
-          0.022,
-          -2.2 + i * 0.49,
-          0.22,
-          0.025,
-          0.49,
-          (i + j) % 2 ? black : white,
-        );
-    this.course.add(gate);
-    this.pieces.push({
-      group: gate,
-      base: 80 * SCALE,
-      bounds: new THREE.Box3().setFromObject(gate),
-    });
+    this.pieces = buildCourse(track, this.course, this.dirt, this.surfaces, this.disposables);
     this.focus = 80 * SCALE;
     this.last = 0;
     this.previous = [];
@@ -455,14 +274,19 @@ export class World {
     this.ghostVisibilityPending = true;
   }
   capture(r: Race) {
-    this.previous = r.riders.map((p) => ({
-      x: p.x,
-      lane: p.lane,
-      height: p.height,
-      tilt: p.tilt,
-      crashPhase: p.crashPhase,
-      crashPhaseAge: p.crashPhaseAge,
-    }));
+    this.previous.length = r.riders.length;
+    for (let i = 0; i < r.riders.length; i++) {
+      const p = r.riders[i];
+      const previous = this.previous[i] ??= {
+        x: 0, lane: 0, height: 0, tilt: 0, crashPhase: 'none', crashPhaseAge: 0,
+      };
+      previous.x = p.x;
+      previous.lane = p.lane;
+      previous.height = p.height;
+      previous.tilt = p.tilt;
+      previous.crashPhase = p.crashPhase;
+      previous.crashPhaseAge = p.crashPhaseAge;
+    }
   }
   beginRace(race: Race) {
     this.ghostVisibilityPending = true;
@@ -522,13 +346,20 @@ export class World {
     if (this.reduced || Math.abs(zoomTarget - this.camera.zoom) < 0.001)
       this.camera.zoom = zoomTarget;
     const visibleSpan = span / this.camera.zoom;
+    const projectionChanged =
+      this.camera.left !== (-span * aspect) / 2 || this.camera.right !== (span * aspect) / 2 ||
+      this.camera.top !== span / 2 || this.camera.bottom !== -span / 2 ||
+      this.camera.near !== 0.1 || this.camera.far !== 180 || this.projectionZoom !== this.camera.zoom;
     this.camera.left = (-span * aspect) / 2;
     this.camera.right = (span * aspect) / 2;
     this.camera.top = span / 2;
     this.camera.bottom = -span / 2;
     this.camera.near = 0.1;
     this.camera.far = 180;
-    this.camera.updateProjectionMatrix();
+    if (projectionChanged) {
+      this.camera.updateProjectionMatrix();
+      this.projectionZoom = this.camera.zoom;
+    }
     // Keep the same viewing angle and bring the rider's jumps into the closer framing.
     const lift =
       !menu && !editor && race
@@ -569,13 +400,10 @@ export class World {
       this.renderer,
       this.reduced,
     );
-    const shadowBounds = this.environment.fitShadows(
-      activeCamera,
-      Math.max(
-        10,
-        ...(race?.riders.map((p, i) => lerp(this.previous[i]?.height, p.height) * SCALE + 2) ?? []),
-      ),
-    );
+    let shadowHeight = 10;
+    if (race) for (let i = 0; i < race.riders.length; i++)
+      shadowHeight = Math.max(shadowHeight, lerp(this.previous[i]?.height, race.riders[i].height) * SCALE + 2);
+    const shadowBounds = this.environment.fitShadows(activeCamera, shadowHeight);
     for (const p of this.pieces) {
       const center = p.base + (p.bounds.min.x + p.bounds.max.x) / 2;
       const wrapped = p.base + Math.round((focus - center) / loop) * loop;
@@ -693,7 +521,7 @@ export class World {
     this.stadium.dispose();
     this.environment.dispose();
     this.bikes.forEach((bike) => bike.dispose());
-    this.disposables.forEach((resource) => resource.dispose());
+    disposeResources(this.disposables);
     const roadMaterial = this.roadTop.material as THREE.MeshStandardMaterial;
     const materials = [roadMaterial, this.dirt, this.field.material as THREE.MeshStandardMaterial];
     this.surfaces.dispose();

@@ -13,13 +13,12 @@ import { formatTime } from '../core/simulation';
 import {
   DIFFICULTIES,
   ticksToTime,
-  type CompetitionSession,
   type Difficulty,
   type RaceCourse,
   type PlayerProfile,
   type PersonalRecord,
 } from '../core/game';
-import { placements, standings, turnPlayer } from '../core/competition';
+import { placements } from '../core/competition';
 import { TIME_LABELS } from '../core/time-of-day';
 import { WEATHER_LABELS } from '../core/weather';
 import type { SaveState } from '../persistence';
