@@ -17,7 +17,7 @@ const tri = (h: number): [number, number][] => [
   [1, 0],
 ];
 export const PIECES: Piece[] = [
-  { id: 'T', name: 'Loop · 4 → 1', length: LOOP_LENGTH, profile: [[0,0],[1,0]], lanes: 15, surface: 'dirt', boost: true },
+  { id: 'T', name: 'Loop · 4 → 1 y 2', length: LOOP_LENGTH, profile: [[0,0],[1,0]], lanes: 15, surface: 'dirt', boost: true },
   { id: 'A', name: 'Salto corto', length: 24, profile: tri(8), lanes: 15, surface: 'dirt' },
   { id: 'B', name: 'Salto medio', length: 40, profile: tri(16), lanes: 15, surface: 'dirt' },
   { id: 'C', name: 'Salto alto', length: 72, profile: tri(32), lanes: 15, surface: 'dirt' },

@@ -5,9 +5,9 @@ import { move, fingerprint } from '../src/core/simulation';
 import { stepRace, completeRace, raceResult, isFinished } from '../src/core/racing';
 import { appendInput, newRecording, Playback, validateRecording } from '../src/core/recording';
 import { DRIVE } from '../src/core/handling';
-import { LOOP_DISTANCE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_SAMPLES, LOOP_WIDTH, LOOP_LENGTH, LOOP_APPROACH, LOOP_RUNOUT, maximumLoops, sampleLane, sampleLoop, loopPosition, loopSupportMargin, wrapAngle, add, mul } from '../src/core/loop-geometry';
+import { LOOP_DISTANCE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_EXIT_CENTER_LANE, LOOP_GEOMETRY_VERSION, LOOP_MANIFEST, LOOP_SAMPLES, LOOP_WIDTH, LOOP_LENGTH, LOOP_APPROACH, LOOP_RUNOUT, maximumLoops, sampleLane, sampleLoop, loopPosition, loopSupportMargin, loopWarnings, wrapAngle, add, mul } from '../src/core/loop-geometry';
 import { LOOP_STEERING, MAX_SPEED, ridersTouch, roadImpact } from '../src/core/loop-physics';
-import { HZ, Input, type Race } from '../src/core/types';
+import { clamp, HZ, Input, type Race } from '../src/core/types';
 import { testRace } from './race-fixture';
 const origin = 512;
 function live(loops = true) {
@@ -26,11 +26,13 @@ function live(loops = true) {
   return r;
 }
 // Test driver emits only buttons. It never writes lane, speed, position or route state.
-export function loopButtons(r: Race, motor: number = Input.B) {
+export function loopButtons(r: Race, motor: number = Input.B, exitLane = LOOP_EXIT_CENTER_LANE) {
   const p = r.riders[0];
   let buttons = motor;
   if (p.motion.kind === 'loop') {
-    const target = sampleLane(sampleLoop(p.motion.distance + p.speed * 9.5));
+    const s = sampleLoop(p.motion.distance + p.speed * 9.5);
+    const bias = (exitLane - LOOP_EXIT_CENTER_LANE) * clamp((p.motion.distance / LOOP_DISTANCE - 0.55) / 0.25, 0, 1);
+    const target = sampleLane(s) + bias * s.lateral[2];
     if (p.lane > target + 0.015)
       buttons |= Input.UP;
     if (p.lane < target - 0.015)
@@ -46,12 +48,12 @@ export function loopButtons(r: Race, motor: number = Input.B) {
   return buttons;
 }
 function tick(r: Race, buttons: number) { r.frame++; r.elapsed++; r.events = []; move(r, r.riders[0], buttons); }
-function complete(motor: number) {
+function complete(motor: number, targetExitLane = LOOP_EXIT_CENTER_LANE) {
   const r = live(), p = r.riders[0];
   let reached = false, exitLane = -1, exitSpeed = 0, minMargin = 1;
   for (let i = 0; i < 450; i++) {
     const before = p.motion.kind;
-    tick(r, loopButtons(r, motor));
+    tick(r, loopButtons(r, motor, targetExitLane));
     if (p.motion.kind === 'loop')
       minMargin = Math.min(minMargin, loopSupportMargin(sampleLoop(p.motion.distance),p.lane));
     if (before === 'loop' && (p.motion as Race['riders'][number]['motion']).kind === 'loop-air') {
@@ -67,22 +69,35 @@ describe('loop route and driving', () => {
   it.each([Input.A, Input.B])('completes with manual input and motor %s', motor => {
     const result = complete(motor);
     expect(result.reached).toBe(true);
-    expect(result.exitLane).toBeLessThan(0.5);
+    expect(result.exitLane).toBeCloseTo(LOOP_EXIT_CENTER_LANE, 1);
     expect(result.exitSpeed).toBeGreaterThan(DRIVE.turboSpeed + 1);
     expect(LOOP_STEERING).toBeLessThanOrEqual(0.034 * 1.5);
     expect(result.minMargin).toBeGreaterThan(0.01);
   });
+  it.each([0, 1])('completes manually into exit lane %s with the same impulse and free air control', exitLane => {
+    const result = complete(Input.A, exitLane), p = result.r.riders[0];
+    expect(result.reached).toBe(true);
+    expect(result.exitLane).toBeCloseTo(exitLane, 1);
+    expect(result.exitSpeed).toBe(complete(Input.A, 1 - exitLane).exitSpeed);
+    const lane = p.lane;
+    tick(result.r, Input.B | (exitLane === 0 ? Input.DOWN : Input.UP));
+    expect(p.motion.kind).toBe('loop-air');
+    expect(exitLane === 0 ? p.lane > lane : p.lane < lane).toBe(true);
+    expect(p.crashes).toBe(0);
+  });
   it.each([
-    { motor: Input.A, first: 51, last: 78 },
-    { motor: Input.B, first: 48, last: 71 },
-  ])('accepts a broad manual steering start window with motor $motor', ({ motor, first, last }) => {
-    // Only hold UP after the selected contact frame; no route-following controller.
+    { motor: Input.A, first: 53, last: 87, exitLane: 0 },
+    { motor: Input.B, first: 49, last: 82, exitLane: 0 },
+    { motor: Input.A, first: 53, last: 87, exitLane: 1 },
+    { motor: Input.B, first: 49, last: 82, exitLane: 1 },
+  ])('accepts a broader manual steering window with motor $motor into lane $exitLane', ({ motor, first, last, exitLane }) => {
+    // Hold UP from the chosen frame and release on the desired lane. No path follower.
     for (let start = first; start <= last; start++) {
       const r = live(), p = r.riders[0];
       let contactFrame = 0, reached = false;
       for (let frame = 0; frame < 300; frame++) {
         const before = p.motion;
-        const steering = before.kind === 'loop' && contactFrame++ >= start ? Input.UP : 0;
+        const steering = before.kind === 'loop' && contactFrame++ >= start && p.lane > exitLane ? Input.UP : 0;
         tick(r, motor | steering);
         if (before.kind === 'loop' && p.motion.kind === 'loop-air') {
           reached = before.distance >= LOOP_DISTANCE;
@@ -90,7 +105,7 @@ describe('loop route and driving', () => {
         }
       }
       expect(reached, `steering starts at contact frame ${start}`).toBe(true);
-      expect(p.lane).toBe(0);
+      expect(p.lane).toBeCloseTo(exitLane, 0);
       expect(p.speed).toBeGreaterThan(DRIVE.turboSpeed + 1);
       expect(p.crashes).toBe(0);
     }
@@ -462,14 +477,26 @@ describe('loop editor and generation constraints', () => {
     }
     expect(() => generateMap({ ...generatorDefaults, size, loops: maximumLoops(length) + 1 })).toThrow(/caben/);
   });
-  it('uses a full 3D ribbon with a two-lane top and one-lane entry and exit', () => {
+  it('uses a full 3D ribbon with a one-lane entry and two lanes from the top through takeoff', () => {
     expect(LOOP_DISTANCE).toBeGreaterThan(500);
     expect(LOOP_SAMPLES.some(s => s.normal[1] < -0.99)).toBe(true);
     expect(LOOP_WIDTH).toBeCloseTo(1.22 / 0.052);
     expect(LOOP_SAMPLES[0].width).toBe(LOOP_WIDTH);
-    expect(LOOP_SAMPLES.at(-1)!.width).toBe(LOOP_WIDTH);
+    expect(LOOP_SAMPLES.at(-1)!.width).toBe(2 * LOOP_WIDTH);
+    expect(LOOP_SAMPLES.filter(s => s.pitch >= Math.PI).every(s => s.width === 2 * LOOP_WIDTH)).toBe(true);
+    expect(sampleLane(LOOP_SAMPLES.at(-1)!)).toBeCloseTo(0.5, 6);
+    expect(LOOP_MANIFEST.exitLanes).toEqual([1, 2]);
+    expect(LOOP_GEOMETRY_VERSION).toBe(2);
     expect(Math.max(...LOOP_SAMPLES.map(s => s.width))).toBe(2 * LOOP_WIDTH);
     expect(LOOP_SAMPLES.filter(s => s.normal[1] < -0.9).every(s => s.width === 2 * LOOP_WIDTH)).toBe(true);
     expect(LOOP_LENGTH).toBe(128); // Existing serialized loop slots remain valid.
+  });
+  it.each([1, 2])('warns about a piece in exit lane mask %s without forbidding the placement', lanes => {
+    const d = emptyDesign();
+    d.items = [placedPiece('T', origin), placedPiece('A', origin + LOOP_LENGTH + 32, lanes)];
+    expect(validateMap(d).items).toHaveLength(2);
+    expect(loopWarnings(d.items)).toEqual([expect.stringContaining('carriles 1 y 2')]);
+    d.items[1].lanes = 4;
+    expect(loopWarnings(d.items)).toEqual([]);
   });
 });

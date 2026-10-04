@@ -34,6 +34,8 @@ export interface TrackRef {
 }
 export interface RaceCourse {
   track: Track;
+  /** Present only on courses whose simulation depends on the loop geometry. */
+  loopGeometryVersion?: number;
   ref: TrackRef;
   timeOfDay: TimeOfDay;
   weather: Weather;

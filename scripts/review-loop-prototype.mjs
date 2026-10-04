@@ -24,7 +24,7 @@ try {
   await page.waitForFunction(() => window.__loopPrototype?.ready, undefined, { timeout: 60000 });
   const initialRiders = await page.evaluate(() => JSON.stringify(window.__loopPrototype.race.riders));
   const screenshots = [];
-  for (const view of ['game', 'top', 'side']) {
+  for (const view of ['game', 'top', 'side', 'front']) {
     await page.locator(`[data-view="${view}"]`).click();
     await page.waitForTimeout(600);
     await page.locator('main').screenshot({ path: `${directory}/${view}.png` });
@@ -48,10 +48,11 @@ try {
     };
   });
   if (Math.abs(integration.entryLane - 4) > 1e-5 ||
-      Math.abs(integration.exitLane - 1) > 1e-5 ||
-      Math.abs(integration.landingLane - 1) > 1e-5 ||
+      Math.abs(integration.exitCenterLane - 1.5) > 1e-5 ||
+      integration.geometryVersion !== 2 || integration.exitLanes.join(',') !== '1,2' ||
+      integration.landingLanes.join(',') !== '1,2' ||
       integration.maximumWidth !== 2 * integration.width ||
-      integration.entryWidth !== integration.width || integration.exitWidth !== integration.width ||
+      integration.entryWidth !== integration.width || integration.exitWidth !== 2 * integration.width ||
       integration.entryDirection[0] < 0.999 || integration.exitDirection[0] < 0.999 ||
       !integration.unchangedTrack || integration.framesAdvanced !== 0 ||
       integration.riders !== initialRiders || integration.clearanceMargin < 0.25)

@@ -21,10 +21,16 @@ export const LOOP_RUNOUT = 320;
 export const LOOP_SPACING = LOOP_APPROACH + LOOP_LENGTH + LOOP_RUNOUT;
 export const LOOP_FINISH_MARGIN = 24; // Full bike envelope beside the reserved structure volume.
 export const LOOP_ENTRY_LANE = 3;
-export const LOOP_EXIT_LANE = 0;
+export const LOOP_EXIT_LANES = manifest.exitLanes.map(lane => lane - 1);
+export const LOOP_EXIT_CENTER_LANE = manifest.exitCenterLane - 1;
+export const LOOP_GEOMETRY_VERSION = manifest.geometryVersion;
 // Tire support uses 98% of the real ribbon width, without extending past its edges.
 export const LOOP_EDGE = 0.49;
 export const isLoop = (s: Pick<Segment, 'piece'>) => s.piece === 'T';
+export const loopGeometryMetadata = (track: Pick<Track, 'segments'>): { loopGeometryVersion?: number } =>
+  track.segments.some(isLoop) ? { loopGeometryVersion: LOOP_GEOMETRY_VERSION } : {};
+export const compatibleLoopGeometry = (course: { track: Track; loopGeometryVersion?: number }) =>
+  !course.track.segments.some(isLoop) || course.loopGeometryVersion === LOOP_GEOMETRY_VERSION;
 export interface LoopSample {
   position: Vec3;
   tangent: Vec3;
@@ -109,7 +115,7 @@ export function maximumLoops(length: number) {
 }
 export function loopPlacementError(loop: Segment, items: Segment[], length: number): string | null {
   if (loop.length !== LOOP_LENGTH || loop.lanes !== 15 || loop.surface !== 'dirt' || !loop.boost || loop.profile.length !== 2 || loop.profile.some(p => p[1] !== 0))
-    return 'El loop tiene dimensiones y carriles fijos: entrada 4, salida 1.';
+    return 'El loop tiene dimensiones y carriles fijos: entrada 4, salida 1 y 2.';
   if (loop.x < 80 + LOOP_FINISH_MARGIN && loop.x + LOOP_LENGTH > 80 - LOOP_FINISH_MARGIN)
     return 'El loop debe dejar libre la línea de salida/meta.';
   if (loop.x < 0 || loop.x + LOOP_LENGTH > length)
@@ -127,6 +133,6 @@ export function loopPlacementError(loop: Segment, items: Segment[], length: numb
   return null;
 }
 export function loopWarnings(items: Segment[]): string[] {
-  return items.filter(isLoop).flatMap(loop => items.some(s => s !== loop && !isLoop(s) && s.lanes & 1 && s.x < loop.x + LOOP_EXIT_X + LOOP_RUNOUT && s.x + s.length > loop.x + LOOP_LENGTH)
-    ? ['Loop: hay piezas en la zona de aterrizaje del carril 1; el caballito puede alargar el salto.'] : []);
+  return items.filter(isLoop).flatMap(loop => items.some(s => s !== loop && !isLoop(s) && s.lanes & 3 && s.x < loop.x + LOOP_EXIT_X + LOOP_RUNOUT && s.x + s.length > loop.x + LOOP_LENGTH)
+    ? ['Loop: hay piezas en la zona de aterrizaje de los carriles 1 y 2; el caballito puede alargar el salto.'] : []);
 }

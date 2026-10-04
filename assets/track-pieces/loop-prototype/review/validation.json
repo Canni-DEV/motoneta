@@ -7,8 +7,16 @@
   },
   "integration": {
     "entryLane": 4.0000000351765115,
-    "exitLane": 0.9999999648234883,
-    "landingLane": 0.9999999648234883,
+    "geometryVersion": 2,
+    "exitLanes": [
+      1,
+      2
+    ],
+    "exitCenterLane": 1.4999999765489922,
+    "landingLanes": [
+      1,
+      2
+    ],
     "entryDirection": [
       1,
       0,
@@ -22,7 +30,7 @@
     "width": 1.22,
     "maximumWidth": 2.44,
     "entryWidth": 1.22,
-    "exitWidth": 1.22,
+    "exitWidth": 2.44,
     "bypassClearance": 2.427000045776367,
     "trackId": "nes-1-main",
     "physicalSegmentsAdded": 0,
@@ -35,6 +43,7 @@
     "assets/track-pieces/loop-prototype/review/game.png",
     "assets/track-pieces/loop-prototype/review/top.png",
     "assets/track-pieces/loop-prototype/review/side.png",
+    "assets/track-pieces/loop-prototype/review/front.png",
     "assets/track-pieces/loop-prototype/review/game-clean.png",
     "assets/track-pieces/loop-prototype/review/mobile.png",
     "assets/track-pieces/loop-prototype/review/narrow.png"

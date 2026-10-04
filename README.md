@@ -31,9 +31,11 @@ Las repeticiones pueden verse con cámaras cinematográficas y el tema de result
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla.
 
-El editor incluye **T · Loop**, con entrada automática desde el piso del carril 4 y salida elevada sobre el carril 1. La cinta se ensancha gradualmente a dos carriles durante el giro y vuelve a un carril en la salida. Hay que seguirla usando ↑ y ↓: conservan su dirección hacia los carriles 1 y 4 aun cabeza abajo. Se puede completar manteniendo A a velocidad normal; salir del camino o perder contacto permite corregir la moto en el aire. Recorrer toda la cinta otorga un impulso mayor que la superrampa, que B conserva. Los otros tres carriles permiten circular por debajo.
+El editor incluye **T · Loop**, con entrada automática desde el piso del carril 4 y salida elevada sobre los carriles 1 y 2. La cinta se ensancha gradualmente durante la subida y conserva dos carriles hasta el despegue. Hay que seguirla usando ↑ y ↓: conservan su dirección hacia los carriles 1 y 4 aun cabeza abajo. Se puede completar manteniendo A a velocidad normal; salir del camino o perder contacto permite corregir la moto en el aire. Recorrer toda la cinta otorga un impulso mayor que la superrampa, que B conserva. Los otros tres carriles permiten circular por debajo.
 
 El loop tiene dimensiones fijas y solo permite cambiar su posición longitudinal. El editor rechaza piezas elevadas superpuestas, protege la meta y avisa si hay piezas en la zona de aterrizaje. El generador reserva primero la cantidad independiente de loops y sus espacios de aproximación y salida; los valores iniciales son 0, 1 y 2 para Fácil, Normal y Difícil. Una cantidad superior a la capacidad de la longitud elegida muestra un error.
+
+La geometría del loop usa versión 2, registrada en los cursos y repeticiones que incluyen la pieza. Al cargar el guardado se retiran solo los récords, repeticiones y competencias con una geometría de loop incompatible. Se conservan perfiles, desbloqueos, mapas, borrador y datos de circuitos sin loops. Los mapas existentes usan la salida nueva; las repeticiones anteriores con loops se rechazan al importar.
 
 Esta versión usa archivos de formato **3**, reglas **`motoneta-3`**, generador **2** y almacenamiento **4**. Reinicia completamente el guardado de desarrollo anterior (perfiles, desbloqueos, mapas, borrador, récords, repeticiones y competencias) y rechaza archivos anteriores. Las preferencias de interfaz se conservan y las cinco pistas oficiales mantienen su diseño.
 
@@ -67,7 +69,7 @@ npm run build
 
 `typecheck` comprueba también las pruebas y sus configuraciones. TypeScript detecta símbolos sin uso; se mantienen las dependencias y el workflow de publicación actuales.
 
-Las pruebas de `tests/loop.test.ts` verifican el manejo manual, impulso, vuelo, estructura sólida, choques, progreso y repeticiones con las tres dificultades. `tests/e2e/loop.spec.ts` recorre editor, generador y reinicio del guardado. `node scripts/review-loop-integration.mjs` captura poses de la simulación en el renderer del juego y valida el GLB; el modelo se regenera con Blender ejecutando `scripts/build-loop-prototype.py`. El manifiesto compartido define recorrido, marcos locales, límites y soportes tanto para física como para render.
+Las pruebas de `tests/loop.test.ts` verifican el manejo manual, impulso, vuelo, estructura sólida, choques, progreso y repeticiones con las tres dificultades. `tests/e2e/loop.spec.ts` recorre editor, generador, reinicio del guardado anterior y limpieza selectiva de resultados con geometrías de loop incompatibles. `node scripts/review-loop-integration.mjs` captura poses de la simulación en el renderer del juego y valida el GLB; el modelo se regenera con Blender ejecutando `scripts/build-loop-prototype.py`. El manifiesto compartido define recorrido, marcos locales, límites y soportes tanto para física como para render.
 
 Las pruebas de navegador pueden seleccionarse según el cambio. Por ejemplo, `npm run test:e2e -- tests/e2e/game.spec.ts tests/e2e/persistence.spec.ts` comprueba controles, editor y guardado. `npm run test:compat -- tests/e2e/ui-compat.spec.ts` realiza una comprobación breve con Firefox y WebKit; este último aproxima Safari, sin sustituir una prueba en iPhone.
 

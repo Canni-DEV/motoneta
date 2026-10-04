@@ -51,7 +51,9 @@ export function stepLoop(r: Race, p: Rider, input: number) {
     p.lane += LOOP_STEERING;
   p.lane = q(clamp(p.lane, 0, 3));
   p.speed = q(clamp(p.speed - LOOP_GRAVITY * before.tangent[1], 0, MAX_SPEED));
-  m.distance = q(Math.min(LOOP_DISTANCE, m.distance + p.speed));
+  // Clamp after quantizing: a route length rounded down must still reach its
+  // exact endpoint rather than leaving the rider permanently attached there.
+  m.distance = Math.min(LOOP_DISTANCE, q(m.distance + p.speed));
   m.age++;
   const s = sampleLoop(m.distance), position = loopPosition(s, p.lane);
   p.x = q(m.origin + position[0]);

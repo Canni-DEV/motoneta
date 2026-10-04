@@ -12,10 +12,13 @@ import { defaultSettings } from '../core/types';
 import { LANE_WIDTH, WORLD_SCALE } from '../world-space';
 import { soilNoise } from '../rendering/scene-geometry';
 
-type View = 'game' | 'top' | 'side';
+type View = 'game' | 'top' | 'side' | 'front';
 interface Sample { position: number[]; tangent: number[]; lateral: number[]; normal: number[]; width: number }
 interface Manifest {
   visualOnly: boolean;
+  geometryVersion: number;
+  exitLanes: number[];
+  exitCenterLane: number;
   width: number;
   maximumWidth: number;
   height: number;
@@ -43,7 +46,7 @@ async function start() {
   ]);
   if (!response.ok) throw new Error('No se pudo cargar la definición del loop.');
   const manifest = await response.json() as Manifest;
-  if (manifest.width !== LANE_WIDTH || manifest.maximumWidth !== 2 * LANE_WIDTH || manifest.samples[0].width !== LANE_WIDTH || manifest.samples.at(-1)!.width !== LANE_WIDTH || manifest.minimumBypassClearance < 2.35)
+  if (manifest.geometryVersion !== 2 || manifest.exitLanes.join(',') !== '1,2' || manifest.exitCenterLane !== 1.5 || manifest.width !== LANE_WIDTH || manifest.maximumWidth !== 2 * LANE_WIDTH || manifest.samples[0].width !== LANE_WIDTH || manifest.samples.at(-1)!.width !== 2 * LANE_WIDTH || manifest.minimumBypassClearance < 2.35)
     throw new Error('El modelo no coincide con el ancho o el paso libre del juego.');
   const settings = structuredClone(defaultSettings);
   settings.volume = 0;
@@ -108,7 +111,7 @@ async function start() {
   const entry = vector(manifest.entry).add(new THREE.Vector3(baseX, 0, 0));
   const exit = vector(manifest.exit).add(new THREE.Vector3(baseX, 0, 0));
   label('Entrada · 4', entry.clone().add(new THREE.Vector3(-0.2, 0.55, 0)), 'entry');
-  label('Salida elevada · 1', exit.clone().add(new THREE.Vector3(0.25, 0.45, 0)), 'exit');
+  label('Salida elevada · 1 y 2', exit.clone().add(new THREE.Vector3(0.25, 0.45, 0)), 'exit');
   for (let lane = 0; lane < 4; lane++) {
     label(`${lane + 1}`, new THREE.Vector3(baseX - 6.2, 0.16, (lane - 1.5) * LANE_WIDTH));
     const points: THREE.Vector3[] = [];
@@ -135,22 +138,24 @@ async function start() {
     mark.position.x += baseX;
     guides.add(mark);
   }
-  // A guide only: the exit and the whole flight arc keep lane 1's EXACT Z.
-  const flightPoints: THREE.Vector3[] = [];
-  for (let i = 0; i < 40; i++) {
-    for (const t of [i / 40, (i + 0.53) / 40])
-      flightPoints.push(new THREE.Vector3(exit.x + 4 * t,
-        0.025 + (exit.y - 0.025) * (1 - t * t), exit.z));
+  // Illustrative launch paths from both lane centers. Actual flight stays free.
+  for (const lane of manifest.exitLanes) {
+    const z = (lane - 2.5) * LANE_WIDTH, flightPoints: THREE.Vector3[] = [];
+    for (let i = 0; i < 40; i++) {
+      for (const t of [i / 40, (i + 0.53) / 40])
+        flightPoints.push(new THREE.Vector3(exit.x + 4 * t,
+          0.025 + (exit.y - 0.025) * (1 - t * t), z));
+    }
+    const landing = new THREE.Vector3(exit.x + 4, 0.025, z);
+    guides.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(flightPoints),
+      new THREE.LineBasicMaterial({ color: '#51b4e4' })));
+    const target = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.23, 32),
+      new THREE.MeshBasicMaterial({ color: '#51b4e4', side: THREE.DoubleSide }));
+    target.rotation.x = -Math.PI / 2;
+    target.position.copy(landing);
+    guides.add(target);
+    label(`Caída · ${lane}`, landing.clone().add(new THREE.Vector3(0, 0.22, 0)), 'exit');
   }
-  const landing = new THREE.Vector3(exit.x + 4, 0.025, exit.z);
-  guides.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(flightPoints),
-    new THREE.LineBasicMaterial({ color: '#51b4e4' })));
-  const target = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.23, 32),
-    new THREE.MeshBasicMaterial({ color: '#51b4e4', side: THREE.DoubleSide }));
-  target.rotation.x = -Math.PI / 2;
-  target.position.copy(landing);
-  guides.add(target);
-  label('Caída · 1', landing.clone().add(new THREE.Vector3(0, 0.22, 0)), 'exit');
 
   let view: View = 'game';
   const controls = new OrbitControls(world.camera, canvas);
@@ -168,9 +173,10 @@ async function start() {
       world.camera.position.set(baseX, 24, 0.001);
       world.camera.lookAt(controls.target);
       world.camera.zoom = 1.1;
-    } else if (next === 'side') {
+    } else if (next === 'side' || next === 'front') {
       controls.target.copy(center);
-      world.camera.position.set(baseX, center.y, 22);
+      if (next === 'front') world.camera.position.set(baseX + 10, center.y, 0);
+      else world.camera.position.set(baseX, center.y, 22);
       world.camera.lookAt(center);
       world.camera.zoom = 1.45;
     } else {
@@ -223,8 +229,12 @@ async function start() {
     }
     if (refreshCamera) {
       world.camera.updateMatrixWorld();
-      const bounds = world.environment.fitShadows(world.camera, manifest.height + 2);
-      world.stadium.update(world.camera, 0, race, 'race', true, 1, true, 0, bounds);
+      // Looking exactly down X has no finite horizontal X bounds. The frontal
+      // specimen uses the local stadium/shadows already prepared by world.render.
+      if (view !== 'front') {
+        const bounds = world.environment.fitShadows(world.camera, manifest.height + 2);
+        world.stadium.update(world.camera, 0, race, 'race', true, 1, true, 0, bounds);
+      }
       world.composer.render();
     }
     for (const item of labels) {
@@ -241,8 +251,10 @@ async function start() {
     ready: true, world, model, manifest, race, setView,
     validation: {
       entryLane: entry.z / LANE_WIDTH + 1.5 + 1,
-      exitLane: exit.z / LANE_WIDTH + 1.5 + 1,
-      landingLane: landing.z / LANE_WIDTH + 1.5 + 1,
+      geometryVersion: manifest.geometryVersion,
+      exitLanes: manifest.exitLanes,
+      exitCenterLane: exit.z / LANE_WIDTH + 2.5,
+      landingLanes: manifest.exitLanes,
       entryDirection: manifest.samples[0].tangent,
       exitDirection: manifest.samples.at(-1)!.tangent,
       width: manifest.width,

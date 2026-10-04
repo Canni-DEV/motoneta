@@ -38,7 +38,9 @@ try {
     for (let frame = 0; frame < 400; frame++) {
       let input = Input.A;
       if (p.motion.kind === 'loop') {
-        const target = geometry.sampleLane(geometry.sampleLoop(p.motion.distance + p.speed * 9.5));
+        const s = geometry.sampleLoop(p.motion.distance + p.speed * 9.5);
+        const bias = -0.5 * Math.min(1, Math.max(0, (p.motion.distance / geometry.LOOP_DISTANCE - 0.55) / 0.25));
+        const target = geometry.sampleLane(s) + bias * s.lateral[2];
         if (p.lane > target + .015) input |= Input.UP;
         if (p.lane < target - .015) input |= Input.DOWN;
       } else if (p.motion.kind === 'loop-air') {
@@ -58,6 +60,27 @@ try {
       }
       if (!has('boost') && p.motion.kind === 'loop-air' && p.speed > 5) snapshot('boost');
       if (has('boost') && p.motion.kind === 'track') {snapshot('landing'); break;}
+    }
+    Object.assign(r, structuredClone(initial));
+    for (let frame = 0; frame < 400; frame++) {
+      const rider = r.riders[0];
+      let input = Input.A;
+      if (rider.motion.kind === 'loop') {
+        const s = geometry.sampleLoop(rider.motion.distance + rider.speed * 9.5);
+        const bias = 0.5 * Math.min(1, Math.max(0, (rider.motion.distance / geometry.LOOP_DISTANCE - 0.55) / 0.25));
+        const target = geometry.sampleLane(s) + bias * s.lateral[2];
+        if (rider.lane > target + .015) input |= Input.UP;
+        if (rider.lane < target - .015) input |= Input.DOWN;
+      } else if (rider.motion.kind === 'loop-air') {
+        const pitch = geometry.wrapAngle(rider.tilt);
+        input = Input.B;
+        if (pitch > .05) input |= Input.RIGHT;
+        if (pitch < -.05) input |= Input.LEFT;
+      }
+      r.frame++; r.elapsed++; r.events = []; move(r, rider, input);
+      const has = name => result.some(s => s.name === name);
+      if (!has('boost-lane-2') && rider.motion.kind === 'loop-air' && rider.speed > 5) snapshot('boost-lane-2');
+      if (has('boost-lane-2') && rider.motion.kind === 'track') { snapshot('landing-lane-2'); break; }
     }
     Object.assign(r, structuredClone(initial));
     for (let frame = 0; frame < 200; frame++) {
@@ -95,8 +118,9 @@ try {
       await page.locator('main').screenshot({path: side}); screenshots.push(side);
     }
   }
-  if (states.length !== 7 || states.find(s => s.name === 'boost')?.lane > 1.5 ||
-      states.find(s => s.name === 'landing')?.crashes !== 0 || errors.length)
+  if (states.length !== 9 || Math.abs(states.find(s => s.name === 'boost')?.lane - 1) > .1 ||
+      Math.abs(states.find(s => s.name === 'boost-lane-2')?.lane - 2) > .1 ||
+      states.filter(s => s.name.startsWith('landing')).some(s => s.crashes !== 0) || errors.length)
     throw new Error(JSON.stringify({states, errors}));
   const report = {gltf: {errors: gltf.issues.numErrors, warnings: gltf.issues.numWarnings, triangles: gltf.info.totalTriangleCount}, states, screenshots, errors};
   await writeFile(`${directory}/validation.json`, JSON.stringify(report, null, 2) + '\n');

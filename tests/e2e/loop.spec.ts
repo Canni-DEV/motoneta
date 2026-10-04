@@ -10,6 +10,7 @@ test('loop editor operations, fixed properties and generator counts', async ({ p
   await page.locator('[data-action="add-piece"]').click();
   await expect(page.locator('#piece-length')).toBeDisabled();
   await expect(page.locator('#piece-height')).toBeDisabled();
+  await expect(page.locator('.piece-inspector').locator('..').getByRole('heading')).toHaveText('Loop · entrada 4 → salida 1 y 2');
   await page.locator('#piece-x').fill('352');
   await page.locator('#piece-x').blur();
   await expect.poll(() => page.evaluate(() => (window as any).__motoneta.design.items[0].x)).toBe(352);
@@ -79,6 +80,105 @@ test('loop editor operations, fixed properties and generator counts', async ({ p
     await discard.click();
   await expect.poll(() => page.evaluate(() => (window as any).__motoneta.design.items.filter((p: any) => p.piece === 'T').length)).toBe(2);
   expect(errors).toEqual([]);
+});
+
+test('selective loop cleanup preserves maps, progression and current or unrelated race data', async ({ page }) => {
+  await page.goto('/loop-prototype.html');
+  const result = await page.evaluate(async () => {
+    const source = (path: string) => import(/* @vite-ignore */ path);
+    const [{ GameStore }, maps, recording, racing] = await Promise.all([
+      source('/src/persistence.ts'), source('/src/core/maps.ts'), source('/src/core/recording.ts'), source('/src/core/racing.ts'),
+    ]);
+    const store = new GameStore();
+    await store.open();
+    const loop = maps.validateMap({ ...maps.emptyDesign(), id: 'keep-loop-map', items: [maps.placedPiece('T', 512)] });
+    const flat = maps.validateMap({ ...maps.emptyDesign(), id: 'flat-map' });
+    const profile = store.state.profiles[0];
+    profile.name = 'Conservar piloto';
+    profile.unlockedMotoneta = true;
+    const config = (track: any, version?: number) => {
+      const c = { ...maps.mapCourse(track), mode: 'quick', player: profile, bots: [], difficulty: 'normal', seed: 1984 };
+      if (track === loop) {
+        if (version === undefined) delete c.loopGeometryVersion;
+        else c.loopGeometryVersion = version;
+      }
+      return c;
+    };
+    const configs = { flat: config(flat), missing: config(loop), old: config(loop, 1), current: config(loop, 2) };
+    const replay = (c: any) => {
+      const value = recording.newRecording(c);
+      // Seed records produced by older builds; newRecording normalizes new races.
+      value.config = structuredClone(c);
+      value.result.config = structuredClone(c);
+      return value;
+    };
+    const record = (id: string, c: any) => ({ key: id, profileId: profile.id, ref: c.ref, config: c,
+      ticks: 500, bestLap: 500, date: '2026-10-04', replayId: id, lapReplayId: id });
+    const session = (id: string, c: any, resultConfig = c) => ({ id, mode: 'versus', players: [profile], bots: [], difficulty: 'normal',
+      courses: [c], courseIndex: 0, turnIndex: 0, phase: 'ready', seed: 1984,
+      results: [{ course: 0, player: profile.id, result: racing.raceResult(racing.createRace(resultConfig)), replayId: id }] });
+    const state = structuredClone(store.state);
+    state.maps = [loop, flat]; state.draft = structuredClone(loop);
+    state.records = Object.entries(configs).map(([id, c]) => record(id, c));
+    state.sessions = { tournament: session('bad-session', configs.missing), versus: session('current-session', configs.current) };
+    state.motonetaSessions = { old: session('old', configs.old), flat: session('flat-session', configs.flat), current: session('current', configs.current) };
+    const settings = JSON.stringify({ quality: 'low', volume: 0.15 });
+    localStorage.setItem('motoneta.settings.v3', settings);
+    const preserved = JSON.stringify([state.profiles, state.activeProfile, state.maps, state.draft]);
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('motoneta-game', 4);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(['data', 'replays'], 'readwrite');
+      tx.objectStore('data').put(state, 'state');
+      for (const [id, c] of Object.entries(configs)) tx.objectStore('replays').put(replay(c), id);
+      tx.objectStore('replays').put(replay(configs.old), 'orphan-old-loop');
+      tx.objectStore('replays').put(replay(configs.flat), 'orphan-flat');
+      tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+    // Failure after the state write but during replay deletion must roll back both stores.
+    const originalDelete = IDBCursor.prototype.delete;
+    let cleanupRejected = false;
+    IDBCursor.prototype.delete = function () { throw new DOMException('Cleanup failure', 'QuotaExceededError'); };
+    try {
+      await new GameStore().open();
+    } catch {
+      cleanupRejected = true;
+    } finally {
+      IDBCursor.prototype.delete = originalDelete;
+    }
+    const rawDb = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('motoneta-game', 4);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    const rawTx = rawDb.transaction(['data', 'replays'], 'readonly');
+    const [rawState, rawReplay] = await Promise.all([
+      rawTx.objectStore('data').get('state'), rawTx.objectStore('replays').get('missing'),
+    ].map(request => new Promise<any>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    })));
+    rawDb.close();
+    const atomicRollback = cleanupRejected && JSON.stringify(rawState) === JSON.stringify(state) && !!rawReplay;
+    const loaded = new GameStore(); await loaded.open();
+    const backup = await loaded.backup();
+    const after = JSON.stringify(backup);
+    await loaded.open();
+    return {
+      preserved: JSON.stringify([loaded.state.profiles, loaded.state.activeProfile, loaded.state.maps, loaded.state.draft]) === preserved,
+      settings: localStorage.getItem('motoneta.settings.v3') === settings,
+      records: loaded.state.records.map((r: any) => r.key), sessions: Object.keys(loaded.state.sessions),
+      motoneta: Object.keys(loaded.state.motonetaSessions), replayIds: Object.keys(backup.replays).sort(),
+      missing: await loaded.replay('missing') === undefined, old: await loaded.replay('old') === undefined,
+      current: (await loaded.replay('current')).config.loopGeometryVersion,
+      unchangedSecondLoad: JSON.stringify(await loaded.backup()) === after,
+      atomicRollback,
+    };
+  });
+  expect(result).toEqual({ preserved: true, settings: true, records: ['flat', 'current'], sessions: ['versus'],
+    motoneta: ['flat', 'current'], replayIds: ['current', 'flat', 'orphan-flat'], missing: true, old: true,
+    current: 2, unchangedSecondLoad: true, atomicRollback: true });
 });
 test('storage upgrade removes development data and accepts only format 3', async ({ page }) => {
   await page.goto('/loop-prototype.html');

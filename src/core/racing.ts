@@ -2,11 +2,13 @@ import { type Race, type RaceConfig, type RaceResult } from './game';
 import { crash, move, START_X } from './simulation';
 import { heightAt, segmentAt } from './tracks';
 import { clamp, Input, type Rider } from './types';
-import { loopInstances, sampleLane, sampleLoop, wrapAngle } from './loop-geometry';
+import { loopGeometryMetadata, loopInstances, sampleLane, sampleLoop, wrapAngle } from './loop-geometry';
 import { canAimForLoop, ridersTouch } from './loop-physics';
 
 export function createRace(config: RaceConfig): Race {
   const c = structuredClone(config);
+  delete c.loopGeometryVersion;
+  Object.assign(c, loopGeometryMetadata(c.track));
   if (c.bots.length > 5 || c.track.laps < 1 || c.track.laps > 9)
     throw new Error('Configuración de carrera inválida.');
   const riders: Rider[] = [c.player, ...c.bots].map((p, id) => ({

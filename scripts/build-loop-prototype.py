@@ -21,7 +21,7 @@ RADIUS = 3.0
 EXIT_HEIGHT = 2.5
 THICKNESS = 0.085
 ENTRY_Z = 1.5 * WIDTH
-EXIT_Z = -1.5 * WIDTH
+EXIT_Z = -WIDTH  # Center between lanes 1 and 2.
 
 
 def smooth(t):
@@ -40,10 +40,9 @@ def loop_point(theta):
 
 
 def loop_width(theta):
-    # Widen before steering starts; keep both lanes through the upper descent.
+    # Widen before steering starts; keep both lanes all the way to takeoff.
     widen = smooth((theta - math.pi / 3) / (math.pi / 3))
-    narrow = smooth((theta - math.pi * 1.5) / (math.pi / 3))
-    return WIDTH * (1 + widen * (1 - narrow))
+    return WIDTH * (1 + widen)
 
 
 points = [Vector((-3 + 3 * i / 24, 0.012, ENTRY_Z)) for i in range(25)]
@@ -51,7 +50,7 @@ points += [loop_point(2 * math.pi * i / 256) for i in range(1, 257)]
 points += [Vector((2 * i / 24, EXIT_HEIGHT + 0.012, EXIT_Z)) for i in range(1, 25)]
 widths = [WIDTH] * 25
 widths += [loop_width(2 * math.pi * i / 256) for i in range(1, 257)]
-widths += [WIDTH] * 24
+widths += [2 * WIDTH] * 24
 frames = []
 for i, point in enumerate(points):
     tangent = (points[min(i + 1, len(points) - 1)] - points[max(0, i - 1)]).normalized()
@@ -91,7 +90,9 @@ root = bpy.data.objects.new('Loop_Prototype', None)
 bpy.context.collection.objects.link(root)
 root['visual_only'] = False
 root['entry_lane'] = 4
-root['exit_lane'] = 1
+root['exit_lanes'] = [1, 2]
+root['exit_center_lane'] = 1.5
+root['geometry_version'] = 2
 
 
 def mesh(name, vertices, faces, mat, smooth_faces=False):
@@ -191,7 +192,7 @@ assert abs(points[0].z - ENTRY_Z) < 1e-6
 assert abs(points[-1].z - EXIT_Z) < 1e-6
 assert frames[0][0].x > 0.999 and frames[-1][0].x > 0.999
 assert abs(frames[24 + 128][2].y + 1) < 1e-6, 'Apex must face down'
-assert widths[0] == WIDTH and widths[-1] == WIDTH
+assert widths[0] == WIDTH and widths[-1] == 2 * WIDTH
 assert widths[24 + 128] == 2 * WIDTH
 assert all(WIDTH <= w <= 2 * WIDTH for w in widths)
 
@@ -206,6 +207,7 @@ for obj in bpy.data.objects:
 triangles = sum(len(obj.data.loop_triangles) for obj in bpy.data.objects if obj.type == 'MESH')
 manifest = {
     'visualOnly': False,
+    'geometryVersion': 2,
     'worldScale': SCALE,
     'width': WIDTH,
     'maximumWidth': max(widths),
@@ -214,7 +216,8 @@ manifest = {
     'height': max(p.y for p in surface_vertices + shell_vertices),
     'exitHeight': EXIT_HEIGHT + 0.012,
     'entryLane': 4,
-    'exitLane': 1,
+    'exitLanes': [1, 2],
+    'exitCenterLane': 1.5,
     'entry': list(points[0]),
     'exit': list(points[-1]),
     'entryTangent': list(frames[0][0]),

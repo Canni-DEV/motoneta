@@ -4,7 +4,7 @@ import { readTimeOfDay } from './time-of-day';
 import { PIECES, getTrack } from './tracks';
 import type { Segment, TimeOfDay, Track, Weather } from './types';
 import { readWeather } from './weather';
-import { isLoop, loopPlacementError, LOOP_APPROACH, LOOP_LENGTH, LOOP_RUNOUT, LOOP_SPACING, maximumLoops } from './loop-geometry';
+import { isLoop, loopGeometryMetadata, loopPlacementError, LOOP_APPROACH, LOOP_LENGTH, LOOP_RUNOUT, LOOP_SPACING, maximumLoops } from './loop-geometry';
 
 export interface PlacedPiece extends Segment {
   id: string;
@@ -185,8 +185,10 @@ export function mapTrack(d: MapDesign): Track {
   };
 }
 export function mapCourse(d: MapDesign): RaceCourse {
+  const track = mapTrack(d);
   return {
-    track: mapTrack(d),
+    track,
+    ...loopGeometryMetadata(track),
     ref: { id: d.id, revision: d.revision, name: d.name },
     timeOfDay: d.timeOfDay,
     weather: d.weather,
