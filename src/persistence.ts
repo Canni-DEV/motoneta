@@ -22,6 +22,7 @@ export interface SaveState {
   records: PersonalRecord[];
   sessions: Partial<Record<'tournament' | 'versus', CompetitionSession>>;
   motonetaSessions: Record<string, CompetitionSession>;
+  tanqueSessions: Record<string, CompetitionSession>;
   draft: MapDesign;
 }
 const initial = (): SaveState => ({
@@ -32,6 +33,7 @@ const initial = (): SaveState => ({
   records: [],
   sessions: {},
   motonetaSessions: {},
+  tanqueSessions: {},
   draft: emptyDesign(),
 });
 export class GameStore {
@@ -58,17 +60,18 @@ export class GameStore {
     });
     const stored = await this.get<SaveState>('data', 'state');
     if (stored) {
-      this.state = stored;
+      this.state = structuredClone(stored);
       this.state.profiles = stored.profiles.map(localProfile);
       this.state.motonetaSessions ??= {};
-      await this.invalidateObsoleteLoops();
+      this.state.tanqueSessions ??= {};
+      await this.invalidateObsoleteLoops(stored);
     }
     else {
       this.state = initial();
       await this.update(() => {});
     }
   }
-  private async invalidateObsoleteLoops() {
+  private async invalidateObsoleteLoops(stored: SaveState) {
     const next = structuredClone(this.state);
     const obsoleteSession = (session: CompetitionSession) =>
       session.courses.some(course => !compatibleLoopGeometry(course)) ||
@@ -76,9 +79,10 @@ export class GameStore {
     next.records = next.records.filter(record => compatibleLoopGeometry(record.config));
     for (const mode of ['tournament', 'versus'] as const)
       if (next.sessions[mode] && obsoleteSession(next.sessions[mode]!)) delete next.sessions[mode];
-    for (const [owner, session] of Object.entries(next.motonetaSessions))
-      if (obsoleteSession(session)) delete next.motonetaSessions[owner];
-    const changed = JSON.stringify(next) !== JSON.stringify(this.state);
+    for (const bucket of [next.motonetaSessions, next.tanqueSessions])
+      for (const [owner, session] of Object.entries(bucket))
+        if (obsoleteSession(session)) delete bucket[owner];
+    const changed = JSON.stringify(next) !== JSON.stringify(stored);
     // Metadata and replay invalidation share one transaction. Maps, progression
     // and unrelated records are preserved even if cleanup cannot be committed.
     await new Promise<void>((resolve, reject) => {
@@ -153,6 +157,7 @@ export class GameStore {
             ...next.records.flatMap((r) => [r.replayId, r.lapReplayId]),
             ...Object.values(next.sessions).flatMap((s) => s?.results.map((r) => r.replayId) ?? []),
             ...Object.values(next.motonetaSessions).flatMap((s) => s.results.map((r) => r.replayId)),
+            ...Object.values(next.tanqueSessions).flatMap((s) => s.results.map((r) => r.replayId)),
           ]);
           const cursor = tx.objectStore('replays').openCursor();
           cursor.onsuccess = () => {
@@ -181,7 +186,7 @@ export class GameStore {
       (s) => {
         if (session) {
           const ownerId = session.players[0].id;
-          const current = session.presetId === 'motoneta' ? s.motonetaSessions[ownerId] : s.sessions[session.mode];
+          const current = session.presetId ? s[`${session.presetId}Sessions`][ownerId] : s.sessions[session.mode];
           if (
             !current ||
             current.id !== session.id ||
@@ -191,15 +196,17 @@ export class GameStore {
           )
             return false;
           let accepted = acceptResult(current, replay.result, replayId);
-          if (current.presetId === 'motoneta') {
+          if (current.presetId) {
             if (accepted.results.length === accepted.courses.length) {
               accepted = advanceSession(accepted);
               const owner = s.profiles.find((p) => p.id === ownerId);
-              const won = standings(accepted).some((row) => row.id === ownerId && row.rank === 1);
-              accepted.reward = won && owner ? owner.unlockedMotoneta ? 'already-unlocked' : 'unlocked' : 'not-earned';
-              if (won && owner) owner.unlockedMotoneta = true;
+              const won = standings(accepted).some((row) => row.id === ownerId && row.rank === 1) &&
+                (current.presetId !== 'tanque' || owner?.unlockedMotoneta === true);
+              const flag = current.presetId === 'tanque' ? 'unlockedTanque' : 'unlockedMotoneta';
+              accepted.reward = won && owner ? owner[flag] ? 'already-unlocked' : 'unlocked' : 'not-earned';
+              if (won && owner) owner[flag] = true;
             }
-            s.motonetaSessions[ownerId] = accepted;
+            s[`${current.presetId}Sessions`][ownerId] = accepted;
           } else s.sessions[session.mode] = accepted;
         }
         const own = replay.result.finishes.find((f) => f.id === replay.config.player.id);

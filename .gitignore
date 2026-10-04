@@ -22,6 +22,7 @@
 /assets/*
 !/assets/motocross/
 !/assets/motoneta/
+!/assets/tanque/
 !/assets/track-pieces/
 /scripts/*
 !/scripts/validate-motocross.mjs
@@ -31,6 +32,8 @@
 !/scripts/review-loop-integration.mjs
 !/scripts/review-motoneta.mjs
 !/scripts/benchmark-motoneta.mjs
+!/scripts/review-tanque.mjs
+!/scripts/benchmark-tanque.mjs
 !/scripts/check-motoneta-model.py
 !/scripts/review-model-quality.mjs
 !/scripts/check-motocross-topology.py

@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { bikePose, crashPose, type GroundHeight } from './bike-pose';
 import rigDefinition from './bike-rig.json';
-import { sameAppearance, defaultAppearance, SLOTS, VARIANTS, type VehicleId, type Appearance, type SlotId } from './appearance';
+import { sameAppearance, defaultVehicleAppearance, normalizeAppearance, SLOTS, VARIANTS, slotVariants, type VehicleId, type Appearance, type SlotId } from './appearance';
 import { VEHICLE_VISUALS, type RigDefinition } from './vehicle-visual';
 import { GHOST_OPACITY, GHOST_OVERLAP_OPACITY } from './ghost-visibility';
 
@@ -50,10 +50,10 @@ const requiredNodes = [
   'Spring',
   ...Object.keys(rigDefinition),
 ];
-const CHASSIS_ATTACHMENTS = VARIANTS.flatMap((variant) => [
+const CHASSIS_ATTACHMENTS = ['Floorboard', ...VARIANTS.flatMap((variant) => [
   ...['seat', 'fairing', 'exhaust', 'plate'].map((slot) => `Slot_${slot}_${variant}`),
   `Slot_fender_${variant}_Rear`,
-]);
+])];
 const RIDER_SUPPORTS = [
   ['Head', 0.17],
   ['Spine', 0.12],
@@ -72,11 +72,11 @@ const RIDER_SUPPORTS = [
   ['FootR', 0.06],
 ] as const;
 
-export function validateBikeAsset(scene: THREE.Group): THREE.Group {
+export function validateBikeAsset(scene: THREE.Group, vehicle: VehicleId = 'motocross'): THREE.Group {
   for (const name of requiredNodes) {
     if (!scene.getObjectByName(name)) throw new Error(`Modelo incompleto: ${name}`);
   }
-  for (const slot of SLOTS) for (const variant of VARIANTS)
+  for (const slot of SLOTS) for (const variant of slotVariants(vehicle, slot))
     if (!scene.getObjectByName(`Slot_${slot}_${variant}`) &&
         !scene.getObjectByName(`Slot_${slot}_${variant}_Front`) &&
         !scene.getObjectByName(`Slot_${slot}_${variant}_FrontWheel`))
@@ -85,13 +85,13 @@ export function validateBikeAsset(scene: THREE.Group): THREE.Group {
 }
 
 /** A rejected load can be retried; already loaded assets are retained. */
-export function createBikeAssetLoader(fetchAsset: (quality: BikeQuality) => Promise<THREE.Group>) {
+export function createBikeAssetLoader(fetchAsset: (quality: BikeQuality) => Promise<THREE.Group>, vehicle: VehicleId = 'motocross') {
   const cache = new Map<BikeQuality, Promise<THREE.Group>>();
   const get = (quality: BikeQuality) => {
     let promise = cache.get(quality);
     if (!promise) {
       promise = fetchAsset(quality)
-        .then(validateBikeAsset)
+        .then((scene) => validateBikeAsset(scene, vehicle))
         .catch((error) => {
           cache.delete(quality);
           throw error;
@@ -115,10 +115,14 @@ export const loadBikeAssets = createBikeAssetLoader(async (quality) => {
 const loadMotonetaAssets = createBikeAssetLoader(async (quality) => {
   const gltf = await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/motoneta-${quality}.glb`);
   return gltf.scene;
-});
+}, 'motoneta');
+const loadTanqueAssets = createBikeAssetLoader(async (quality) => {
+  const gltf = await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/tanque-${quality}.glb`);
+  return gltf.scene;
+}, 'tanque');
 export async function loadVehicleAssets(): Promise<VehicleAssets> {
-  const [motocross, motoneta] = await Promise.all([loadBikeAssets(), loadMotonetaAssets()]);
-  return { motocross, motoneta };
+  const [motocross, motoneta, tanque] = await Promise.all([loadBikeAssets(), loadMotonetaAssets(), loadTanqueAssets()]);
+  return { motocross, motoneta, tanque };
 }
 
 const Y = new THREE.Vector3(0, 1, 0);
@@ -218,9 +222,11 @@ export class Bike {
 
   setAppearance(value: Appearance | number, ghost = false) {
     if (typeof value === 'number' && value === this.appearanceColor && ghost === this.ghost) return;
-    const appearance = typeof value === 'number'
-      ? defaultAppearance(`#${value.toString(16).padStart(6, '0')}`)
+    const incoming = typeof value === 'number'
+      ? defaultVehicleAppearance(this.vehicle, `#${value.toString(16).padStart(6, '0')}`)
       : value;
+    if (this.appearance && ghost === this.ghost && sameAppearance(incoming, this.appearance)) return;
+    const appearance = incoming.vehicle === 'tanque' ? normalizeAppearance(incoming) : incoming;
     if (this.appearance && ghost === this.ghost && sameAppearance(appearance, this.appearance)) return;
     this.appearance = structuredClone(appearance);
     this.appearanceColor = typeof value === 'number' ? value : null;
@@ -249,7 +255,7 @@ export class Bike {
         copy.depthWrite = false;
         copy.depthTest = true;
         copy.userData.ghost = true;
-        if (copy instanceof THREE.MeshStandardMaterial && /^Lamp(Front|Rear)$/.test(copy.name))
+        if (copy instanceof THREE.MeshStandardMaterial && /^Lamp(Front|Rear|Reflector)$/.test(copy.name))
           copy.emissiveIntensity = 0;
         this.ghostMaterials.set(material, copy);
         this.ownMaterial(copy);
@@ -366,14 +372,14 @@ export class Bike {
             (slot === 'boots' && material.name === 'Boot');
           const accent = material.name === 'TeamAccent' ||
             (slot === 'torso' && material.name === 'Ceramic');
-          if (!primary && !accent && !/^Lamp(Front|Rear)$/.test(material.name)) return material;
+          if (!primary && !accent && !/^Lamp(Front|Rear|Reflector)$/.test(material.name)) return material;
           const key = `${material.uuid}:${slot ?? 'frame'}:${primary ? 'primary' : accent ? 'accent' : 'lamp'}`;
           if (!colored.has(key)) {
             const instance = material.clone() as THREE.MeshStandardMaterial;
             if (primary || accent) {
               instance.userData.paint = { slot: slot ?? 'frame', role: primary ? 'primary' : 'accent' };
               instance.color.setHex(color);
-            } else instance.emissive.set(material.name === 'LampFront' ? '#fff4d8' : '#ff1935');
+            } else instance.emissive.set(material.name === 'LampRear' ? '#ff1935' : '#fff4d8');
             colored.set(key, instance);
             this.ownMaterial(instance);
           }
@@ -455,7 +461,7 @@ export class Bike {
 
   private ownMaterial(material: THREE.Material) {
     this.ownedMaterials.push(material);
-    if (material.name === 'LampFront' || material.name === 'LampRear')
+    if (/^Lamp(Front|Rear|Reflector)$/.test(material.name))
       this.lampMaterials.push(material as THREE.MeshStandardMaterial);
   }
 
@@ -466,7 +472,7 @@ export class Bike {
     this.headlight.distance = 10 * this.root.scale.x;
     for (const material of this.lampMaterials)
       material.emissiveIntensity =
-        material.userData.ghost ? 0 : level * (material.name === 'LampFront' ? 6 : 3);
+        material.userData.ghost ? 0 : level * (material.name === 'LampRear' ? 3 : 6);
   }
 
   update(state: BikeVisualState) {
@@ -586,7 +592,7 @@ export class Bike {
     this.nodes.Chassis.position.y = -suspension;
     // These interchangeable meshes are exported at the scene root. Keep their
     // common mounting surface on the chassis through compression, for every option.
-    for (const name of CHASSIS_ATTACHMENTS) this.nodes[name].position.y = -suspension;
+    for (const name of CHASSIS_ATTACHMENTS) if (this.nodes[name]) this.nodes[name].position.y = -suspension;
     // Follow the posed chassis in root coordinates, including while the model is hidden.
     this.nodes.Chassis.updateWorldMatrix(true, false);
     this.lightMount.matrix

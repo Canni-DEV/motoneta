@@ -1,0 +1,783 @@
+{
+  "baselineCommit": "08849cf34e9f9dcd7767e8f7702384e857753b3c",
+  "baselineVehicle": "motoneta",
+  "candidateVehicle": "tanque",
+  "candidateHashes": {
+    "public/models/tanque-low.glb": "7949ef30dc39d20f91b21b15facc1478a11980fe581a4b0cd8ff4348480ecee8",
+    "public/models/tanque-high.glb": "77620c935698b552e9996d1c2a144c245438801807d122f0a66be95462c90f03",
+    "src/bike-model.ts": "e1d9ba537039bc99464407aaedd6f1f7e28e198e583e2d796fc0acbfb5c60ad6",
+    "src/vehicle-visual.ts": "861787f64a9a7718f45431fb046f9838d5b76f9fafc2b17520c9b72763f049ff"
+  },
+  "platform": "win32 10.0.26200",
+  "cpu": "Intel(R) Core(TM) Ultra 7 265",
+  "browser": "153.0.8010.12",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "seconds": 10,
+  "samples": 3,
+  "warmupSeconds": 3,
+  "method": "Same hardware GPU and Chromium/D3D11, six riders and five ghosts; High/Low in morning/clear and night/rain. Reference visual runtime and GLBs come from the recorded Git commit; unchanged dependencies use current sources. Sequential interleaved samples after shader warmup. Measure CPU render/submission without gl.finish; this does not measure GPU execution. Median of three run p95 values. Browser served by Vite; physical mobile performance is not measured.",
+  "stableResources": true,
+  "comparisons": [
+    {
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95Ms": 10,
+      "candidateP95Ms": 7.5,
+      "changePercent": -25,
+      "limitPercent": 10,
+      "passes": true
+    },
+    {
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95Ms": 9.600000001490116,
+      "candidateP95Ms": 8.699999995529652,
+      "changePercent": -9.375000060632976,
+      "limitPercent": 10,
+      "passes": true
+    },
+    {
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95Ms": 6.100000001490116,
+      "candidateP95Ms": 5.799999997019768,
+      "changePercent": -4.918032858968258,
+      "limitPercent": 10,
+      "passes": true
+    },
+    {
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95Ms": 6.699999995529652,
+      "candidateP95Ms": 6.399999998509884,
+      "changePercent": -4.477611898804968,
+      "limitPercent": 10,
+      "passes": true
+    }
+  ],
+  "runs": [
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5.300000004470348,
+        "p95Ms": 11.899999998509884
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 605
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5,
+        "p95Ms": 10.899999998509884
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 563
+    },
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 5.300000004470348,
+        "p95Ms": 10
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 605
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5,
+        "p95Ms": 7.5
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 563
+    },
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 5.399999998509884,
+        "p95Ms": 8.5
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 231,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 605
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5.0999999940395355,
+        "p95Ms": 7.5
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "after": {
+        "geometries": 228,
+        "textures": 76
+      },
+      "stableResources": true,
+      "drawCalls": 563
+    },
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 6.100000001490116,
+        "p95Ms": 9.799999997019768
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 608
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 5.700000002980232,
+        "p95Ms": 8.700000002980232
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 566
+    },
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 6,
+        "p95Ms": 9.600000001490116
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 608
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5.699999995529652,
+        "p95Ms": 8.699999995529652
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 566
+    },
+    {
+      "kind": "baseline",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 6.100000001490116,
+        "p95Ms": 9.400000005960464
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 608
+    },
+    {
+      "kind": "candidate",
+      "quality": "low",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.799999997019768,
+        "p95Ms": 7.799999997019768
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 77
+      },
+      "stableResources": true,
+      "drawCalls": 566
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.300000004470348,
+        "p95Ms": 6.100000001490116
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 884
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 4.100000001490116,
+        "p95Ms": 5.799999997019768
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.300000004470348,
+        "p95Ms": 6
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 884
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.300000004470348,
+        "p95Ms": 6.100000001490116
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 229,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 884
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.399999998509884,
+        "p95Ms": 6
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.899999998509884,
+        "p95Ms": 6.600000001490116
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 870
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5,
+        "p95Ms": 5.899999998509884
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 810
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 5.299999997019768,
+        "p95Ms": 6.700000002980232
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 870
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 4.799999997019768,
+        "p95Ms": 6.399999998509884
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 810
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 600,
+        "medianMs": 4.899999998509884,
+        "p95Ms": 6.699999995529652
+      },
+      "frameIntervals": {
+        "count": 599,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 233,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 870
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "night",
+        "weather": "rain"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 601,
+        "medianMs": 4.799999997019768,
+        "p95Ms": 6.399999998509884
+      },
+      "frameIntervals": {
+        "count": 600,
+        "medianMs": 16.699999999999818,
+        "p95Ms": 16.700000000000728
+      },
+      "memory": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "after": {
+        "geometries": 230,
+        "textures": 89
+      },
+      "stableResources": true,
+      "drawCalls": 810
+    }
+  ]
+}

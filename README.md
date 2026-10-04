@@ -27,6 +27,10 @@ Dentro de Torneo podés elegir el Torneo personalizado o el **Torneo Motoneta**:
 
 El garaje permite equipar Motocross o Motoneta al guardar, con seis piezas y dos colores por pieza. Las configuraciones de cada moto son independientes y el piloto es compartido; Cancelar descarta la edición. La Motoneta bloqueada permite verla en 3D y muestra el requisito. Ambos vehículos tienen la misma física y sonido, comparten marcas y conservan su apariencia original en repeticiones y fantasmas.
 
+Obtener la Motoneta habilita el **Torneo Tanque**: cinco pistas largas de 6144 unidades, dos vueltas y tres bots en Difícil. Las pistas se generan por fecha de Argentina, con 0, 1, 1, 2 y 2 loops en orden diario variable, y cubren mañana, tarde, noche, despejado, lluvia y nieve. A medianoche de Argentina cambia el calendario de nuevos intentos; los intentos pendientes conservan sus cinco pistas, condiciones y resultados. Todos los perfiles reciben el mismo calendario para esa fecha y versión del juego. Se permiten reintentos ilimitados, con las mismas reglas de puntos y desempate de Motoneta. Se usa el reloj del dispositivo, sin servidor.
+
+Ganar el campeonato desbloquea el **Tanque**, una scooter inspirada en la Yamaha Axis de la referencia, para ese perfil. Su carrocería es fija y se personaliza con un color principal y uno secundario; asiento, piso, neumáticos y metales conservan sus materiales. El piloto mantiene sus piezas y colores compartidos. El premio abre el garaje con el Tanque seleccionado y se equipa al Guardar. Los tres vehículos comparten física, sonido y récords; repeticiones y fantasmas conservan su vehículo y colores originales. Los guardados de formato 3 existentes incorporan el Tanque bloqueado sin perder datos.
+
 Las repeticiones pueden verse con cámaras cinematográficas y el tema de resultados. En Inicio, tras 60 segundos de inactividad en un equipo no móvil, se reproducen automáticamente las marcas del perfil activo; Escape vuelve al menú. Esta opción se puede desactivar en Ajustes → Interfaz.
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla.
@@ -106,6 +110,19 @@ npm run models:validate
 ```
 
 La scooter usa el mismo generador con un objetivo separado, después de aprobar Esencial a partir de la referencia del usuario. Sus archivos editables, rig y manifiesto están en `assets/motoneta/`, y el juego carga `motoneta-high.glb` y `motoneta-low.glb` junto con los dos modelos de motocross y el estadio antes de habilitar el menú.
+
+El objetivo `--vehicle=tanque` genera el modelo fijo del Tanque en `assets/tanque/` y sus GLB High/Low en `public/models/`. Las referencias fotográfica, de modelado, de frente/atrás/lateral y la comparación del usuario se conservan en `assets/tanque/concepts/`. La revisión `classic-scooter-reference-v4` reconstruye el frente con planos rectos inclinados y pliegues que convergen en la punta; sus paneles inferiores continúan hasta el piso. Modela los pliegues diagonales y el receso del lateral, un asiento con techo plano y bordes moldeados, faro con lente translúcida y reflector interior, espejos, portaequipajes y ruedas de tres radios, sin logos ni letras. El piso y el zócalo usan plástico mate neutro, independiente de la pintura. Conserva los centros de ruedas, contactos de manos/pies y jerarquía de 15 huesos de Motoneta, con una posición sentada ajustada al asiento del Tanque. Incluye todas las opciones compartidas del piloto y limita la combinación visible a 8000 triángulos Low y 24 000 High. Los seis GLB de vehículos se cargan antes de habilitar carreras y garaje.
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python-exit-code 1 --python scripts/build-motocross.py -- --vehicle=tanque
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background assets/tanque/tanque.blend --python-exit-code 1 --python scripts/check-motoneta-model.py -- --vehicle=tanque
+npm run models:validate
+# Con Vite activo:
+npm run models:review:tanque
+npm run models:benchmark:tanque -- <commit-de-referencia>
+```
+
+La revisión visual captura ambos modelos, frente, atrás, lateral y ambas perspectivas sin piloto, las tres familias del piloto, repintado, conducción, salto, caída, reincorporación, faro nocturno y fantasma. El piso y los paneles acompañan la suspensión como una sola carrocería; el reflector se ilumina detrás de la lente y los fantasmas no emiten luz. `assets/tanque/reproducibility.json` compara los hashes de dos exportaciones consecutivas de GLB, manifiesto y rig. El benchmark compara el Tanque con la Motoneta del commit de referencia, con seis pilotos y cinco fantasmas, High/Low y dos condiciones ambientales en la misma GPU. Registra p95 de CPU de render y presentación de comandos, sin sincronizar ni medir el tiempo de ejecución de la GPU; la regresión máxima admitida es del 10 %. El informe, los hashes del candidato y las muestras quedan en `assets/tanque/performance-comparison.json`.
 
 ```powershell
 & 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --python-exit-code 1 --python scripts/build-motocross.py -- --vehicle=motoneta

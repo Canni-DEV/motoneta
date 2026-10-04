@@ -1,0 +1,33 @@
+{
+  "generator": "scripts/build-motocross.py --vehicle=tanque",
+  "blender": "5.2.2 LTS",
+  "method": "Two consecutive factory-startup exports; SHA-256 of both GLBs, manifest and rig definitions",
+  "files": [
+    {
+      "path": "public/models/tanque-low.glb",
+      "sha256": "7949EF30DC39D20F91B21B15FACC1478A11980FE581A4B0CD8FF4348480ECEE8",
+      "identical": true
+    },
+    {
+      "path": "public/models/tanque-high.glb",
+      "sha256": "77620C935698B552E9996D1C2A144C245438801807D122F0A66BE95462C90F03",
+      "identical": true
+    },
+    {
+      "path": "assets/tanque/manifest.json",
+      "sha256": "31D454387ACE82068901475CCB411EBDBB45EB29B87DB0D2F9A8F40D2D50C35B",
+      "identical": true
+    },
+    {
+      "path": "assets/tanque/rig.json",
+      "sha256": "5E2B4F70AC9FD26911F86FCDB23AC56FEDE68D418767FC73BC867D6007BE40E8",
+      "identical": true
+    },
+    {
+      "path": "src/tanque-rig.json",
+      "sha256": "5E2B4F70AC9FD26911F86FCDB23AC56FEDE68D418767FC73BC867D6007BE40E8",
+      "identical": true
+    }
+  ],
+  "passed": true
+}

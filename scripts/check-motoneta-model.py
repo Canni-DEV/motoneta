@@ -2,12 +2,14 @@
 import bpy
 import bmesh
 import json
+import sys
 from pathlib import Path
 from mathutils.bvhtree import BVHTree
 
 root = Path(__file__).resolve().parents[1]
-directory = root / 'assets' / 'motoneta'
-rig = json.loads((root / 'src' / 'motoneta-rig.json').read_text())
+vehicle = 'tanque' if '--vehicle=tanque' in sys.argv else 'motoneta'
+directory = root / 'assets' / vehicle
+rig = json.loads((root / 'src' / f'{vehicle}-rig.json').read_text())
 arm = bpy.data.objects['RiderRig']
 assert set(rig) == {bone.name for bone in arm.data.bones}
 report = {'rigBones': len(rig), 'rigMatchesDefinition': True, 'surfaces': {}, 'slotMeshes': 0, 'weightedVertices': 0}
@@ -53,6 +55,10 @@ for obj in bpy.data.objects:
 manifest = json.loads((directory / 'manifest.json').read_text())
 report['trianglesSelectedMax'] = {quality: data['trianglesSelectedMax'] for quality,data in manifest['assets'].items()}
 assert report['trianglesSelectedMax']['low'] <= 8000
-assert report['trianglesSelectedMax']['high'] <= 30000
+assert report['trianglesSelectedMax']['high'] <= (24000 if vehicle == 'tanque' else 30000)
+if vehicle == 'tanque':
+    bike = [obj for obj in bpy.data.objects if obj.name.startswith('Slot_') and obj.name.split('_')[1] in manifest['slots'][:6]]
+    assert all('_core' in obj.name for obj in bike)
+    report['fixedBikeMeshes'] = len(bike)
 (directory / 'model-validation.json').write_text(json.dumps(report,indent=2)+'\n')
-print('MOTONETA_SOURCE_VALIDATION',json.dumps(report))
+print(f'{vehicle.upper()}_SOURCE_VALIDATION',json.dumps(report))

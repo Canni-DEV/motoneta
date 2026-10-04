@@ -1,5 +1,6 @@
 import motocrossRig from './bike-rig.json';
 import motonetaRig from './motoneta-rig.json';
+import tanqueRig from './tanque-rig.json';
 import type { VehicleId } from './appearance';
 
 export interface WheelDimensions { rearX: number; frontX: number; axleY: number; radius: number }
@@ -29,4 +30,11 @@ const motoneta: VehicleVisual = {
   suspension: { swingPivot: [-.26,.35,0], shock: [[-.51,.27,0],[-.4,.61,0]], spring: [[-.482,.355,0],[-.42,.548,0]] },
   crashEnvelope: [[-.78,.65,-.218,0],[.785,.45,.124,0],[-.005,.264,-.25,0],[.33,1.137,.286,0]],
 };
-export const VEHICLE_VISUALS: Record<VehicleId, VehicleVisual> = { motocross, motoneta };
+const tanque: VehicleVisual = {
+  ...motoneta,
+  dimensions: { ...motoneta.dimensions, radius: .205 },
+  rig: tanqueRig,
+  exhaust: [-.777,.327,.182],
+  crashEnvelope: [[-.80,.70,-.23,0],[.79,.49,.15,0],[-.015,.27,-.255,0],[.34,1.137,.286,0]],
+};
+export const VEHICLE_VISUALS: Record<VehicleId, VehicleVisual> = { motocross, motoneta, tanque };

@@ -18,6 +18,8 @@
     "models:validate": "node scripts/validate-motocross.mjs",
     "models:review:motoneta": "node scripts/review-motoneta.mjs",
     "models:benchmark:motoneta": "node scripts/benchmark-motoneta.mjs",
+    "models:review:tanque": "node scripts/review-tanque.mjs",
+    "models:benchmark:tanque": "node scripts/benchmark-tanque.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

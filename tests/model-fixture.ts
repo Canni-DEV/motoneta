@@ -14,7 +14,7 @@ export function modelAssets(vehicle: VehicleId = 'motocross') {
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength,
       ) as ArrayBuffer;
-      return validateBikeAsset((await new GLTFLoader().parseAsync(data, '')).scene);
+      return validateBikeAsset((await new GLTFLoader().parseAsync(data, '')).scene, vehicle);
     }),
   ).then(([high, low]) => ({ high, low })));
 }
