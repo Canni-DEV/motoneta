@@ -1,6 +1,8 @@
 import { DRIVE, updateWheelie } from './handling';
 import { heightAt, segmentAt } from './tracks';
 import { clamp, Input, q, type Race, type Rider } from './types';
+import { enterLoop, stepLoop, stepLoopAir, pendingAirCrash, roadImpact, jumpVelocity } from './loop-physics';
+import { LOOP_WIDTH } from './loop-geometry';
 
 export const START_X = 80;
 function event(
@@ -18,6 +20,7 @@ export function crash(
   contactSpeed = Math.abs(p.vy),
 ) {
   if (p.recovery || (p.invincible && kind === 'impact')) return;
+  if (p.motion.kind !== 'track') { pendingAirCrash(p,kind); return; }
   const impactSpeed = Math.max(contactSpeed, p.speed);
   const segment = segmentAt(r.track, p.x, p.lane);
   const localX = ((p.x % r.track.length) + r.track.length) % r.track.length;
@@ -46,7 +49,8 @@ export function crash(
     cause: kind,
   });
 }
-export function move(r: Race, p: Rider, input: number) {
+function moveInternal(r: Race, p: Rider, input: number) {
+  if(p.motion.kind==='loop-air' && p.motion.pendingCrash) input=0;
   const a = !!(input & Input.A),
     b = !!(input & Input.B),
     edgeA = a && !p.previousA;
@@ -123,12 +127,15 @@ export function move(r: Race, p: Rider, input: number) {
       event(r, 'overheat', p);
     }
   }
+  if(p.motion.kind === 'loop') { stepLoop(r,p,input); return; }
+  if(p.motion.kind === 'loop-air') { stepLoopAir(r,p,input,crash); return; }
   const oldX = p.x,
     oldY = p.height,
     oldGround = heightAt(r.track, p.x, p.lane);
   if (input & Input.UP) p.lane = clamp(p.lane - 0.034, 0, 3);
   if (input & Input.DOWN) p.lane = clamp(p.lane + 0.034, 0, 3);
   p.x = q(p.x + p.speed);
+  if (enterLoop(r,p,oldX)) return;
   const ground = heightAt(r.track, p.x, p.lane),
     next = heightAt(r.track, p.x + 4, p.lane);
   const prev = heightAt(r.track, p.x - 4, p.lane),
@@ -152,7 +159,7 @@ export function move(r: Race, p: Rider, input: number) {
       oldGround - ground > 3
     ) {
       p.height = Math.max(oldY, ground);
-      p.vy = p.tilt > 0.1 ? 1.2 + p.speed * 0.28 + Math.max(0, p.tilt) * 1.5 : 0;
+      p.vy = jumpVelocity(p.speed,p.tilt);
       p.grounded = false;
       p.tilt = clamp(p.tilt, -0.2, Math.max(0.65, p.wheelie));
       p.wheelie = 0;
@@ -174,6 +181,10 @@ export function move(r: Race, p: Rider, input: number) {
   } else {
     p.vy -= 0.105;
     p.height = q(p.height + p.vy);
+    if (roadImpact(r,[oldX,oldY+10,(p.lane-1.5)*LOOP_WIDTH],[p.x,p.height+10,(p.lane-1.5)*LOOP_WIDTH])) {
+      p.motion={kind:'loop-air',origin:oldX,age:0,vx:p.speed,vlane:0,basis:[[1,0,0],[0,1,0],[0,0,1]],basisPitch:0,pendingCrash:'impact',ignoreRoad:0,stuck:0};
+      p.speed=q(p.speed*0.45); p.motion.vx=p.speed; p.vy=Math.min(p.vy,-0.5); return;
+    }
     p.tilt = clamp(
       p.tilt + (input & Input.LEFT ? 0.037 : 0) - (input & Input.RIGHT ? 0.037 : 0) - 0.005,
       -1.65,
@@ -198,6 +209,10 @@ export function move(r: Race, p: Rider, input: number) {
   p.heat = q(p.heat);
   p.tilt = q(p.tilt);
 }
+export function move(r: Race, p: Rider, input: number) {
+  moveInternal(r,p,input);
+  if(p.motion.kind !== 'loop') p.progress=p.x;
+}
 export function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds * 100 + 1e-7));
   return `${Math.floor(total / 6000)
@@ -208,7 +223,7 @@ export function formatTime(seconds: number) {
     )}:${Math.floor(total / 100) % 60 < 10 ? '0' : ''}${Math.floor(total / 100) % 60}.${(total % 100).toString().padStart(2, '0')}`;
 }
 export function currentLap(r: Race) {
-  return clamp(Math.floor((r.riders[0].x - START_X) / r.track.length) + 1, 1, r.track.laps);
+  return clamp(Math.floor((r.riders[0].progress - START_X) / r.track.length) + 1, 1, r.track.laps);
 }
 export function fingerprint(r: Race) {
   return JSON.stringify([r.frame, r.elapsed, r.phase, r.seed, r.riders, r.laps]);

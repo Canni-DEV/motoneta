@@ -235,9 +235,9 @@ describe('race rules', () => {
   });
 });
 describe('circuits', () => {
-  it('has five ordered, gap-free original table layouts and all 19 editor pieces', () => {
+  it('has five ordered, gap-free original table layouts and all 20 editor pieces', () => {
     expect(Array.from({ length: 5 }, (_, n) => getTrack(n))).toHaveLength(5);
-    expect(PIECES).toHaveLength(19);
+    expect(PIECES).toHaveLength(20);
     for (let n = 0; n < 5; n++) {
       {
         const t = getTrack(n);

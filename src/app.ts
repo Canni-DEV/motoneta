@@ -1594,7 +1594,7 @@ export async function startApp() {
         if (screen === 'editor' && editor.change(el)) return;
         if (el.dataset.generator) {
           const k = el.dataset.generator as keyof GeneratorOptions;
-          (generator as unknown as Record<string, unknown>)[k] = ['ramps', 'mud', 'cool'].includes(
+          (generator as unknown as Record<string, unknown>)[k] = ['ramps', 'mud', 'cool', 'loops'].includes(
             k,
           )
             ? Number(el.value)
@@ -1603,13 +1603,14 @@ export async function startApp() {
             Object.assign(
               generator,
               generator.difficulty === 'easy'
-                ? { ramps: 35, mud: 10, cool: 40 }
+                ? { ramps: 35, mud: 10, cool: 40, loops: 0 }
                 : generator.difficulty === 'normal'
-                  ? { ramps: 55, mud: 20, cool: 25 }
-                  : { ramps: 75, mud: 35, cool: 15 },
+                  ? { ramps: 55, mud: 20, cool: 25, loops: 1 }
+                  : { ramps: 75, mud: 35, cool: 15, loops: 2 },
             );
             render();
           }
+          if(k === 'size') render();
           return;
         }
         if (el.dataset.profileName || el.dataset.profileColor) {

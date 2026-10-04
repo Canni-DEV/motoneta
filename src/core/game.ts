@@ -58,7 +58,7 @@ export interface RaceResult {
 }
 export interface Recording {
   game: typeof GAME_ID;
-  version: 2;
+  version: 3;
   ruleset: typeof RULESET;
   config: RaceConfig;
   inputs: [number, number][];

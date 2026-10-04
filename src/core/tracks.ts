@@ -1,5 +1,6 @@
 import raw from './track-layouts.json';
 import type { PieceId, Segment, Surface, Track } from './types';
+import { isLoop, LOOP_LENGTH, LOOP_SAMPLES, LOOP_HEIGHT } from './loop-geometry';
 
 export interface Piece {
   id: PieceId;
@@ -16,6 +17,7 @@ const tri = (h: number): [number, number][] => [
   [1, 0],
 ];
 export const PIECES: Piece[] = [
+  { id: 'T', name: 'Loop · 4 → 1', length: LOOP_LENGTH, profile: [[0,0],[1,0]], lanes: 15, surface: 'dirt', boost: true },
   { id: 'A', name: 'Salto corto', length: 24, profile: tri(8), lanes: 15, surface: 'dirt' },
   { id: 'B', name: 'Salto medio', length: 40, profile: tri(16), lanes: 15, surface: 'dirt' },
   { id: 'C', name: 'Salto alto', length: 72, profile: tri(32), lanes: 15, surface: 'dirt' },
@@ -332,7 +334,7 @@ export function segmentAt(track: Track, x: number, lane: number): Segment | unde
   let index = laneIndices.get(track);
   if (!index) {
     index = Array.from({ length: 4 }, (_, n) =>
-      track.segments.filter((s) => s.lanes & (1 << n)).sort((a, b) => a.x - b.x),
+      track.segments.filter((s) => !isLoop(s) && s.lanes & (1 << n)).sort((a, b) => a.x - b.x),
     );
     laneIndices.set(track, index);
   }
@@ -367,9 +369,9 @@ export function heightAt(track: Track, x: number, lane: number): number {
 }
 export function trackSvg(track: Track, width = 300, height = 46): string {
   const points = track.segments
-    .filter((s) => s.profile.some((p) => p[1] > 0))
+    .filter((s) => isLoop(s) || s.profile.some((p) => p[1] > 0))
     .map((s) =>
-      s.profile
+      (isLoop(s) ? LOOP_SAMPLES.filter((_, i) => i % 4 === 0).map(p => [p.position[0] / LOOP_LENGTH, p.position[1] / LOOP_HEIGHT * 52]) : s.profile)
         .map(
           ([t, h]) =>
             `${(((s.x + t * s.length) / track.length) * width).toFixed(1)},${height - 5 - h * 0.65}`,

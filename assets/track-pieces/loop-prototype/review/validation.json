@@ -1,0 +1,40 @@
+{
+  "prototype": "visual-only",
+  "gltf": {
+    "errors": 0,
+    "warnings": 0,
+    "triangles": 3784
+  },
+  "integration": {
+    "entryLane": 4.0000000351765115,
+    "exitLane": 0.9999999648234883,
+    "landingLane": 0.9999999648234883,
+    "entryDirection": [
+      1,
+      0,
+      0
+    ],
+    "exitDirection": [
+      1,
+      0,
+      0
+    ],
+    "width": 1.22,
+    "bypassClearance": 2.427000045776367,
+    "trackId": "nes-1-main",
+    "physicalSegmentsAdded": 0,
+    "maximumStationaryRiderHeight": 1.7336201057363212,
+    "clearanceMargin": 0.693379940040046,
+    "unchangedTrack": true,
+    "framesAdvanced": 0
+  },
+  "screenshots": [
+    "assets/track-pieces/loop-prototype/review/game.png",
+    "assets/track-pieces/loop-prototype/review/top.png",
+    "assets/track-pieces/loop-prototype/review/side.png",
+    "assets/track-pieces/loop-prototype/review/game-clean.png",
+    "assets/track-pieces/loop-prototype/review/mobile.png",
+    "assets/track-pieces/loop-prototype/review/narrow.png"
+  ],
+  "errors": []
+}

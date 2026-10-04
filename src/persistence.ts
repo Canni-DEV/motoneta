@@ -14,7 +14,7 @@ import { defaultAppearance } from './appearance';
 
 export interface SaveState {
   game: string;
-  version: 2;
+  version: 3;
   profiles: LocalProfile[];
   activeProfile: string;
   maps: MapDesign[];
@@ -40,12 +40,12 @@ export class GameStore {
   async open() {
     this.db?.close();
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, 3);
+      const request = indexedDB.open(DATABASE_NAME, 4);
       request.onupgradeneeded = (event) => {
         const db = request.result;
         if (!db.objectStoreNames.contains('data')) db.createObjectStore('data');
         if (!db.objectStoreNames.contains('replays')) db.createObjectStore('replays');
-        if (event.oldVersion > 0 && event.oldVersion < 3) {
+        if (event.oldVersion > 0 && event.oldVersion < 4) {
           request.transaction!.objectStore('data').clear();
           request.transaction!.objectStore('replays').clear();
         }

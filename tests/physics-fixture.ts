@@ -3,6 +3,7 @@ import { makeBots } from '../src/core/game';
 import { createRace, stepRace } from '../src/core/racing';
 import { getTrack } from '../src/core/tracks';
 import { defaultAppearance } from '../src/appearance';
+import { strict as assert } from 'node:assert';
 
 export function physicsTrace(trackIndex: number, bots: number) {
   const track = getTrack(trackIndex);
@@ -29,7 +30,10 @@ export function physicsTrace(trackIndex: number, bots: number) {
           race.elapsed,
           race.phase,
           race.seed,
-          race.riders,
+          race.riders.map(({progress,motion,...physical})=> {
+            assert.equal(motion.kind,'track'); assert.equal(progress,physical.x);
+            return physical;
+          }),
           race.laps,
           race.riderLaps,
           race.events,

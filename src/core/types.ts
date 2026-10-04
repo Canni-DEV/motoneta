@@ -23,7 +23,8 @@ export type PieceId =
   | 'P'
   | 'Q'
   | 'R'
-  | 'S';
+  | 'S'
+  | 'T';
 export type Surface = 'dirt' | 'mud' | 'grass' | 'cool' | 'bump';
 export interface Segment {
   x: number;
@@ -48,6 +49,9 @@ export interface Track {
 export interface Rider {
   id: number;
   x: number;
+  /** Timing/rank coordinate; physical x can move backwards inside a loop. */
+  progress: number;
+  motion: RiderMotion;
   lane: number;
   height: number;
   vy: number;
@@ -75,6 +79,15 @@ export interface Rider {
   crashVelocity: number;
   crashExitX: number | null;
 }
+export type RiderMotion = { kind: 'track' } | {
+  kind: 'loop'; origin: number; distance: number; age: number;
+  vx: number; vy: number; vlane: number;
+} | {
+  kind: 'loop-air'; origin: number; age: number; vx: number; vlane: number;
+  basis: [number, number, number][]; basisPitch: number;
+  pendingCrash: 'impact' | 'backflip' | null; ignoreRoad: number;
+  stuck: number;
+};
 export type RacePhase = 'countdown' | 'racing' | 'finished';
 export type GameEvent = {
   type: 'start' | 'jump' | 'land' | 'crash' | 'cool' | 'overheat' | 'lap' | 'finish';

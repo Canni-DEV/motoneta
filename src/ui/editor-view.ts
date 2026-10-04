@@ -1,6 +1,7 @@
 import type { Editor } from './editor';
 import { PIECES } from '../core/tracks';
 import { placedPiece, validateMap } from '../core/maps';
+import { isLoop, LOOP_SAMPLES, LOOP_LENGTH, LOOP_HEIGHT, sampleLane, loopWarnings } from '../core/loop-geometry';
 import { button as b, esc, select, environmentFields, icon } from './widgets';
 import { sceneHost } from './screens';
 
@@ -9,6 +10,8 @@ export function editorView(e: Editor) {
     p = d.items.find((item) => item.id === e.chosenItem);
   const width = Math.max(1, d.length * e.scale);
   const proposed = placedPiece(e.chosenPiece, e.cursor);
+  const routes = d.items.filter(isLoop).map(p => `<svg class="loop-route" viewBox="0 0 100 100" preserveAspectRatio="none" style="left:${p.x/d.length*100}%;width:${p.length/d.length*100}%" aria-hidden="true"><polyline points="${LOOP_SAMPLES.filter((_,i)=>i%4===0).map(s=>`${s.position[0]/LOOP_LENGTH*100},${(sampleLane(s)+0.5)*25}`).join(' ')}"/></svg>`).join('');
+
   let placementError = '';
   if (e.armed || e.tab === 'pieces') {
     try {
@@ -31,7 +34,7 @@ export function editorView(e: Editor) {
           .map((piece) =>
             b(
               'piece',
-              `<strong>${piece.id}</strong><span>${esc(piece.name)}</span><svg viewBox="0 0 100 36" aria-hidden="true"><polyline points="${piece.profile.map(([x, y]) => `${x * 96 + 2},${32 - (y / 128) * 30}`).join(' ')}"/></svg><small>${[0, 1, 2, 3].map((lane) => `<i class="lane-dot ${piece.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</small>`,
+              `<strong>${piece.id}</strong><span>${esc(piece.name)}</span><svg viewBox="0 0 100 36" aria-hidden="true"><polyline points="${(piece.id==='T' ? LOOP_SAMPLES.filter((_,i)=>i%8===0).map(s=>`${s.position[0]/LOOP_LENGTH*96+2},${32-s.position[1]/LOOP_HEIGHT*30}`) : piece.profile.map(([x, y]) => `${x * 96 + 2},${32 - (y / 128) * 30}`)).join(' ')}"/></svg><small>${[0, 1, 2, 3].map((lane) => `<i class="lane-dot ${piece.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</small>`,
               piece.id,
               `class="piece ${piece.surface}" aria-label="${piece.id}: ${esc(piece.name)}" aria-pressed="${piece.id === e.chosenPiece}"`,
             ),
@@ -40,7 +43,7 @@ export function editorView(e: Editor) {
     )
     .join('');
   const properties = p
-    ? `<span class="eyebrow">PIEZA ${esc(p.piece)}</span><h2>Detalle del salto</h2><div class="piece-inspector form-grid"><label>Posición<input id="piece-x" data-piece-field="x" type="number" min="0" max="${d.length - p.length}" step="8" value="${p.x}"></label><label>Largo<input id="piece-length" data-piece-field="length" type="number" min="8" max="640" step="8" value="${p.length}"></label><label>Altura<input id="piece-height" data-piece-field="height" type="number" min="0" max="128" step="1" value="${Math.max(...p.profile.map((v) => v[1]))}" ${p.profile.every((v) => v[1] === 0) ? 'disabled' : ''}></label><fieldset><legend>Carriles</legend><div class="lane-options">${[0, 1, 2, 3].map((lane) => `<label class="check"><input type="checkbox" data-piece-lane="${lane}" ${p.lanes & (1 << lane) ? 'checked' : ''}>${lane + 1}</label>`).join('')}</div></fieldset></div><div class="actions">${b('move-left', '← 8')}${b('move-right', '8 →')}${b('duplicate-piece', 'Duplicar')}${b('replace-piece', 'Reemplazar por ' + e.chosenPiece)}${b('remove-piece', 'Quitar pieza', '', 'class="danger"')}</div>`
+    ? `<span class="eyebrow">PIEZA ${esc(p.piece)}</span><h2>${isLoop(p)?'Loop · carril 4 → 1':'Detalle del salto'}</h2>${isLoop(p)?'<p class="muted">Dimensiones fijas · ↑ hacia el carril 1 · Reducí antes si llegás con impulso.</p>':''}<div class="piece-inspector form-grid"><label>Posición<input id="piece-x" data-piece-field="x" type="number" min="0" max="${d.length - p.length}" step="8" value="${p.x}"></label><label>Largo<input id="piece-length" data-piece-field="length" type="number" min="8" max="640" step="8" value="${p.length}" ${isLoop(p)?'disabled':''}></label><label>${isLoop(p)?'Altura total':'Altura'}<input id="piece-height" data-piece-field="height" type="number" min="0" max="128" step="1" value="${isLoop(p)?Math.round(LOOP_HEIGHT):Math.max(...p.profile.map((v) => v[1]))}" ${p.profile.every((v) => v[1] === 0) ? 'disabled' : ''}></label><fieldset><legend>Carriles</legend><div class="lane-options">${[0, 1, 2, 3].map((lane) => `<label class="check"><input type="checkbox" data-piece-lane="${lane}" ${isLoop(p)?'disabled':''} ${p.lanes & (1 << lane) ? 'checked' : ''}>${lane + 1}</label>`).join('')}</div></fieldset></div><div class="actions">${b('move-left', '← 8')}${b('move-right', '8 →')}${b('duplicate-piece', 'Duplicar')}${b('replace-piece', 'Reemplazar por ' + e.chosenPiece)}${b('remove-piece', 'Quitar pieza', '', 'class="danger"')}</div>`
     : `<div class="empty-state">${icon('editor')}<h2>Elegí una pieza</h2><p>Seleccioná una pieza en los carriles para ajustar sus propiedades.</p>${b('editor-tab', 'Ver piezas', 'pieces')}</div>`;
   const track = `<h2>Tu circuito</h2><div class="form-grid"><label class="wide-field">Nombre<input id="design-name" aria-label="Nombre del circuito" maxlength="40" value="${esc(d.name)}" data-editor="name"></label><label>Longitud<input id="design-length" type="number" min="640" max="30000" step="8" value="${d.length}" data-editor="length"></label>${select(
     'design-laps',
@@ -57,13 +60,13 @@ export function editorView(e: Editor) {
         .map((p) =>
           b(
             'select-item',
-            esc(p.piece),
+            isLoop(p) ? (lane===3?'T →':lane===0?'T ↗':'T') : esc(p.piece),
             p.id,
-            `data-key="${esc(p.id)}-${lane}" data-drag="${esc(p.id)}" class="placed ${e.chosenItem === p.id ? 'selected' : ''} surface-${p.surface}" style="left:${(p.x / d.length) * 100}%;width:max(5px,${(p.length / d.length) * 100}%)" aria-label="${esc(p.piece)}, carril ${lane + 1}, posición ${p.x}"`,
+            `data-key="${esc(p.id)}-${lane}" data-drag="${esc(p.id)}" class="placed ${e.chosenItem === p.id ? 'selected' : ''} surface-${p.surface} ${isLoop(p)?'placed-loop':''}" style="left:${(p.x / d.length) * 100}%;width:max(5px,${(p.length / d.length) * 100}%)" title="${isLoop(p)?(lane===3?'Entrada por el carril 4':lane===0?'Salida elevada sobre el carril 1':'Paso libre por debajo'):esc(p.piece)}" aria-label="${esc(p.piece)}, carril ${lane + 1}, posición ${p.x}"`,
           ),
         )
         .join('')}</div>`,
   ).join(
     '',
-  )}${insertion}<div class="timeline-cursor" style="left:${(e.cursor / d.length) * 100}%"></div><div class="placement-ghost" hidden></div></div></div></section></section><aside class="panel editor-sidebar" ${e.collapsed ? 'hidden' : ''}><div class="tabs editor-tabs" role="tablist" aria-label="Herramientas del editor">${(['pieces', 'properties', 'track'] as const).map((tab, i) => b('editor-tab', ['Piezas', 'Propiedades', 'Pista'][i], tab, `role="tab" aria-selected="${e.tab === tab}"`)).join('')}</div><div class="editor-panel-content scroll-region" data-key="panel-${e.tab}" role="tabpanel">${e.tab === 'pieces' ? palette : e.tab === 'properties' ? properties : track}</div>${e.tab === 'pieces' ? `<footer class="palette-footer"><label>Insertar en<input id="insert-position" type="number" min="0" max="${d.length}" step="8" value="${e.cursor}"></label>${b('add-piece', 'Colocar ' + e.chosenPiece, '', 'class="primary" aria-label="Añadir pieza"')}</footer>` : ''}</aside></div><footer class="editor-footer"><span id="editor-hint" class="muted" role="status">${e.hint || (e.armed ? placementError || `Posición ${e.cursor} válida · Colocá ${e.chosenPiece}` : '') || `${d.items.length} piezas · ${d.laps} vueltas · Arrastrá una pieza a los carriles`}</span><div class="actions">${b('play-design-bots', 'Con bots')}${b('play-design-solo', 'Probar pista →', '', 'class="primary" aria-label="Probar pista"')}</div></footer></main>`;
+  )}${routes}${insertion}<div class="timeline-cursor" style="left:${(e.cursor / d.length) * 100}%"></div><div class="placement-ghost" hidden></div></div></div></section></section><aside class="panel editor-sidebar" ${e.collapsed ? 'hidden' : ''}><div class="tabs editor-tabs" role="tablist" aria-label="Herramientas del editor">${(['pieces', 'properties', 'track'] as const).map((tab, i) => b('editor-tab', ['Piezas', 'Propiedades', 'Pista'][i], tab, `role="tab" aria-selected="${e.tab === tab}"`)).join('')}</div><div class="editor-panel-content scroll-region" data-key="panel-${e.tab}" role="tabpanel">${e.tab === 'pieces' ? palette : e.tab === 'properties' ? properties : track}</div>${e.tab === 'pieces' ? `<footer class="palette-footer"><label>Insertar en<input id="insert-position" type="number" min="0" max="${d.length}" step="8" value="${e.cursor}"></label>${b('add-piece', 'Colocar ' + e.chosenPiece, '', 'class="primary" aria-label="Añadir pieza"')}</footer>` : ''}</aside></div><footer class="editor-footer"><span id="editor-hint" class="muted" role="status">${e.hint || loopWarnings(d.items)[0] || (e.armed ? placementError || `Posición ${e.cursor} válida · Colocá ${e.chosenPiece}` : '') || `${d.items.length} piezas · ${d.laps} vueltas · Arrastrá una pieza a los carriles`}</span><div class="actions">${b('play-design-bots', 'Con bots')}${b('play-design-solo', 'Probar pista →', '', 'class="primary" aria-label="Probar pista"')}</div></footer></main>`;
 }

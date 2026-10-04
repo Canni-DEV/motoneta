@@ -29,6 +29,14 @@ import { vfxSettings } from './vfx/config';
 import { StadiumFlags } from './vfx/flags';
 import { CinematicCamera } from './cinematic-camera';
 import { advanceGhostOpacity, ghostOverlapOpacity, projectGhostBounds } from './ghost-visibility';
+import { sampleLoop, loopPosition, dot, sub, wrapAngle, riderBasis, riderLocalTilt, type Vec3 } from './core/loop-geometry';
+
+function riderFrame(p: Race['riders'][number]) {
+  const basis=riderBasis(p);
+  const quaternion=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(...basis.map(v=>new THREE.Vector3(...v as Vec3)) as [THREE.Vector3,THREE.Vector3,THREE.Vector3]));
+  const tilt=riderLocalTilt(p);
+  return {quaternion,tilt};
+}
 
 export class World {
   scene = new THREE.Scene();
@@ -79,6 +87,7 @@ export class World {
     lane: number;
     height: number;
     tilt: number;
+    quaternion: THREE.Quaternion;
     crashPhase: Race['riders'][number]['crashPhase'];
     crashPhaseAge: number;
   }[] = [];
@@ -305,12 +314,14 @@ export class World {
     for (let i = 0; i < r.riders.length; i++) {
       const p = r.riders[i];
       const previous = this.previous[i] ??= {
-        x: 0, lane: 0, height: 0, tilt: 0, crashPhase: 'none', crashPhaseAge: 0,
+        x: 0, lane: 0, height: 0, tilt: 0, quaternion:new THREE.Quaternion(), crashPhase: 'none', crashPhaseAge: 0,
       };
       previous.x = p.x;
       previous.lane = p.lane;
       previous.height = p.height;
-      previous.tilt = p.tilt;
+      const frame=riderFrame(p);
+      previous.tilt = frame.tilt;
+      previous.quaternion.copy(frame.quaternion);
       previous.crashPhase = p.crashPhase;
       previous.crashPhaseAge = p.crashPhaseAge;
     }
@@ -478,6 +489,9 @@ export class World {
       if (!p) continue;
       b.setAppearance(this.appearances[i] ?? p.color, i >= this.ghostStart);
       const prev = this.previous[i];
+      const frame=riderFrame(p);
+      b.root.quaternion.copy(frame.quaternion);
+      if(prev && !paused && race?.phase!=='finished') b.root.quaternion.copy(prev.quaternion).slerp(frame.quaternion,alpha);
       b.root.position.set(
         (lerp(prev?.x, p.x) +
           Math.round(((race?.riders[0].x ?? p.x) - p.x) / track.length) * track.length) *
@@ -487,14 +501,18 @@ export class World {
       );
       b.body.visible = !p.invincible || this.reduced || Math.floor(effectTime * 12) % 2 === 0;
       b.riderLayer.visible = b.body.visible && !(i === 0 && this.cinematic?.currentShot === 'helmet');
-      const ground: GroundHeight = (x) =>
+      let ground: GroundHeight = (x) =>
         heightAt(track, (b.root.position.x + x) / SCALE, b.root.position.z / LANE + 1.5) * SCALE -
         b.root.position.y;
+      if(p.motion.kind==='loop') {
+        const distance=p.motion.distance,s=sampleLoop(distance),center=loopPosition(s,p.lane);
+        ground=x=>dot(sub(loopPosition(sampleLoop(distance+x/SCALE),p.lane),center),s.normal)*SCALE;
+      } else if(p.motion.kind==='loop-air') ground=()=>0;
       b.update({
         time,
         paused: paused || results || race?.phase === 'finished',
         speed: p.speed,
-        tilt: lerp(prev?.tilt, p.tilt),
+        tilt: prev && !paused ? prev.tilt+wrapAngle(frame.tilt-prev.tilt)*alpha : frame.tilt,
         grounded: p.grounded,
         recovery: p.recovery > 0,
         lane: p.lane,

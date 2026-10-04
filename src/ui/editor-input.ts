@@ -1,6 +1,7 @@
 import type { Editor } from './editor';
 import { placedPiece, validateMap } from '../core/maps';
 import type { PieceId } from '../core/types';
+import { loopWarnings } from '../core/loop-geometry';
 
 /** Delegated Pointer Events support mouse and touch; listeners live exactly as long as the view. */
 export function bindEditor(root: HTMLElement, editor: Editor, signal: AbortSignal) {
@@ -92,7 +93,7 @@ export function bindEditor(root: HTMLElement, editor: Editor, signal: AbortSigna
             ],
           });
           valid = true;
-          message = `${candidate.piece} · posición ${candidate.x} · Soltá para colocar`;
+          message = loopWarnings([...editor.design.items.filter(p=>p.id!==candidate.id),candidate])[0] || `${candidate.piece} · posición ${candidate.x} · Soltá para colocar`;
         } catch (error) {
           valid = false;
           message = (error as Error).message;

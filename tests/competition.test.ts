@@ -123,7 +123,7 @@ describe('real competition', () => {
   });
   it('validates complete recordings, rejects extra frames and untrusted geometry', () => {
     const { replay } = drive(config());
-    expect(validateRecording(replay).version).toBe(2);
+    expect(validateRecording(replay).version).toBe(3);
     const bad = structuredClone(replay);
     bad.inputs[0][1]++;
     expect(() => validateRecording(bad)).toThrow();
@@ -187,7 +187,7 @@ describe('competition sessions', () => {
     replay.termination = 'abandoned';
     replay.result = raceResult(completeRace(r));
     const imported = validateRecording(replay);
-    expect(imported.version).toBe(2);
+    expect(imported.version).toBe(3);
     expect(imported.result.finishes).toHaveLength(3);
     expect(imported.result.finishes.find((f) => f.id === 'p1')!.ticks).toBeNull();
     const ghost = new Playback(imported);
@@ -309,7 +309,7 @@ describe('map library and generator', () => {
     },
   );
   it('honors zero frequencies and rejects invalid controls', () => {
-    expect(generateMap({ ...generatorDefaults, ramps: 0, mud: 0, cool: 0 }).items).toEqual([]);
+    expect(generateMap({ ...generatorDefaults, ramps: 0, mud: 0, cool: 0, loops: 0 }).items).toEqual([]);
     expect(() => generateMap({ ...generatorDefaults, mud: -1 })).toThrow();
   });
 });

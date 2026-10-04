@@ -1,0 +1,146 @@
+{
+  "gltf": {
+    "errors": 0,
+    "warnings": 0,
+    "triangles": 3784
+  },
+  "states": [
+    {
+      "name": "entry",
+      "frame": 2,
+      "kind": "loop",
+      "x": 253.125,
+      "progress": 250.5859375,
+      "lane": 4,
+      "height": 0.23046875,
+      "speed": 3.125,
+      "tilt": 0,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "climbing",
+      "frame": 46,
+      "kind": "loop",
+      "x": 355.4375,
+      "progress": 276.203125,
+      "lane": 4,
+      "height": 60.04296875,
+      "speed": 3.0546875,
+      "tilt": 1.2535475455139682,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0.5865348194817176,
+        0.8099240121983969
+      ]
+    },
+    {
+      "name": "inverted",
+      "frame": 90,
+      "kind": "loop",
+      "x": 317.18359375,
+      "progress": 301.49609375,
+      "lane": 2.92578125,
+      "height": 162.98828125,
+      "speed": 3.109375,
+      "tilt": 3.031105926186698,
+      "crashes": 0,
+      "rootQuaternion": [
+        -0.23269609102688582,
+        0.012870025754638442,
+        0.9709803550577132,
+        0.05370327503867219
+      ]
+    },
+    {
+      "name": "descending",
+      "frame": 121,
+      "kind": "loop",
+      "x": 250.4453125,
+      "progress": 319.94140625,
+      "lane": 1.59375,
+      "height": 113.47265625,
+      "speed": 3.26171875,
+      "tilt": 4.543484902038736,
+      "crashes": 0,
+      "rootQuaternion": [
+        0.11629727212788749,
+        0.09814486403918385,
+        -0.7553291654207337,
+        0.6374326490094151
+      ]
+    },
+    {
+      "name": "boost",
+      "frame": 163,
+      "kind": "loop-air",
+      "x": 346.15234375,
+      "progress": 346.15234375,
+      "lane": 1,
+      "height": 48.30859375,
+      "speed": 7.25,
+      "tilt": -2.4492935982947064e-16,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "landing",
+      "frame": 198,
+      "kind": "track",
+      "x": 599.90234375,
+      "progress": 599.90234375,
+      "lane": 1,
+      "height": 0,
+      "speed": 7.25,
+      "tilt": 0,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "side-fall",
+      "frame": 91,
+      "kind": "loop-air",
+      "x": 304.49609375,
+      "progress": 304.49609375,
+      "lane": 4,
+      "height": 167.28515625,
+      "speed": 3.125,
+      "tilt": 2.65625,
+      "crashes": 0,
+      "rootQuaternion": [
+        -0.1784727383844456,
+        0.041220343115447346,
+        0.9578651455602937,
+        0.22123003387370183
+      ]
+    }
+  ],
+  "screenshots": [
+    "assets/track-pieces/loop-prototype/review/integration/entry.png",
+    "assets/track-pieces/loop-prototype/review/integration/climbing.png",
+    "assets/track-pieces/loop-prototype/review/integration/inverted.png",
+    "assets/track-pieces/loop-prototype/review/integration/inverted-side.png",
+    "assets/track-pieces/loop-prototype/review/integration/descending.png",
+    "assets/track-pieces/loop-prototype/review/integration/boost.png",
+    "assets/track-pieces/loop-prototype/review/integration/landing.png",
+    "assets/track-pieces/loop-prototype/review/integration/side-fall.png"
+  ],
+  "errors": []
+}

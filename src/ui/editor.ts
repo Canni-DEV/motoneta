@@ -1,5 +1,6 @@
 import { emptyDesign, placedPiece, validateMap, type MapDesign } from '../core/maps';
 import type { PieceId } from '../core/types';
+import { isLoop } from '../core/loop-geometry';
 import { editorView } from './editor-view';
 import { bindEditor } from './editor-input';
 
@@ -195,14 +196,17 @@ export class Editor {
           });
         return true;
       case 'replace-piece':
-        if (selected)
-          this.edit((d) => {
+        if (selected) {
+          this.armed = false;
+          const changed = this.edit((d) => {
             d.items = d.items.map((p) =>
               p.id === selected.id
                 ? { ...placedPiece(this.chosenPiece, p.x, p.lanes), id: p.id }
                 : p,
             );
           });
+          if (!changed) this.refresh();
+        }
         return true;
       case 'undo':
       case 'redo': {
@@ -240,6 +244,7 @@ export class Editor {
       this.edit((d) => {
         const p = d.items.find((p) => p.id === this.chosenItem);
         if (!p) return;
+        if(isLoop(p) && el.dataset.pieceField!=='x') throw new Error('El loop solo permite editar su posición.');
         if (el.dataset.pieceLane !== undefined) {
           const bit = 1 << Number(el.dataset.pieceLane);
           p.lanes = el.checked ? p.lanes | bit : p.lanes & ~bit;

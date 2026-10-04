@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MotoNeta · prototipo 3D del loop</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; color: #edf0e6; background: #1c2922; font: 14px system-ui, sans-serif; }
+      header { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 22px; }
+      h1 { font-size: 18px; margin: 0 0 4px; }
+      p { margin: 0; color: #bdc6ba; }
+      nav { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+      button, a { border: 1px solid #526253; border-radius: 6px; padding: 8px 12px; color: inherit; background: #2c3c30; text-decoration: none; font: inherit; cursor: pointer; }
+      button[aria-pressed="true"] { color: #1a261d; background: #e1bb83; border-color: #e1bb83; }
+      button:disabled { opacity: .4; cursor: wait; }
+      label { display: inline-flex; align-items: center; gap: 5px; margin: 0 6px; white-space: nowrap; }
+      main { position: absolute; inset: 78px 0 46px; overflow: hidden; }
+      canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+      #status { position: absolute; inset: 0; display: grid; place-content: center; background: #1c2922; }
+      #status[hidden] { display: none; }
+      #labels { position: absolute; inset: 0; pointer-events: none; }
+      .marker { position: absolute; transform: translate(-50%, -100%); padding: 4px 7px; border: 1px solid #ffffff75; border-radius: 4px; background: #1c2922d9; color: #fff5dc; white-space: nowrap; font-size: 12px; }
+      .entry { border-color: #84d28b; color: #a9f0ab; }
+      .exit { border-color: #70bce4; color: #a3dfff; }
+      footer { position: absolute; bottom: 0; min-height: 46px; width: 100%; padding: 10px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      footer a { padding: 4px 9px; }
+      @media (max-width: 900px) { header { min-height: 118px; flex-wrap: wrap; padding: 10px 12px; gap: 7px; } main { top: 118px; bottom: 64px; } footer { min-height: 64px; padding: 8px 12px; font-size: 12px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div><h1>Loop · prototipo 3D</h1><p>Ancho de un carril · entrada 4 → salida elevada 1</p></div>
+      <nav aria-label="Vistas del prototipo">
+        <button data-view="game" aria-pressed="true" disabled>Cámara del juego</button>
+        <button data-view="top" aria-pressed="false" disabled>Vista superior</button>
+        <button data-view="side" aria-pressed="false" disabled>Vista lateral</button>
+        <label><input id="guides" type="checkbox" checked />Ver referencias</label>
+      </nav>
+    </header>
+    <main><canvas id="world" aria-label="Modelo 3D del loop integrado en la pista real de MotoNeta"></canvas><div id="labels"></div><div id="status">Cargando el loop, las motos y el estadio…</div></main>
+    <footer><p id="hint">Prototipo visual. Las motos están quietas para comparar escala y paso libre.</p><div><a id="download-model" download="loop-prototype.glb">GLB</a> <a id="download-blend" download="loop-prototype.blend">Blender</a></div></footer>
+    <script type="module" src="/src/prototypes/loop-review.ts"></script>
+  </body>
+</html>
