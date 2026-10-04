@@ -2,14 +2,20 @@ import { type Race, type RaceConfig, type RaceResult } from './game';
 import { crash, move, START_X } from './simulation';
 import { heightAt, segmentAt } from './tracks';
 import { clamp, Input, type Rider } from './types';
+import { loopGeometryMetadata, loopInstances, sampleLane, sampleLoop, wrapAngle } from './loop-geometry';
+import { canAimForLoop, ridersTouch } from './loop-physics';
 
 export function createRace(config: RaceConfig): Race {
   const c = structuredClone(config);
+  delete c.loopGeometryVersion;
+  Object.assign(c, loopGeometryMetadata(c.track));
   if (c.bots.length > 5 || c.track.laps < 1 || c.track.laps > 9)
     throw new Error('Configuración de carrera inválida.');
   const riders: Rider[] = [c.player, ...c.bots].map((p, id) => ({
     id,
     x: START_X - (id >= 4 ? 24 : 0),
+    progress: START_X - (id >= 4 ? 24 : 0),
+    motion: { kind: 'track' },
     lane: (id + 2) % 4,
     height: 0,
     vy: 0,
@@ -69,6 +75,27 @@ function ai(r: Race, p: Rider): number {
       ? Input.A
       : 0;
   }
+  if(p.motion.kind==='loop') {
+    const m=p.motion;
+    const target=sampleLane(sampleLoop(m.distance+p.speed*9.5));
+    const period=d==='easy'?3:d==='normal'?2:1;
+    const error=d==='easy'?0.18:d==='normal'?0.06:0.015;
+    let input=p.heat<78 ? Input.B:Input.A;
+    if(r.elapsed%period===p.id%period) p.targetLane=target+(random(r)-0.5)*error;
+    if(p.lane>p.targetLane+0.02) input|=Input.UP;
+    if(p.lane<p.targetLane-0.02) input|=Input.DOWN;
+    if(p.wheelie>0.05) input|=Input.RIGHT;
+    return input;
+  }
+  if(p.motion.kind==='loop-air') {
+    let input=p.heat<65?Input.B:Input.A;
+    const error=wrapAngle(p.tilt);
+    if(error>0.06) input|=Input.RIGHT;
+    if(error< -0.06) input|=Input.LEFT;
+    if(p.lane<0.05) input|=Input.DOWN;
+    if(p.lane>2.95) input|=Input.UP;
+    return input;
+  }
   const period = d === 'easy' ? 45 : d === 'normal' ? 20 : 8;
   const look = d === 'easy' ? 70 : d === 'normal' ? 150 : 230;
   if (r.elapsed % period === p.id % period) {
@@ -89,6 +116,13 @@ function ai(r: Race, p: Rider): number {
       return cost + random(r) * (d === 'easy' ? 65 : d === 'normal' ? 18 : 3);
     });
     p.targetLane = scores.indexOf(Math.min(...scores));
+    const nextLoop=loopInstances(r.track,p.x).find(({origin})=>origin>p.x && origin-p.x<Math.max(360,p.speed*110));
+    if(nextLoop) {
+      const traffic=r.riders.some(o=>o.id!==p.id && o.motion.kind==='loop' && Math.abs(o.motion.origin-nextLoop.origin)<1);
+      const willingness=d==='easy'?0.25:d==='normal'?0.65:0.95;
+      if(canAimForLoop(p) && !traffic && random(r)<willingness) p.targetLane=3;
+      else if(p.targetLane===3) p.targetLane=2;
+    }
   }
   let input: number = p.heat < (d === 'easy' ? 35 : d === 'normal' ? 65 : 78) ? Input.B : Input.A;
   // Easier riders occasionally hesitate; all riders retain identical speed/handling constants.
@@ -135,18 +169,18 @@ export function stepRace(r: Race, input: number) {
   for (const p of r.riders) {
     if (isFinished(r, p.id)) continue;
     move(r, p, p.id === 0 ? input : ai(r, p));
-    const lap = clamp(Math.floor((p.x - START_X) / r.track.length), 0, r.track.laps);
+    const lap = clamp(Math.floor((p.progress - START_X) / r.track.length), 0, r.track.laps);
     if (!p.recovery && lap > r.riderLaps[p.id].length) {
       r.riderLaps[p.id].push(r.elapsed);
       r.events.push({ type: 'lap', rider: p.id, frame: r.frame });
     }
     if (
-      (!p.recovery && p.x >= START_X + r.track.length * r.track.laps) ||
+      (!p.recovery && p.progress >= START_X + r.track.length * r.track.laps) ||
       r.elapsed >= r.limitTicks
     ) {
       r.finishes.push({
         id: identity(r, p.id),
-        ticks: !p.recovery && p.x >= START_X + r.track.length * r.track.laps ? r.elapsed : null,
+        ticks: !p.recovery && p.progress >= START_X + r.track.length * r.track.laps ? r.elapsed : null,
         laps: [...r.riderLaps[p.id]],
         crashes: p.crashes,
       });
@@ -168,15 +202,17 @@ export function stepRace(r: Race, input: number) {
         !b.recovery &&
         !a.invincible &&
         !b.invincible &&
-        Math.abs(delta) < 12 &&
-        Math.abs(a.lane - b.lane) < 0.4 &&
-        Math.abs(a.height - b.height) < 8
-      )
-        crash(r, delta < 0 ? a : b);
+        ridersTouch(a,b,delta)
+      ) {
+        if(a.motion.kind==='loop-air' || b.motion.kind==='loop-air') { crash(r,a); crash(r,b); }
+        else if(a.motion.kind==='loop' && b.motion.kind==='loop' && Math.abs((a.motion.origin-b.motion.origin)%r.track.length)<1)
+          crash(r,a.motion.distance<b.motion.distance?a:b);
+        else crash(r, delta < 0 ? a : b);
+      }
     }
   r.laps = r.riderLaps[0].map((n) => n * 0.016);
   r.previousLap = r.laps.length;
-  const order = r.riders.filter((p) => !isFinished(r, p.id)).sort((a, b) => b.x - a.x);
+  const order = r.riders.filter((p) => !isFinished(r, p.id)).sort((a, b) => b.progress - a.progress);
   r.rank =
     r.finishes.filter((f) => f.ticks !== null).length + order.findIndex((p) => p.id === 0) + 1;
   const own = r.finishes.find((f) => f.id === r.config.player.id);

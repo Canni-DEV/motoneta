@@ -69,7 +69,7 @@ export class EngineAudio {
         v.source.playbackRate.setTargetAtTime(this.layerRate(v, rpm, detune), t, 0.12);
         v.pan.pan.setTargetAtTime(position.pan, t, 0.07);
       });
-      const material = materialFor(segmentAt(r.track, p.x, p.lane)?.surface, weather);
+      const material = materialFor(p.motion.kind==='loop' ? 'dirt' : segmentAt(r.track, p.x, p.lane)?.surface, weather);
       const moving = p.grounded && p.speed > 0.2 && !p.recovery && !stopped;
       if (bike.material !== material || (!bike.rolling && moving)) {
         bike.rolling?.stop();

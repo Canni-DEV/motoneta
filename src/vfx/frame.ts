@@ -3,6 +3,7 @@ import { bikePose, crashPose } from '../bike-pose';
 import { heightAt, segmentAt } from '../core/tracks';
 import type { Race, Rider, GameEvent, Track, Weather } from '../core/types';
 import { SCALE, LANE } from './config';
+import { dot,sub,loopPosition,sampleLoop,riderBasis,riderLocalTilt } from '../core/loop-geometry';
 
 export type Point = Readonly<{ x: number; y: number; z: number }>;
 export interface EffectAnchors {
@@ -23,6 +24,18 @@ export function effectAnchors(p: Readonly<Rider>, track: Track, visual: VehicleV
     y = p.height * SCALE,
     z = (p.lane - 1.5) * LANE;
   const ground = (dx: number) => heightAt(track, (x + dx) / SCALE, p.lane) * SCALE - y;
+  if(p.motion.kind!=='track') {
+    const basis=riderBasis(p),angle=riderLocalTilt(p),c=Math.cos(angle),s=Math.sin(angle);
+    let localGround=(_dx:number)=>0;
+    if(p.motion.kind==='loop') {
+      const distance=p.motion.distance,frame=sampleLoop(distance),center=loopPosition(frame,p.lane);
+      localGround=dx=>dot(sub(loopPosition(sampleLoop(distance+dx/SCALE),p.lane),center),frame.normal)*SCALE;
+    }
+    const pose=bikePose(angle,p.grounded,localGround,visual.dimensions);
+    const framePoint=(px:number,py:number,pz=0):Point=>({x:x+basis[0][0]*px+basis[1][0]*py+basis[2][0]*pz,y:y+basis[0][1]*px+basis[1][1]*py+basis[2][1]*pz,z:z+basis[0][2]*px+basis[1][2]*py+basis[2][2]*pz});
+    const transform=(px:number,py:number,pz=0)=>framePoint(pose.x+c*px-s*py,pose.y+s*px+c*py,pz);
+    return {rear:framePoint(pose.rear.x,pose.rear.y),front:framePoint(pose.front.x,pose.front.y),rearContact:pose.rear.touching,frontContact:pose.front.touching,exhaust:transform(...visual.exhaust),engine:transform(...visual.engine)};
+  }
   if (p.crashPhase !== 'none') {
     const pose = crashPose(p, ground, false, visual);
     const c = Math.cos(pose.pitch),
@@ -97,8 +110,8 @@ export function captureVfxFrame(race: Race, weather: Weather): VfxFrame {
     riders: race.riders.map((p, index) => ({
       ...p,
       anchors: effectAnchors(p, race.track, VEHICLE_VISUALS[(index === 0 ? race.config.player?.appearance?.vehicle : race.config.bots[index - 1]?.appearance?.vehicle) ?? 'motocross']),
-      surface: segmentAt(race.track, p.x, p.lane)?.surface ?? 'dirt',
-      clearance: p.height - heightAt(race.track, p.x, p.lane),
+      surface: p.motion.kind==='loop' ? 'dirt' : segmentAt(race.track, p.x, p.lane)?.surface ?? 'dirt',
+      clearance: p.motion.kind==='loop' ? 0 : p.height - heightAt(race.track, p.x, p.lane),
     })),
     events: race.events.map((e) => ({ ...e })),
     finished:

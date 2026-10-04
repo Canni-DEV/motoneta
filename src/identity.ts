@@ -7,8 +7,8 @@ export const GAME_LOGO = `<img class="brand-mark" src="${import.meta.env?.BASE_U
 export const SETTINGS_KEY = `${GAME_ID}.settings.v3`;
 export const DATABASE_NAME = `${GAME_ID}-game`;
 export const DEBUG_KEY = `__${GAME_ID}`;
-export const FORMAT_VERSION = 2;
-export const RULESET = `${GAME_ID}-2`;
+export const FORMAT_VERSION = 3;
+export const RULESET = `${GAME_ID}-3`;
 export const FILE_HEADER = { game: GAME_ID, version: FORMAT_VERSION } as const;
 export function mapFilename(name: string) {
   const slug =

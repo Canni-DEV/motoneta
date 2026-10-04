@@ -1,0 +1,184 @@
+{
+  "gltf": {
+    "errors": 0,
+    "warnings": 0,
+    "triangles": 3784
+  },
+  "states": [
+    {
+      "name": "entry",
+      "frame": 2,
+      "kind": "loop",
+      "x": 253.125,
+      "progress": 250.59375,
+      "lane": 4,
+      "height": 0.23046875,
+      "speed": 3.125,
+      "tilt": 0,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "climbing",
+      "frame": 46,
+      "kind": "loop",
+      "x": 355.4375,
+      "progress": 276.4296875,
+      "lane": 4,
+      "height": 60.04296875,
+      "speed": 3.0546875,
+      "tilt": 1.2535475455139682,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0.5865348194817176,
+        0.8099240121983969
+      ]
+    },
+    {
+      "name": "inverted",
+      "frame": 90,
+      "kind": "loop",
+      "x": 316.5859375,
+      "progress": 301.9375,
+      "lane": 2.96875,
+      "height": 163.1015625,
+      "speed": 3.109375,
+      "tilt": 3.046159264555732,
+      "crashes": 0,
+      "rootQuaternion": [
+        -0.2003007693389836,
+        0.00956546195872905,
+        0.9785725338203167,
+        0.04673221364553966
+      ]
+    },
+    {
+      "name": "descending",
+      "frame": 119,
+      "kind": "loop",
+      "x": 251.26171875,
+      "progress": 319.3515625,
+      "lane": 1.72265625,
+      "height": 117.98828125,
+      "speed": 3.28515625,
+      "tilt": 4.50775836211891,
+      "crashes": 0,
+      "rootQuaternion": [
+        0.10416960296999474,
+        0.08477153164016253,
+        -0.7685994304688812,
+        0.6254737378366623
+      ]
+    },
+    {
+      "name": "boost",
+      "frame": 161,
+      "kind": "loop-air",
+      "x": 346.15234375,
+      "progress": 346.15234375,
+      "lane": 1,
+      "height": 48.30859375,
+      "speed": 7.25,
+      "tilt": -2.4492935982947064e-16,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "landing",
+      "frame": 196,
+      "kind": "track",
+      "x": 599.90234375,
+      "progress": 599.90234375,
+      "lane": 1,
+      "height": 0,
+      "speed": 7.25,
+      "tilt": 0,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "boost-lane-2",
+      "frame": 161,
+      "kind": "loop-air",
+      "x": 346.15234375,
+      "progress": 346.15234375,
+      "lane": 1.98046875,
+      "height": 48.30859375,
+      "speed": 7.25,
+      "tilt": -2.4492935982947064e-16,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "landing-lane-2",
+      "frame": 196,
+      "kind": "track",
+      "x": 599.90234375,
+      "progress": 599.90234375,
+      "lane": 1.98046875,
+      "height": 0,
+      "speed": 7.25,
+      "tilt": 0,
+      "crashes": 0,
+      "rootQuaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "side-fall",
+      "frame": 102,
+      "kind": "loop-air",
+      "x": 264.03515625,
+      "progress": 264.03515625,
+      "lane": 4,
+      "height": 152.6171875,
+      "speed": 3.45703125,
+      "tilt": 3.2109375,
+      "crashes": 0,
+      "rootQuaternion": [
+        -0.21538520622058546,
+        -0.010996892393533327,
+        0.9751969994349754,
+        -0.04979049700516546
+      ]
+    }
+  ],
+  "screenshots": [
+    "assets/track-pieces/loop-prototype/review/integration/entry.png",
+    "assets/track-pieces/loop-prototype/review/integration/climbing.png",
+    "assets/track-pieces/loop-prototype/review/integration/inverted.png",
+    "assets/track-pieces/loop-prototype/review/integration/inverted-side.png",
+    "assets/track-pieces/loop-prototype/review/integration/descending.png",
+    "assets/track-pieces/loop-prototype/review/integration/boost.png",
+    "assets/track-pieces/loop-prototype/review/integration/landing.png",
+    "assets/track-pieces/loop-prototype/review/integration/boost-lane-2.png",
+    "assets/track-pieces/loop-prototype/review/integration/landing-lane-2.png",
+    "assets/track-pieces/loop-prototype/review/integration/side-fall.png"
+  ],
+  "errors": []
+}

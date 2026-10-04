@@ -414,7 +414,7 @@ export class VfxModel {
         ) * SCALE;
       const nearby = separation < 42;
       const relocated = previous && Math.abs(p.x - previous.x) * SCALE > 1.2;
-      if (relocated || !p.grounded || p.recovery || !groups.tracks || !nearby) {
+      if (relocated || !p.grounded || p.motion.kind==='loop' || p.recovery || !groups.tracks || !nearby) {
         this.lastMarks.delete(p.id * 2);
         this.lastMarks.delete(p.id * 2 + 1);
       } else {

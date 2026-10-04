@@ -34,6 +34,8 @@ export interface TrackRef {
 }
 export interface RaceCourse {
   track: Track;
+  /** Present only on courses whose simulation depends on the loop geometry. */
+  loopGeometryVersion?: number;
   ref: TrackRef;
   timeOfDay: TimeOfDay;
   weather: Weather;
@@ -58,7 +60,7 @@ export interface RaceResult {
 }
 export interface Recording {
   game: typeof GAME_ID;
-  version: 2;
+  version: 3;
   ruleset: typeof RULESET;
   config: RaceConfig;
   inputs: [number, number][];

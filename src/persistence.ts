@@ -11,10 +11,11 @@ import {
 import { emptyDesign, type MapDesign } from './core/maps';
 import { DATABASE_NAME, FILE_HEADER } from './identity';
 import { defaultAppearance } from './appearance';
+import { compatibleLoopGeometry } from './core/loop-geometry';
 
 export interface SaveState {
   game: string;
-  version: 2;
+  version: 3;
   profiles: LocalProfile[];
   activeProfile: string;
   maps: MapDesign[];
@@ -40,12 +41,12 @@ export class GameStore {
   async open() {
     this.db?.close();
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, 3);
+      const request = indexedDB.open(DATABASE_NAME, 4);
       request.onupgradeneeded = (event) => {
         const db = request.result;
         if (!db.objectStoreNames.contains('data')) db.createObjectStore('data');
         if (!db.objectStoreNames.contains('replays')) db.createObjectStore('replays');
-        if (event.oldVersion > 0 && event.oldVersion < 3) {
+        if (event.oldVersion > 0 && event.oldVersion < 4) {
           request.transaction!.objectStore('data').clear();
           request.transaction!.objectStore('replays').clear();
         }
@@ -60,11 +61,52 @@ export class GameStore {
       this.state = stored;
       this.state.profiles = stored.profiles.map(localProfile);
       this.state.motonetaSessions ??= {};
+      await this.invalidateObsoleteLoops();
     }
     else {
       this.state = initial();
       await this.update(() => {});
     }
+  }
+  private async invalidateObsoleteLoops() {
+    const next = structuredClone(this.state);
+    const obsoleteSession = (session: CompetitionSession) =>
+      session.courses.some(course => !compatibleLoopGeometry(course)) ||
+      session.results.some(({ result }) => !compatibleLoopGeometry(result.config));
+    next.records = next.records.filter(record => compatibleLoopGeometry(record.config));
+    for (const mode of ['tournament', 'versus'] as const)
+      if (next.sessions[mode] && obsoleteSession(next.sessions[mode]!)) delete next.sessions[mode];
+    for (const [owner, session] of Object.entries(next.motonetaSessions))
+      if (obsoleteSession(session)) delete next.motonetaSessions[owner];
+    const changed = JSON.stringify(next) !== JSON.stringify(this.state);
+    // Metadata and replay invalidation share one transaction. Maps, progression
+    // and unrelated records are preserved even if cleanup cannot be committed.
+    await new Promise<void>((resolve, reject) => {
+      const tx = this.db!.transaction(['data', 'replays'], 'readwrite');
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error('No se pudieron actualizar las repeticiones del loop.'));
+      tx.onabort = () => reject(tx.error ?? new Error('No se pudieron actualizar las repeticiones del loop.'));
+      try {
+        if (changed) tx.objectStore('data').put(next, 'state');
+        const cursor = tx.objectStore('replays').openCursor();
+        cursor.onsuccess = () => {
+          try {
+            const entry = cursor.result;
+            if (!entry) return;
+            const replay = entry.value as Recording;
+            if (!compatibleLoopGeometry(replay.config) || !compatibleLoopGeometry(replay.result.config)) entry.delete();
+            entry.continue();
+          } catch (error) {
+            tx.abort();
+            reject(error);
+          }
+        };
+      } catch (error) {
+        tx.abort();
+        reject(error);
+      }
+    });
+    this.state = next;
   }
   private get<T>(store: string, key: string): Promise<T | undefined> {
     return new Promise((resolve, reject) => {
@@ -80,6 +122,7 @@ export class GameStore {
   replay(id: string) {
     return this.get<Recording>('replays', id).then((value) => {
       if (!value) return value;
+      if (!compatibleLoopGeometry(value.config) || !compatibleLoopGeometry(value.result.config)) return undefined;
       value.config.player = raceProfile(value.config.player);
       value.config.bots = value.config.bots.map(raceProfile);
       value.result.config.player = raceProfile(value.result.config.player);

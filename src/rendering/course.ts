@@ -3,6 +3,8 @@ import type { Track } from '../core/types';
 import type { WeatherSurfaces } from '../weather-surfaces';
 import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from '../world-space';
 import { box, mat, black, white } from './scene-geometry';
+import { isLoop } from '../core/loop-geometry';
+import { buildLoopModel } from './loop-model';
 
 export interface CoursePiece {
   group: THREE.Group;
@@ -26,6 +28,10 @@ export function buildCourse(
   disposables.push(mud, grass, cool, bump);
   for (const s of track.segments) {
     if (s.piece === 'flat') continue;
+    if(isLoop(s)) {
+      const group=buildLoopModel(dirt,surfaces,disposables),bounds=new THREE.Box3().setFromObject(group);
+      group.position.x=s.x*SCALE; course.add(group); pieces.push({group,base:s.x*SCALE,bounds});continue;
+    }
     const group = new THREE.Group(),
       length = s.length * SCALE,
       hasHeight = s.profile.some((p) => p[1] > 0);

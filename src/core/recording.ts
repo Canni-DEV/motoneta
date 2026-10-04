@@ -12,6 +12,7 @@ import {
 } from './racing';
 import { isTimeOfDay } from './time-of-day';
 import { isWeather } from './weather';
+import { compatibleLoopGeometry, loopGeometryMetadata } from './loop-geometry';
 
 export type { Recording } from './game';
 class InputReader {
@@ -30,12 +31,13 @@ class InputReader {
   }
 }
 export function newRecording(config: RaceConfig): Recording {
+  const race = createRace(config);
   return {
     ...FILE_HEADER,
     ruleset: RULESET,
-    config: structuredClone(config),
+    config: structuredClone(race.config),
     inputs: [],
-    result: raceResult(createRace(config)),
+    result: raceResult(race),
   };
 }
 export function appendInput(r: Recording, input: number) {
@@ -48,6 +50,8 @@ export class Playback {
   private cursor: InputReader;
   done = false;
   constructor(public recording: Recording) {
+    if (!compatibleLoopGeometry(recording.config))
+      throw new Error('Repetición incompatible con la geometría actual del loop.');
     this.race = createRace(recording.config);
     this.cursor = new InputReader(recording.inputs);
   }
@@ -91,6 +95,8 @@ export function validateRecording(value: unknown): Recording {
   )
     fail();
   if (!c.track || !Array.isArray(c.track.segments) || c.track.segments.length > 2500) fail();
+  if (!compatibleLoopGeometry(c))
+    throw new Error('Repetición incompatible con la geometría actual del loop.');
   const checked = validateMap(designFromTrack(c.track));
   const ids = new Set<string>();
   for (const p of [c.player, ...c.bots]) {
@@ -115,6 +121,7 @@ export function validateRecording(value: unknown): Recording {
   track.number = c.track.number;
   const config: RaceConfig = {
     track,
+    ...loopGeometryMetadata(track),
     ref: { id: c.ref.id, revision: checked.revision, name: track.name },
     mode: c.mode,
     player: { id: c.player.id, name: c.player.name, color: c.player.color, appearance: normalizeAppearance(c.player.appearance) },

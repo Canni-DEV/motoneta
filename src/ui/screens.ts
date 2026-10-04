@@ -23,6 +23,7 @@ import { TIME_LABELS } from '../core/time-of-day';
 import { WEATHER_LABELS } from '../core/weather';
 import type { SaveState } from '../persistence';
 import { mapCourse, type GeneratorOptions, type MapDesign } from '../core/maps';
+import { maximumLoops } from '../core/loop-geometry';
 import type { SetupPresentation } from './navigation';
 
 export interface Setup {
@@ -160,6 +161,7 @@ export function setupView(
   return `<main class="page setup-page" data-key="setup-${setup.mode}">${pageTitle(modeNames[setup.mode])}${multi ? steps : ''}${content}<footer class="screen-footer"><span class="selection-summary">${multi ? `${setup.courses.length} pistas seleccionadas` : esc(current.track.name)}</span><div class="actions">${multi && view.step !== 'players' ? b('setup-previous', 'Anterior') : ''}${multi && view.step !== 'review' ? b('setup-next', 'Continuar →', '', `class="primary" ${!canNext ? 'disabled' : ''}`) : b('start', startLabel, '', `class="primary start-button" ${!ready || (multi && !canNext) ? 'disabled' : ''}`)}</div></footer></main>`;
 }
 export function generatorView(g: GeneratorOptions, generated: MapDesign | null = null) {
+  const maxLoops=maximumLoops({short:2048,medium:4096,long:6144}[g.size]);
   return `<main class="page generator-page" data-key="generator">${pageTitle('Generar pista')}<div class="generator-layout"><section class="panel scroll-region"><h2>Parámetros</h2><div class="form-grid">${select(
     'gen-size',
     'Longitud',
@@ -170,7 +172,7 @@ export function generatorView(g: GeneratorOptions, generated: MapDesign | null =
       ['long', 'Larga'],
     ],
     'data-generator="size"',
-  )}${select('gen-difficulty', 'Dificultad', g.difficulty, Object.entries(DIFFICULTIES), 'data-generator="difficulty"')}<label class="wide-field">Semilla<input id="gen-seed" maxlength="80" value="${esc(g.seed)}" data-generator="seed"></label>${(['ramps', 'mud', 'cool'] as const).map((k, i) => `<label>${['Rampas', 'Barro', 'Enfriamiento'][i]} (0–100)<input type="number" min="0" max="100" value="${g[k]}" data-generator="${k}"></label>`).join('')}</div><p class="muted">La misma semilla produce la misma pista.</p></section><section class="generator-result">${sceneHost()}<div class="panel generated-detail">${generated ? `<h2>${esc(generated.name)}</h2>${trackSvg(mapCourse(generated).track)}<p>${generated.length} unidades · ${generated.items.length} piezas</p>` : '<h2>Sin pista generada</h2><p>Elegí los parámetros y previsualizá el resultado.</p>'}</div></section></div><footer class="screen-footer"><div class="actions">${b('generate', 'Previsualizar', '', generated ? '' : 'class="primary"')}${b('regenerate', 'Regenerar')}</div><div class="actions">${b('edit-generated', 'Editar', '', generated ? '' : 'disabled')}${b('save-generated', 'Guardar', '', generated ? '' : 'disabled')}${b('use-generated', 'Usar mapa', '', `class="primary" ${generated ? '' : 'disabled'}`)}</div></footer></main>`;
+  )}${select('gen-difficulty', 'Dificultad', g.difficulty, Object.entries(DIFFICULTIES), 'data-generator="difficulty"')}<label class="wide-field">Semilla<input id="gen-seed" maxlength="80" value="${esc(g.seed)}" data-generator="seed"></label>${(['ramps', 'mud', 'cool'] as const).map((k, i) => `<label>${['Rampas', 'Barro', 'Enfriamiento'][i]} (0–100)<input type="number" min="0" max="100" value="${g[k]}" data-generator="${k}"></label>`).join('')}<label>Loops (0–${maxLoops})<input id="gen-loops" type="number" min="0" max="${maxLoops}" step="1" value="${g.loops}" data-generator="loops"></label></div><p class="muted">La misma semilla produce la misma pista. Máximo ${maxLoops} loops para esta longitud; se reserva una salida normal despejada.</p></section><section class="generator-result">${sceneHost()}<div class="panel generated-detail">${generated ? `<h2>${esc(generated.name)}</h2>${trackSvg(mapCourse(generated).track)}<p>${generated.length} unidades · ${generated.items.length} piezas</p>` : '<h2>Sin pista generada</h2><p>Elegí los parámetros y previsualizá el resultado.</p>'}</div></section></div><footer class="screen-footer"><div class="actions">${b('generate', 'Previsualizar', '', generated ? '' : 'class="primary"')}${b('regenerate', 'Regenerar')}</div><div class="actions">${b('edit-generated', 'Editar', '', generated ? '' : 'disabled')}${b('save-generated', 'Guardar', '', generated ? '' : 'disabled')}${b('use-generated', 'Usar mapa', '', `class="primary" ${generated ? '' : 'disabled'}`)}</div></footer></main>`;
 }
 export interface LibraryPresentation {
   search: string;
