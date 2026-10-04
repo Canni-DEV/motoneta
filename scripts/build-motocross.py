@@ -922,8 +922,8 @@ def make_tanque():
         if parent: obj.location=(0,0,0)
         for child in children: child.parent=obj
         # Deliberate hard edges around panel creases; broad panels stay smooth.
-        if builder.authored_lod: obj['designRevision']='classic-scooter-reference-v4'
-        if name in ('Slot_fairing_core','Slot_seat_core','Handlebar'):
+        if builder.authored_lod: obj['designRevision']='classic-scooter-reference-v5'
+        if name in ('Slot_fairing_core','Slot_seat_core','Handlebar','Slot_fender_core_Front'):
             # Split the sharp body folds and cap boundaries, preserving the
             # broad molded faces instead of averaging them into rounded tubes.
             edge=obj.modifiers.new('Molded panel creases','EDGE_SPLIT')
@@ -1004,40 +1004,50 @@ def make_tanque():
            (.170,.318),(.170,.220),(-.105,.217),(-.390,.249),(-.640,.310),(-.800,.500)]
     for side in (-1,1):
         rings=[]
-        for inset in (.041,.009,0):
+        # The middle ring is coplanar; Low spends those triangles on the nose.
+        for inset in ((.041,.009,0) if HIGH else (.041,0)):
             rings.append([(x,y,side*(.203-inset if x>-.67 else .203-inset-(abs(x)-.67)*.43)) for x,y in skirt])
         stitch(floorboard,rings,'Graphite')
-    # Explicit straight front panels traced from the front and side elevations.
-    # The center ridge lies on a straight inclined plane. There is no swept
-    # elliptical loft, concave bowl or rounded nose between the rows.
+    # The inclined front keeps its broad planar faces. Narrow chamfers make
+    # the two converging pressed ribs legible, while the perimeter rolls over
+    # into a molded lip rather than ending as a knife edge above the wheel.
     front_rows=[
-        [( .341,.811,-.125),(.369,.833,-.070),(.380,.835,0),(.369,.833,.070),(.341,.811,.125)],
-        [( .422,.687,-.169),(.477,.706,-.120),(.502,.706,0),(.477,.706,.120),(.422,.687,.169)],
-        [( .490,.641,-.189),(.616,.579,-.062),(.668,.532,0),(.616,.579,.062),(.490,.641,.189)],
-        [( .565,.513,-.186),(.686,.510,-.013),(.695,.504,0),(.686,.510,.013),(.565,.513,.186)],
+        [( .341,.811,-.125),(.350,.819,-.115),(.380,.835,0),(.350,.819,.115),(.341,.811,.125)],
+        [( .422,.687,-.169),(.477,.706,-.095),(.502,.706,0),(.477,.706,.095),(.422,.687,.169)],
+        [( .490,.641,-.189),(.616,.579,-.052),(.668,.532,0),(.616,.579,.052),(.490,.641,.189)],
+        [( .565,.517,-.186),(.675,.525,-.022),(.683,.517,0),(.675,.525,.022),(.565,.517,.186)],
     ]
+    rear_rows=[.270,.286,.318,.320]
+    if HIGH:
+        front_rows.append([(.563,.514,-.186),(.683,.512,-.017),(.695,.507,0),(.683,.512,.017),(.563,.514,.186)])
+        rear_rows.append(.320)
+    front_rows.append([(.557,.504,-.185),(.676,.500,-.022),(.690,.495,0),(.676,.500,.022),(.557,.504,.185)])
+    rear_rows.append(.318)
     rings=[]
     for row,points in enumerate(front_rows):
-        rear_x=[.270,.286,.318,.320][row]
+        rear_x=rear_rows[row]
         center,shoulder,edge=points[2:]
         x,y,z=edge
-        half=[center,shoulder,edge,(x-.012,y-.004,z+.006),
+        inside=mix(shoulder,center,.08)
+        crest=(shoulder[0]+(.005 if row<len(front_rows)-2 else .002),shoulder[1],shoulder[2])
+        outside=mix(shoulder,edge,.075)
+        half=[center,inside,crest,outside,edge,(x-.012,y-.004,z+.006),
               (rear_x+.014,y-.008,z+.008),(rear_x,y-.010,z-.007),
               (rear_x-.005,y-.010,z*.50),(rear_x-.005,y-.010,0)]
         rings.append(half+[(x,y,-z) for x,y,z in reversed(half[1:-1])])
-    stitch(fairing,rings,'TeamPaint',lambda j,i:'Graphite' if 5<=i<=8 else 'TeamPaint',creases=(1,13))
-    # The wheel opening separates two flat lower wings. Silver outer panels and
-    # black inner panels terminate on the existing flat footboard.
+    stitch(fairing,rings,'TeamPaint',lambda j,i:'Graphite' if 7<=i<=10 else 'TeamPaint',creases=(3,15))
+    # Lower wings continue the rolled rim around the fork opening.
     for side in (-1,1):
-        outer=[(.565,.513,side*.186),(.392,.395,side*.220),(.267,.299,side*.224)]
-        inner=[(.533,.497,side*.098),(.341,.385,side*.157),(.234,.294,side*.179)]
-        rear=[(.320,.493,side*.184),(.240,.378,side*.218),(.205,.295,side*.222)]
+        outer=[(.557,.504,side*.185),(.392,.395,side*.220),(.267,.299,side*.224)]
+        inner=[(.523,.489,side*.105),(.348,.385,side*.157),(.234,.294,side*.179)]
+        rear=[(.370,.484,side*.183),(.300,.378,side*.218),(.223,.295,side*.222)]
         rings=[]
         for j in range(3):
             rx,ry,rz=rear[j]
+            inner_rx=[.318,.240,.205][j]
             x,y,z=outer[j];ix,iy,iz=inner[j]
             rings.append([(x-.009,y+.003,z),(x,y,z-side*.010),(ix,iy,iz),
-                          (rx,ry,iz),(rx-.005,ry,rz-side*.012),(rx,ry+.003,rz),
+                          (inner_rx,ry,iz),(rx-.005,ry,rz-side*.012),(rx,ry+.003,rz),
                           (rx+.014,ry+.007,rz+side*.006),(x-.023,y+.008,z+side*.006)])
         stitch(fairing,rings,'TeamPaint',lambda j,i:'Graphite' if i in (2,3,4) else 'TeamPaint')
     # Rider-facing shield: the black back folds down to the flat mat, with a
@@ -1130,18 +1140,41 @@ def make_tanque():
     # The turnaround's exhaust is on the visible right side in its rear view.
     exhaust.verts=[(x,y,-z) for x,y,z in exhaust.verts]
     replace('Slot_exhaust_core',exhaust)
-    # Recessed black intake above the front's diagonal sculpting, without a badge.
+    # Rounded rectangular intake, flush with the inclined front. The lower lip
+    # and triangular screw layout follow the supplied front close-up.
     plate=Builder()
-    plate.block((.429,.792,.030),(.011,.018,.058),'Graphite',angle=-.76)
-    plate.block((.433,.780,.030),(.005,.004,.049),'TeamAccent',angle=-.76)
-    for y,x in [(.658,.548),(.631,.575)]:
-        plate.ellipsoid((x,y,0),(.003,.004,.004),'Alloy',seg=6,rings=3)
+    intake=[(-.024,-.009),(.024,-.009),(.029,-.004),(.029,.004),
+            (.024,.009),(-.024,.009),(-.029,.004),(-.029,-.004)]
+    stitch(plate,[[(.424+depth-dy*.69,.790+dy*.725,.030+dz) for dz,dy in intake]
+                  for depth in (0,.002)],'Graphite',lambda j,i:'TeamAccent' if i==0 else 'Graphite')
+    for x,y,z in [(.548,.658,0),(.579,.628,-.024),(.579,.628,.024)]:
+        plate.rod((x-.0014,y-.0013,z),(x+.0006,y+.0006,z),.0035,'Alloy',seg=8 if HIGH else 4)
     replace('Slot_plate_core',plate)
     for component,x in [('Rear',-.53),('Front',.57)]:
         guard=Builder()
         if component=='Front':
-            fender(guard,[(x-.157,.402,.087),(x-.119,.440,.096),(x-.065,.465,.102),
-                          (x+.018,.470,.105),(x+.110,.438,.098),(x+.179,.390,.077)],'TeamPaint')
+            # Flatter crown, small rounded shoulders and a short molded front
+            # lip; the previous profile drooped into two pointed side tabs.
+            sections=[(x-.157,.402,.087),(x-.119,.434,.096),(x-.065,.461,.102),
+                      (x+.018,.466,.103),(x+.110,.444,.094),(x+.161,.416,.079)]
+            profile=[(-1,-.022),(-.94,-.013),(-.72,0),(0,.011),(.72,0),(.94,-.013),(1,-.022)]
+            verts=[]
+            for j,(px,y,w) in enumerate(sections):
+                edge_scale=.70 if j==len(sections)-1 else .85 if j==len(sections)-2 else 1
+                for z,dy in profile:
+                    corner=-.011*abs(z)**4 if j==len(sections)-1 else 0
+                    verts.append((px+corner,y+dy*(edge_scale if dy<0 else 1),w*z))
+            faces=[(j*7+i,j*7+i+1,(j+1)*7+i+1,(j+1)*7+i)
+                   for j in range(len(sections)-1) for i in range(6)]
+            start=len(verts);verts += [(px,y-.010,z) for px,y,z in verts]
+            faces += [tuple(start+i for i in reversed(face)) for face in list(faces)]
+            faces += [(j*7+i,(j+1)*7+i,(j+1)*7+i+start,j*7+i+start)
+                      for j in range(len(sections)-1) for i in (0,6)]
+            faces += [(j*7+i,j*7+i+start,j*7+i+1+start,j*7+i+1)
+                      for j in (0,len(sections)-1) for i in range(6)]
+            guard.add(verts,faces,'TeamPaint')
+            for j in range(len(sections)-1):
+                for i in (2,4): guard.sharp_edges.append((j*7+i,(j+1)*7+i))
         else:
             fender(guard,[(x-.187,.337,.079),(x-.11,.420,.086),(x,.448,.091),(x+.12,.410,.087)],'Graphite')
         replace(f'Slot_fender_core_{component}',guard,(.324,.94,0) if component=='Front' else (0,0,0))
@@ -1511,5 +1544,5 @@ for HIGH in [False,True]:
         studio('--render' in __import__('sys').argv)
         bpy.context.preferences.filepaths.save_version=0
         bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/f'{VEHICLE}.blend'))
-(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'classic-scooter-reference-v4; reference panel folds and continuous leg shield; molded cowl and saddle; translucent headlamp and recessed reflector; shared 15-bone hierarchy and wheel/hand/foot anchors; seated fit' if VEHICLE=='tanque' else 'classic-reference-v2; Essential approved; independent racing and touring families' if VEHICLE=='motoneta' else 'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'bikeVariants':['core'] if VEHICLE=='tanque' else VARIANTS,'assets':report},indent=2)+'\n')
+(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'classic-scooter-reference-v5; continuous front V ribs with chamfers, rolled nose and narrower lower wings; flatter molded fender; rounded flush intake and triangular fasteners; shared 15-bone hierarchy and wheel/hand/foot anchors; seated fit' if VEHICLE=='tanque' else 'classic-reference-v2; Essential approved; independent racing and touring families' if VEHICLE=='motoneta' else 'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'bikeVariants':['core'] if VEHICLE=='tanque' else VARIANTS,'assets':report},indent=2)+'\n')
 print(f'{VEHICLE.upper()}_ASSETS',json.dumps({quality:{key:value for key,value in stats.items() if key!='parts'} for quality,stats in report.items()}))

@@ -2,7 +2,7 @@
   "generator": "scripts/build-motocross.py",
   "blender": "5.2.2 LTS",
   "coordinateSystem": "+X forward, +Y up, +Z left in game/glTF",
-  "reviewStage": "classic-scooter-reference-v4; reference panel folds and continuous leg shield; molded cowl and saddle; translucent headlamp and recessed reflector; shared 15-bone hierarchy and wheel/hand/foot anchors; seated fit",
+  "reviewStage": "classic-scooter-reference-v5; continuous front V ribs with chamfers, rolled nose and narrower lower wings; flatter molded fender; rounded flush intake and triangular fasteners; shared 15-bone hierarchy and wheel/hand/foot anchors; seated fit",
   "slots": [
     "fairing",
     "fender",
@@ -27,10 +27,10 @@
   ],
   "assets": {
     "low": {
-      "trianglesSelected": 7910,
-      "trianglesSelectedMax": 7966,
-      "trianglesCatalog": 14022,
-      "bytes": 545892,
+      "trianglesSelected": 7942,
+      "trianglesSelectedMax": 7998,
+      "trianglesCatalog": 14054,
+      "bytes": 548328,
       "textures": 0,
       "bones": 15,
       "parts": [
@@ -133,11 +133,11 @@
             -0.0
           ],
           "size": [
-            1.5049999952316284,
+            1.5,
             0.46000000834465027,
             0.5409999787807465
           ],
-          "triangles": 790,
+          "triangles": 858,
           "boundsBlender": [
             [
               -0.8100000023841858,
@@ -145,7 +145,7 @@
               0.2939999997615814
             ],
             [
-              0.6949999928474426,
+              0.6899999976158142,
               0.23000000417232513,
               0.8349999785423279
             ]
@@ -167,7 +167,7 @@
             0.48399633169174194,
             0.3779999762773514
           ],
-          "triangles": 352,
+          "triangles": 308,
           "boundsBlender": [
             [
               -0.800000011920929,
@@ -284,21 +284,21 @@
             -0.0
           ],
           "size": [
-            0.15791350603103638,
-            0.0620000003837049,
-            0.1744411587715149
+            0.1642206311225891,
+            0.08650000020861626,
+            0.17236250638961792
           ],
-          "triangles": 104,
+          "triangles": 64,
           "boundsBlender": [
             [
-              0.41968458890914917,
+              0.4177899956703186,
               -0.05900000035762787,
-              0.6269999742507935
+              0.624162495136261
             ],
             [
-              0.5775980949401855,
-              0.003000000026077032,
-              0.8014411330223083
+              0.5820106267929077,
+              0.027499999850988388,
+              0.7965250015258789
             ]
           ],
           "materials": [
@@ -344,21 +344,21 @@
             -0.0
           ],
           "size": [
-            0.3360000103712082,
-            0.20999999344348907,
-            0.132999986410141
+            0.318000003695488,
+            0.20600000023841858,
+            0.10699999332427979
           ],
-          "triangles": 116,
+          "triangles": 164,
           "boundsBlender": [
             [
               0.08900000154972076,
-              -0.10499999672174454,
-              -0.5839999914169312
+              -0.10300000011920929,
+              -0.5699999928474426
             ],
             [
-              0.42500001192092896,
-              0.10499999672174454,
-              -0.45100000500679016
+              0.40700000524520874,
+              0.10300000011920929,
+              -0.46299999952316284
             ]
           ],
           "materials": [
@@ -1181,10 +1181,10 @@
       ]
     },
     "high": {
-      "trianglesSelected": 15170,
-      "trianglesSelectedMax": 15226,
-      "trianglesCatalog": 25414,
-      "bytes": 896328,
+      "trianglesSelected": 15330,
+      "trianglesSelectedMax": 15386,
+      "trianglesCatalog": 25574,
+      "bytes": 901808,
       "textures": 0,
       "bones": 15,
       "parts": [
@@ -1291,7 +1291,7 @@
             0.46000000834465027,
             0.5409999787807465
           ],
-          "triangles": 946,
+          "triangles": 1050,
           "boundsBlender": [
             [
               -0.8100000023841858,
@@ -1438,21 +1438,21 @@
             -0.0
           ],
           "size": [
-            0.15791350603103638,
-            0.0620000003837049,
-            0.1744411587715149
+            0.1642206311225891,
+            0.08650000020861626,
+            0.17236250638961792
           ],
-          "triangles": 104,
+          "triangles": 112,
           "boundsBlender": [
             [
-              0.41968458890914917,
+              0.4177899956703186,
               -0.05900000035762787,
-              0.6269999742507935
+              0.624162495136261
             ],
             [
-              0.5775980949401855,
-              0.003000000026077032,
-              0.8014411330223083
+              0.5820106267929077,
+              0.027499999850988388,
+              0.7965250015258789
             ]
           ],
           "materials": [
@@ -1498,21 +1498,21 @@
             -0.0
           ],
           "size": [
-            0.3360000103712082,
-            0.20999999344348907,
-            0.132999986410141
+            0.318000003695488,
+            0.20600000023841858,
+            0.10699999332427979
           ],
-          "triangles": 116,
+          "triangles": 164,
           "boundsBlender": [
             [
               0.08900000154972076,
-              -0.10499999672174454,
-              -0.5839999914169312
+              -0.10300000011920929,
+              -0.5699999928474426
             ],
             [
-              0.42500001192092896,
-              0.10499999672174454,
-              -0.45100000500679016
+              0.40700000524520874,
+              0.10300000011920929,
+              -0.46299999952316284
             ]
           ],
           "materials": [
