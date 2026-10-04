@@ -31,7 +31,7 @@ Las repeticiones pueden verse con cámaras cinematográficas y el tema de result
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla.
 
-El editor incluye **T · Loop**, con entrada automática desde el piso del carril 4 y salida elevada sobre el carril 1. Hay que seguir la cinta usando ↑ y ↓: conservan su dirección hacia los carriles 1 y 4 aun cabeza abajo. Se puede completar manteniendo A a velocidad normal; salir del camino o perder contacto permite corregir la moto en el aire. Recorrer toda la cinta otorga un impulso mayor que la superrampa, que B conserva. Los otros tres carriles permiten circular por debajo.
+El editor incluye **T · Loop**, con entrada automática desde el piso del carril 4 y salida elevada sobre el carril 1. La cinta se ensancha gradualmente a dos carriles durante el giro y vuelve a un carril en la salida. Hay que seguirla usando ↑ y ↓: conservan su dirección hacia los carriles 1 y 4 aun cabeza abajo. Se puede completar manteniendo A a velocidad normal; salir del camino o perder contacto permite corregir la moto en el aire. Recorrer toda la cinta otorga un impulso mayor que la superrampa, que B conserva. Los otros tres carriles permiten circular por debajo.
 
 El loop tiene dimensiones fijas y solo permite cambiar su posición longitudinal. El editor rechaza piezas elevadas superpuestas, protege la meta y avisa si hay piezas en la zona de aterrizaje. El generador reserva primero la cantidad independiente de loops y sus espacios de aproximación y salida; los valores iniciales son 0, 1 y 2 para Fácil, Normal y Difícil. Una cantidad superior a la capacidad de la longitud elegida muestra un error.
 

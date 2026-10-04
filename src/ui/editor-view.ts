@@ -1,7 +1,7 @@
 import type { Editor } from './editor';
 import { PIECES } from '../core/tracks';
 import { placedPiece, validateMap } from '../core/maps';
-import { isLoop, LOOP_SAMPLES, LOOP_LENGTH, LOOP_HEIGHT, sampleLane, loopWarnings } from '../core/loop-geometry';
+import { isLoop, LOOP_SAMPLES, LOOP_LENGTH, LOOP_HEIGHT, LOOP_WIDTH, sampleLane, loopWarnings } from '../core/loop-geometry';
 import { button as b, esc, select, environmentFields, icon } from './widgets';
 import { sceneHost } from './screens';
 
@@ -10,7 +10,11 @@ export function editorView(e: Editor) {
     p = d.items.find((item) => item.id === e.chosenItem);
   const width = Math.max(1, d.length * e.scale);
   const proposed = placedPiece(e.chosenPiece, e.cursor);
-  const routes = d.items.filter(isLoop).map(p => `<svg class="loop-route" viewBox="0 0 100 100" preserveAspectRatio="none" style="left:${p.x/d.length*100}%;width:${p.length/d.length*100}%" aria-hidden="true"><polyline points="${LOOP_SAMPLES.filter((_,i)=>i%4===0).map(s=>`${s.position[0]/LOOP_LENGTH*100},${(sampleLane(s)+0.5)*25}`).join(' ')}"/></svg>`).join('');
+  const samples = LOOP_SAMPLES.filter((_, i) => i % 4 === 0);
+  const roadEdge = (side: number) => samples.map(s =>
+    `${(s.position[0] + side * s.lateral[0] * s.width / 2) / LOOP_LENGTH * 100},${(sampleLane(s) + 0.5 + side * s.lateral[2] * s.width / LOOP_WIDTH / 2) * 25}`);
+  const outline = [...roadEdge(-1), ...roadEdge(1).reverse()].join(' ');
+  const routes = d.items.filter(isLoop).map(p => `<svg class="loop-route" viewBox="0 0 100 100" preserveAspectRatio="none" style="left:${p.x/d.length*100}%;width:${p.length/d.length*100}%" aria-hidden="true"><polygon points="${outline}"/><polyline points="${samples.map(s=>`${s.position[0]/LOOP_LENGTH*100},${(sampleLane(s)+0.5)*25}`).join(' ')}"/></svg>`).join('');
 
   let placementError = '';
   if (e.armed || e.tab === 'pieces') {

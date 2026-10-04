@@ -39,9 +39,19 @@ def loop_point(theta):
                    ENTRY_Z + (EXIT_Z - ENTRY_Z) * sideways))
 
 
+def loop_width(theta):
+    # Widen before steering starts; keep both lanes through the upper descent.
+    widen = smooth((theta - math.pi / 3) / (math.pi / 3))
+    narrow = smooth((theta - math.pi * 1.5) / (math.pi / 3))
+    return WIDTH * (1 + widen * (1 - narrow))
+
+
 points = [Vector((-3 + 3 * i / 24, 0.012, ENTRY_Z)) for i in range(25)]
 points += [loop_point(2 * math.pi * i / 256) for i in range(1, 257)]
 points += [Vector((2 * i / 24, EXIT_HEIGHT + 0.012, EXIT_Z)) for i in range(1, 25)]
+widths = [WIDTH] * 25
+widths += [loop_width(2 * math.pi * i / 256) for i in range(1, 257)]
+widths += [WIDTH] * 24
 frames = []
 for i, point in enumerate(points):
     tangent = (points[min(i + 1, len(points) - 1)] - points[max(0, i - 1)]).normalized()
@@ -99,8 +109,8 @@ def mesh(name, vertices, faces, mat, smooth_faces=False):
 
 surface_vertices = []
 shell_vertices = []
-for p, (_, lateral, normal) in zip(points, frames):
-    left, right = p - lateral * WIDTH / 2, p + lateral * WIDTH / 2
+for p, (_, lateral, normal), width in zip(points, frames, widths):
+    left, right = p - lateral * width / 2, p + lateral * width / 2
     surface_vertices.extend((left, right))
     shell_vertices.extend((left, right, right - normal * THICKNESS, left - normal * THICKNESS))
 surface_faces = []
@@ -122,14 +132,14 @@ uv = surface.data.uv_layers.new(name='RoadUV')
 for polygon in surface.data.polygons:
     for loop_index in polygon.loop_indices:
         index = surface.data.loops[loop_index].vertex_index
-        uv.data[loop_index].uv = (arc[index // 2], (index % 2) * WIDTH)
+        uv.data[loop_index].uv = (arc[index // 2], (index % 2) * widths[index // 2])
 mesh('Loop_Underside', shell_vertices, shell_faces, steel, True)
 
 
 for side in (-1, 1):
     vertices, faces = [], []
-    for p, (_, lateral, normal) in zip(points, frames):
-        center = p + lateral * side * (WIDTH / 2 - 0.045) + normal * 0.003
+    for p, (_, lateral, normal), width in zip(points, frames, widths):
+        center = p + lateral * side * (width / 2 - 0.045) + normal * 0.003
         vertices.extend((center - lateral * 0.013, center + lateral * 0.013))
     for i in range(len(points) - 1):
         a, b = 2 * i, 2 * (i + 1)
@@ -181,6 +191,9 @@ assert abs(points[0].z - ENTRY_Z) < 1e-6
 assert abs(points[-1].z - EXIT_Z) < 1e-6
 assert frames[0][0].x > 0.999 and frames[-1][0].x > 0.999
 assert abs(frames[24 + 128][2].y + 1) < 1e-6, 'Apex must face down'
+assert widths[0] == WIDTH and widths[-1] == WIDTH
+assert widths[24 + 128] == 2 * WIDTH
+assert all(WIDTH <= w <= 2 * WIDTH for w in widths)
 
 bpy.context.view_layer.update()
 bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE / 'loop-prototype.blend'))
@@ -195,9 +208,10 @@ manifest = {
     'visualOnly': False,
     'worldScale': SCALE,
     'width': WIDTH,
+    'maximumWidth': max(widths),
     'thickness': THICKNESS,
     'radius': RADIUS,
-    'height': 2 * RADIUS + EXIT_HEIGHT + 0.012,
+    'height': max(p.y for p in surface_vertices + shell_vertices),
     'exitHeight': EXIT_HEIGHT + 0.012,
     'entryLane': 4,
     'exitLane': 1,
@@ -208,8 +222,8 @@ manifest = {
     'minimumBypassClearance': clearance,
     'triangles': triangles,
     'beams': beams,
-    'samples': [{'position': list(p), 'tangent': list(t), 'lateral': list(b), 'normal': list(n)}
-                for p, (t, b, n) in zip(points, frames)],
+    'samples': [{'position': list(p), 'tangent': list(t), 'lateral': list(b), 'normal': list(n), 'width': w}
+                for p, (t, b, n), w in zip(points, frames, widths)],
 }
 (SOURCE / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
 print(json.dumps({key: value for key, value in manifest.items() if key != 'samples'}))

@@ -5,7 +5,7 @@ import { move, fingerprint } from '../src/core/simulation';
 import { stepRace, completeRace, raceResult, isFinished } from '../src/core/racing';
 import { appendInput, newRecording, Playback, validateRecording } from '../src/core/recording';
 import { DRIVE } from '../src/core/handling';
-import { LOOP_DISTANCE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_SAMPLES, LOOP_WIDTH, LOOP_LENGTH, LOOP_APPROACH, LOOP_RUNOUT, maximumLoops, sampleLane, sampleLoop, loopPosition, loopSupportMargin, wrapAngle } from '../src/core/loop-geometry';
+import { LOOP_DISTANCE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_SAMPLES, LOOP_WIDTH, LOOP_LENGTH, LOOP_APPROACH, LOOP_RUNOUT, maximumLoops, sampleLane, sampleLoop, loopPosition, loopSupportMargin, wrapAngle, add, mul } from '../src/core/loop-geometry';
 import { LOOP_STEERING, MAX_SPEED, ridersTouch, roadImpact } from '../src/core/loop-physics';
 import { HZ, Input, type Race } from '../src/core/types';
 import { testRace } from './race-fixture';
@@ -73,9 +73,9 @@ describe('loop route and driving', () => {
     expect(result.minMargin).toBeGreaterThan(0.01);
   });
   it.each([
-    { motor: Input.A, first: 62, last: 67 },
-    { motor: Input.B, first: 59, last: 62 },
-  ])('accepts manual steering timing variations with motor $motor', ({ motor, first, last }) => {
+    { motor: Input.A, first: 51, last: 78 },
+    { motor: Input.B, first: 48, last: 71 },
+  ])('accepts a broad manual steering start window with motor $motor', ({ motor, first, last }) => {
     // Only hold UP after the selected contact frame; no route-following controller.
     for (let start = first; start <= last; start++) {
       const r = live(), p = r.riders[0];
@@ -107,6 +107,31 @@ describe('loop route and driving', () => {
     expect(p.motion.kind).toBe('loop-air');
     expect(p.recovery).toBe(0);
     expect(p.speed).toBeLessThan(DRIVE.turboSpeed + 1);
+  });
+  it('supports the widened upper ribbon while retaining falls past its actual edge', () => {
+    const r = live(), p = r.riders[0];
+    const s = LOOP_SAMPLES.find(s => s.normal[1] < -0.99)!;
+    p.lane = sampleLane(s) + 0.75 * s.lateral[2];
+    const position = loopPosition(s, p.lane);
+    p.x = origin + position[0];
+    p.height = position[1];
+    p.tilt = s.pitch;
+    p.motion = { kind: 'loop', origin, distance: s.distance, age: 0, vx: 0, vy: 0, vlane: 0 };
+    tick(r, Input.A);
+    expect(p.motion.kind).toBe('loop');
+    if (p.motion.kind !== 'loop')
+      throw new Error('The widened road lost tire support');
+    const next = sampleLoop(p.motion.distance);
+    p.lane = sampleLane(next) - 1.1 * next.lateral[2];
+    tick(r, Input.A);
+    expect(p.motion.kind).toBe('loop-air');
+    expect(p.recovery).toBe(0);
+  });
+  it.each([-1, 1])('collides with the newly widened road wing on side %s', side => {
+    const r = live(), s = LOOP_SAMPLES.find(s => s.normal[1] < -0.99)!;
+    const point = add(s.position, mul(s.lateral, side * 0.75 * LOOP_WIDTH));
+    point[0] += origin;
+    expect(roadImpact(r, add(point, mul(s.normal, 12)), add(point, mul(s.normal, -12)))).not.toBeNull();
   });
   it('requires actual steering rather than carrying the rider between lanes', () => {
     const r = live(), p = r.riders[0];
@@ -437,9 +462,14 @@ describe('loop editor and generation constraints', () => {
     }
     expect(() => generateMap({ ...generatorDefaults, size, loops: maximumLoops(length) + 1 })).toThrow(/caben/);
   });
-  it('uses a full 3D ribbon, including inversion and exactly one-lane width', () => {
+  it('uses a full 3D ribbon with a two-lane top and one-lane entry and exit', () => {
     expect(LOOP_DISTANCE).toBeGreaterThan(500);
     expect(LOOP_SAMPLES.some(s => s.normal[1] < -0.99)).toBe(true);
     expect(LOOP_WIDTH).toBeCloseTo(1.22 / 0.052);
+    expect(LOOP_SAMPLES[0].width).toBe(LOOP_WIDTH);
+    expect(LOOP_SAMPLES.at(-1)!.width).toBe(LOOP_WIDTH);
+    expect(Math.max(...LOOP_SAMPLES.map(s => s.width))).toBe(2 * LOOP_WIDTH);
+    expect(LOOP_SAMPLES.filter(s => s.normal[1] < -0.9).every(s => s.width === 2 * LOOP_WIDTH)).toBe(true);
+    expect(LOOP_LENGTH).toBe(128); // Existing serialized loop slots remain valid.
   });
 });

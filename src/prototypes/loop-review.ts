@@ -13,10 +13,11 @@ import { LANE_WIDTH, WORLD_SCALE } from '../world-space';
 import { soilNoise } from '../rendering/scene-geometry';
 
 type View = 'game' | 'top' | 'side';
-interface Sample { position: number[]; tangent: number[]; lateral: number[]; normal: number[] }
+interface Sample { position: number[]; tangent: number[]; lateral: number[]; normal: number[]; width: number }
 interface Manifest {
   visualOnly: boolean;
   width: number;
+  maximumWidth: number;
   height: number;
   exitHeight: number;
   entry: number[];
@@ -42,7 +43,7 @@ async function start() {
   ]);
   if (!response.ok) throw new Error('No se pudo cargar la definición del loop.');
   const manifest = await response.json() as Manifest;
-  if (manifest.width !== LANE_WIDTH || manifest.minimumBypassClearance < 2.35)
+  if (manifest.width !== LANE_WIDTH || manifest.maximumWidth !== 2 * LANE_WIDTH || manifest.samples[0].width !== LANE_WIDTH || manifest.samples.at(-1)!.width !== LANE_WIDTH || manifest.minimumBypassClearance < 2.35)
     throw new Error('El modelo no coincide con el ancho o el paso libre del juego.');
   const settings = structuredClone(defaultSettings);
   settings.volume = 0;
@@ -245,6 +246,9 @@ async function start() {
       entryDirection: manifest.samples[0].tangent,
       exitDirection: manifest.samples.at(-1)!.tangent,
       width: manifest.width,
+      maximumWidth: manifest.maximumWidth,
+      entryWidth: manifest.samples[0].width,
+      exitWidth: manifest.samples.at(-1)!.width,
       bypassClearance: manifest.minimumBypassClearance,
       trackId: track.id,
       physicalSegmentsAdded: 0,

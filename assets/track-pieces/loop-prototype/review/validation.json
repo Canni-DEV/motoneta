@@ -20,6 +20,9 @@
       0
     ],
     "width": 1.22,
+    "maximumWidth": 2.44,
+    "entryWidth": 1.22,
+    "exitWidth": 1.22,
     "bypassClearance": 2.427000045776367,
     "trackId": "nes-1-main",
     "physicalSegmentsAdded": 0,

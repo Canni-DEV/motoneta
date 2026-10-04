@@ -50,6 +50,8 @@ try {
   if (Math.abs(integration.entryLane - 4) > 1e-5 ||
       Math.abs(integration.exitLane - 1) > 1e-5 ||
       Math.abs(integration.landingLane - 1) > 1e-5 ||
+      integration.maximumWidth !== 2 * integration.width ||
+      integration.entryWidth !== integration.width || integration.exitWidth !== integration.width ||
       integration.entryDirection[0] < 0.999 || integration.exitDirection[0] < 0.999 ||
       !integration.unchangedTrack || integration.framesAdvanced !== 0 ||
       integration.riders !== initialRiders || integration.clearanceMargin < 0.25)

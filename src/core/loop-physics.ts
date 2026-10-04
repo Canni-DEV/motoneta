@@ -104,7 +104,8 @@ export function roadImpact(r: Race, from: Vec3, to: Vec3) {
         const t = clamp(dot(sub(point, a.position), ab) / dot(ab, ab), 0, 1);
         const delta = sub(point, add(a.position, mul(ab, t)));
         const normalDistance=dot(delta,a.normal),thickness=LOOP_MANIFEST.thickness/WORLD_SCALE;
-        if (normalDistance < 5 && normalDistance > -thickness-5 && Math.abs(dot(delta, a.lateral)) < LOOP_WIDTH / 2 + 3 && Math.abs(dot(delta, a.tangent)) < 4)
+        const width = a.width + (b.width - a.width) * t;
+        if (normalDistance < 5 && normalDistance > -thickness-5 && Math.abs(dot(delta, a.lateral)) < width / 2 + 3 && Math.abs(dot(delta, a.tangent)) < 4)
           return mul(a.normal, normalDistance >= -thickness/2 ? 1 : -1);
       }
     }

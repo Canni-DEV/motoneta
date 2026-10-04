@@ -26,10 +26,12 @@ export function buildLoopModel(dirt: THREE.MeshStandardMaterial, surfaces: Weath
     object.receiveShadow = true;
     group.add(object);
   };
-  const quads = (width: number, offset: number, lift: number) => {
+  type Sample = (typeof LOOP_MANIFEST.samples)[number];
+  const quads = (span: (s: Sample) => number, shift: (s: Sample) => number, lift: number) => {
     const vertices: THREE.Vector3[] = [], faces: number[] = [];
     for (const s of LOOP_MANIFEST.samples) {
       const p = vec(s.position), l = vec(s.lateral), n = vec(s.normal);
+      const width = span(s), offset = shift(s);
       vertices.push(p.clone().addScaledVector(l, offset - width / 2).addScaledVector(n, lift), p.clone().addScaledVector(l, offset + width / 2).addScaledVector(n, lift));
     }
     for (let i = 0; i < LOOP_MANIFEST.samples.length - 1; i++) {
@@ -38,12 +40,12 @@ export function buildLoopModel(dirt: THREE.MeshStandardMaterial, surfaces: Weath
     }
     return { vertices, faces };
   };
-  const surface = quads(LOOP_MANIFEST.width, 0, 0);
-  const uv = LOOP_SAMPLES.flatMap(s => [s.distance * WORLD_SCALE, 0, s.distance * WORLD_SCALE, LOOP_MANIFEST.width]);
+  const surface = quads(s => s.width, () => 0, 0);
+  const uv = LOOP_SAMPLES.flatMap(s => [s.distance * WORLD_SCALE, 0, s.distance * WORLD_SCALE, s.width * WORLD_SCALE]);
   mesh(surface.vertices, surface.faces, dirt, uv);
   const shell: THREE.Vector3[] = [], faces: number[] = [];
   for (const s of LOOP_MANIFEST.samples) {
-    const p = vec(s.position), l = vec(s.lateral), n = vec(s.normal), left = p.clone().addScaledVector(l, -LOOP_MANIFEST.width / 2), right = p.clone().addScaledVector(l, LOOP_MANIFEST.width / 2);
+    const p = vec(s.position), l = vec(s.lateral), n = vec(s.normal), left = p.clone().addScaledVector(l, -s.width / 2), right = p.clone().addScaledVector(l, s.width / 2);
     shell.push(left, right, right.clone().addScaledVector(n, -LOOP_MANIFEST.thickness), left.clone().addScaledVector(n, -LOOP_MANIFEST.thickness));
   }
   const quad = (a: number, b: number, c: number, d: number) => faces.push(a, b, c, a, c, d);
@@ -58,7 +60,7 @@ export function buildLoopModel(dirt: THREE.MeshStandardMaterial, surfaces: Weath
   quad(end, end + 1, end + 2, end + 3);
   mesh(shell, faces, steel);
   for (const side of [-1, 1]) {
-    const q = quads(0.026, side * (LOOP_MANIFEST.width / 2 - 0.045), 0.003);
+    const q = quads(() => 0.026, s => side * (s.width / 2 - 0.045), 0.003);
     mesh(q.vertices, q.faces, edge);
   }
   for (const beam of LOOP_MANIFEST.beams) {

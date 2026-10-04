@@ -10,9 +10,10 @@ export const norm = (a: Vec3) => Math.hypot(...a);
 export const unit = (a: Vec3): Vec3 => mul(a, 1 / (norm(a) || 1));
 export const cross = (a: Vec3, b: Vec3): Vec3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 export const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+// Lane spacing stays fixed; each sample has its own riding-surface width.
 export const LOOP_WIDTH = LANE_WIDTH / WORLD_SCALE;
-const minX = Math.min(...manifest.samples.map(s => s.position[0] - Math.abs(s.lateral[0]) * manifest.width / 2 - Math.abs(s.normal[0]) * manifest.thickness), ...manifest.beams.flatMap(b => [b.a[0] - b.radius, b.b[0] - b.radius]));
-const maxX = Math.max(...manifest.samples.map(s => s.position[0] + Math.abs(s.lateral[0]) * manifest.width / 2 + Math.abs(s.normal[0]) * manifest.thickness), ...manifest.beams.flatMap(b => [b.a[0] + b.radius, b.b[0] + b.radius]));
+const minX = Math.min(...manifest.samples.map(s => s.position[0] - Math.abs(s.lateral[0]) * s.width / 2 - Math.abs(s.normal[0]) * manifest.thickness), ...manifest.beams.flatMap(b => [b.a[0] - b.radius, b.b[0] - b.radius]));
+const maxX = Math.max(...manifest.samples.map(s => s.position[0] + Math.abs(s.lateral[0]) * s.width / 2 + Math.abs(s.normal[0]) * manifest.thickness), ...manifest.beams.flatMap(b => [b.a[0] + b.radius, b.b[0] + b.radius]));
 export const LOOP_OFFSET = -minX;
 export const LOOP_LENGTH = Math.ceil((maxX - minX) / WORLD_SCALE / 8) * 8;
 export const LOOP_APPROACH = 320;
@@ -32,6 +33,7 @@ export interface LoopSample {
   distance: number;
   pitch: number;
   curvature: number;
+  width: number;
 }
 let distance = 0, lastPitch = 0;
 export const LOOP_SAMPLES: LoopSample[] = manifest.samples.map((s, i, all) => {
@@ -45,13 +47,13 @@ export const LOOP_SAMPLES: LoopSample[] = manifest.samples.map((s, i, all) => {
   const before = all[Math.max(0, i - 1)], after = all[Math.min(all.length - 1, i + 1)];
   const ds = norm(sub(after.position as Vec3, before.position as Vec3)) / WORLD_SCALE;
   const curvature = dot(sub(after.tangent as Vec3, before.tangent as Vec3), s.normal as Vec3) / (ds || 1);
-  return { position, tangent: s.tangent as Vec3, lateral: s.lateral as Vec3, normal: s.normal as Vec3, distance, pitch, curvature };
+  return { position, tangent: s.tangent as Vec3, lateral: s.lateral as Vec3, normal: s.normal as Vec3, distance, pitch, curvature, width: s.width / WORLD_SCALE };
 });
 export const LOOP_DISTANCE = distance;
 export const LOOP_ENTRY_X = LOOP_SAMPLES[0].position[0];
 export const LOOP_EXIT_X = LOOP_SAMPLES.at(-1)!.position[0];
 export const LOOP_EXIT_HEIGHT = LOOP_SAMPLES.at(-1)!.position[1];
-export const LOOP_HEIGHT = Math.max(...LOOP_SAMPLES.map(s => s.position[1]));
+export const LOOP_HEIGHT = manifest.height / WORLD_SCALE;
 export const LOOP_MANIFEST = manifest;
 export function sampleLoop(s: number): LoopSample {
   s = clamp(s, 0, LOOP_DISTANCE);
@@ -68,11 +70,12 @@ export function sampleLoop(s: number): LoopSample {
   const tangent = unit(mix(a.tangent, b.tangent));
   const lateral = unit(sub([0, 0, 1], mul(tangent, tangent[2])));
   return { position: mix(a.position, b.position), tangent, lateral, normal: cross(lateral, tangent), distance: s,
-    pitch: a.pitch + (b.pitch - a.pitch) * t, curvature: a.curvature + (b.curvature - a.curvature) * t };
+    pitch: a.pitch + (b.pitch - a.pitch) * t, curvature: a.curvature + (b.curvature - a.curvature) * t,
+    width: a.width + (b.width - a.width) * t };
 }
 export const sampleLane = (s: LoopSample) => s.position[2] / LOOP_WIDTH + 1.5;
 export const loopSupportMargin = (s: LoopSample, lane: number) =>
-  LOOP_EDGE - Math.abs(lane - sampleLane(s)) / s.lateral[2];
+  LOOP_EDGE * s.width / LOOP_WIDTH - Math.abs(lane - sampleLane(s)) / s.lateral[2];
 export function loopPosition(s: LoopSample, lane: number): Vec3 {
   return add(s.position, mul(s.lateral, ((lane - 1.5) * LOOP_WIDTH - s.position[2]) / s.lateral[2]));
 }

@@ -560,3 +560,8 @@
   stroke-width: 2;
   opacity: .75;
 }
+.loop-route polygon {
+  fill: #c7df9c;
+  fill-opacity: .18;
+  stroke-width: .5;
+}
