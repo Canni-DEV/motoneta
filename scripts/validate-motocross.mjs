@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import validator from 'gltf-validator';
 
 let failed = false;
-for (const vehicle of ['motocross', 'motoneta']) for (const quality of ['low', 'high']) {
+for (const vehicle of ['motocross', 'motoneta', 'tanque']) for (const quality of ['low', 'high']) {
   const path = `public/models/${vehicle}-${quality}.glb`;
   const bytes = await readFile(path);
   const report = await validator.validateBytes(new Uint8Array(bytes), {

@@ -15,7 +15,8 @@ from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public' / 'models'
-VEHICLE = 'motoneta' if '--vehicle=motoneta' in sys.argv else 'motocross'
+VEHICLE = next((arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--vehicle=')), 'motocross')
+assert VEHICLE in ('motocross','motoneta','tanque'), VEHICLE
 SOURCE = ROOT / 'assets' / VEHICLE
 OUT.mkdir(parents=True, exist_ok=True)
 SOURCE.mkdir(parents=True, exist_ok=True)
@@ -42,6 +43,11 @@ class Builder:
     def __init__(self):
         self.verts, self.faces, self.materials, self.weights = [], [], [], []
         self.authored_lod = False
+        self.fixed_palette = False
+        self.flat_faces = set()
+        self.smooth_all = False
+        self.sharp_edges = []
+        self.neutral_material = 'MechanicalSurface'
 
     def add(self, verts, faces, mat, bone=None, weights=None):
         start = len(self.verts)
@@ -166,11 +172,13 @@ class Builder:
                  'SlotSurfaceWheel' if slot_id=='wheels' else
                  'SlotSurfaceCloth' if slot_id in ('torso','gloves','pants') else
                  'SlotSurfaceHard')
-        names=[surface] if slot else list(dict.fromkeys(self.materials))
+        def fixed_group(name):
+            return name if not self.fixed_palette or name in ('TeamPaint','TeamAccent','LampFront','LampRear','LampReflector') else self.neutral_material
+        names=[surface] if slot else list(dict.fromkeys(fixed_group(name) for name in self.materials))
         for n in names: mesh.materials.append(MATS[n])
-        for face,n in zip(mesh.polygons,self.materials):
-            face.material_index=0 if slot else names.index(n)
-            face.use_smooth=len(face.vertices)==4 or (self.authored_lod and bool(skin))
+        for index,(face,n) in enumerate(zip(mesh.polygons,self.materials)):
+            face.material_index=0 if slot else names.index(fixed_group(n))
+            face.use_smooth=self.smooth_all or index not in self.flat_faces and (len(face.vertices)==4 or (self.authored_lod and bool(skin)))
         if slot:
             # RGBA palette: alpha 0=primary, .5=accent, 1=neutral. The runtime
             # recolors private copies of this attribute, keeping one draw per part.
@@ -183,6 +191,14 @@ class Builder:
                 rgb=MATS[n].diffuse_color[:3]
                 for loop in face.loop_indices:
                     colors.data[loop].color=(*rgb,role)
+        elif self.fixed_palette:
+            # Fixed neutral parts share a surface and retain their original
+            # authored colors in the vertices. Paint and emissive lamps remain
+            # separate, so global colors and night lights keep their contracts.
+            colors=mesh.color_attributes.new(name='Wear',type='FLOAT_COLOR',domain='CORNER')
+            for face,n in zip(mesh.polygons,self.materials):
+                rgb=MATS[n].diffuse_color[:3] if fixed_group(n)==self.neutral_material else (1,1,1)
+                for loop in face.loop_indices: colors.data[loop].color=(*rgb,1)
         else:
             # Fixed mechanical pieces retain subtle wear and their PBR materials.
             colors=mesh.color_attributes.new(name='Wear',type='FLOAT_COLOR',domain='POINT')
@@ -199,6 +215,10 @@ class Builder:
             mod=obj.modifiers.new('Rider skeleton','ARMATURE');mod.object=skin
             obj.parent=skin
         bm=bmesh.new();bm.from_mesh(mesh)
+        bm.verts.ensure_lookup_table()
+        for a,b in self.sharp_edges:
+            edge=bm.edges.get((bm.verts[a],bm.verts[b]))
+            if edge: edge.smooth=False
         bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.000001)
         bmesh.ops.delete(bm,geom=[vert for vert in bm.verts if not vert.link_faces],context='VERTS')
         bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
@@ -875,6 +895,412 @@ def make_scooter():
             guard.block((x,.483,0),(.09,.009,.055),'TeamAccent')
             replace(f'Slot_fender_{variant}_{component}',guard,(.324,.94,0) if component=='Front' else (0,0,0))
 
+def make_tanque():
+    """Classic step-through scooter: authored panel seams, cast wheels and lamp housing.
+
+    The supplied model-reference.png defines the silhouette. Only the scooter's
+    contact anchors and suspension mechanics are inherited; every visible plastic
+    assembly is reauthored, without decals or manufacturer marks.
+    """
+    make_scooter()
+    # A neutral metal spring retains its original wheel and suspension anchors.
+    spring=bpy.data.objects['Spring']
+    for index,mat in enumerate(spring.data.materials):
+        if mat.name=='TeamPaint': spring.data.materials[index]=MATS['Alloy']
+    for obj in list(bpy.context.scene.objects):
+        if obj.name.startswith('Slot_') and obj.name.split('_')[1] in SLOTS[:6] and '_core' not in obj.name:
+            bpy.data.objects.remove(obj,do_unlink=True)
+    def replace(name,builder,pivot=(0,0,0)):
+        old=bpy.data.objects.get(name);parent=old.parent if old else None;children=list(old.children) if old else []
+        if old: bpy.data.objects.remove(old,do_unlink=True)
+        builder.materials=[{'Graphite':'ScooterGraphite','Textile':'ScooterUpholstery','Alloy':'ScooterMetal'}.get(mat,mat) for mat in builder.materials]
+        builder.authored_lod=True
+        builder.smooth_all=True
+        builder.fixed_palette=name in ('Chassis','Handlebar','Floorboard')
+        if name=='Floorboard': builder.neutral_material='PlasticSurface'
+        obj=builder.build(name,pivot,parent)
+        if parent: obj.location=(0,0,0)
+        for child in children: child.parent=obj
+        # Deliberate hard edges around panel creases; broad panels stay smooth.
+        if builder.authored_lod: obj['designRevision']='classic-scooter-reference-v5'
+        if name in ('Slot_fairing_core','Slot_seat_core','Handlebar','Slot_fender_core_Front'):
+            # Split the sharp body folds and cap boundaries, preserving the
+            # broad molded faces instead of averaging them into rounded tubes.
+            edge=obj.modifiers.new('Molded panel creases','EDGE_SPLIT')
+            edge.split_angle=1.10;edge.use_edge_angle=True
+            bpy.context.view_layer.objects.active=obj
+            bpy.ops.object.modifier_apply(modifier=edge.name)
+        return obj
+    def stitch(builder, rings, mat, bands=None, creases=(), end_cap=True):
+        previous=None
+        for j,points in enumerate(rings):
+            current=builder.ring(points,{})
+            if previous:
+                for i in creases: builder.sharp_edges.append((previous[i],current[i]))
+                for i in range(len(current)):
+                    color=bands(j,i) if bands else mat
+                    if color is not None:
+                        builder.face((previous[i],previous[(i+1)%len(current)],current[(i+1)%len(current)],current[i]),color)
+            else: builder.face(reversed(current),mat)
+            previous=current
+        if end_cap: builder.face(previous,mat)
+    def shell(builder, sections, mat):
+        # Longitudinal cross-sections: crown, shoulder, side crease and lower lip.
+        rings=[]
+        for x,top,shoulder,crease,bottom,wt,ws,wc,wb in sections:
+            rings.append([(x,top,0),(x,top,wt),(x,shoulder,ws),(x,crease,wc),
+                          (x,bottom,wb),(x,bottom,0),(x,bottom,-wb),(x,crease,-wc),
+                          (x,shoulder,-ws),(x,top,-wt)])
+        stitch(builder,rings,mat)
+    fairing=Builder()
+    floorboard=Builder()
+    # Molded cowl, with a narrow rounded shoulder and a long diagonal crease.
+    # The silver flank tapers into a separate, rounded leg-facing cover.
+    rings=[]
+    for x,top,shoulder,crease,bottom,w in [
+        (-.810,.657,.637,.621,.573,.070),
+        (-.765,.686,.659,.623,.541,.144),
+        (-.660,.706,.664,.597,.490,.190),
+        (-.520,.702,.648,.543,.448,.199),
+        (-.350,.692,.625,.466,.402,.198),
+        (-.220,.672,.586,.423,.359,.180),
+        (-.125,.667,.550,.359,.333,.145),
+        (-.060,.652,.565,.363,.337,.105),
+        (-.028,.641,.563,.371,.342,.058),
+    ]:
+        if not HIGH and x in (-.520,-.220): continue
+        def px(y):
+            if x<=-.125: return x
+            controls=[(.340,-.040),(.450,-.080),(.540,-.024),(.605,-.008)]
+            offset=controls[0][1] if y<=controls[0][0] else controls[-1][1]
+            for (a,oa),(b,ob) in zip(controls,controls[1:]):
+                if a<=y<=b: offset=oa+(ob-oa)*(y-a)/(b-a)
+            return x+offset*min(1,(x+.125)/.097)
+        rib=shoulder-(shoulder-crease-.018)*.65
+        half=[(x,top,0),(x,top-.001,w*.48),(x,top-.006,w*.72),
+              (x,top-.017,w*.90),(x,shoulder+.014,w*.985),(x,shoulder,w),
+              (x,rib+.009,w*.990),(x,rib-.009,w*.930),
+              (x,crease+.018,w),(x,crease,w*.890),(x,crease-.010,w*.840),
+              (x,bottom+.008,w*.73),(x,bottom,w*.55),(x,bottom,0)]
+        points=half+[(x,y,-z) for x,y,z in reversed(half[1:-1])]
+        rings.append([(px(y),y,z) for x,y,z in points])
+    stitch(fairing,rings,'TeamPaint',creases=(6,7,10,16,19,20),end_cap=False)
+    # A quad grid gives the leg-facing cover its molded indentation. A single
+    # nonplanar polygon triangulates into arbitrary folds below the saddle.
+    cover=rings[-1][:14]
+    for side in (-1,1):
+        for upper,lower in zip(cover,cover[1:]):
+            for a,b in zip([0,.5,1] if HIGH else [0,1], [.5,1] if HIGH else [1]):
+                def point(edge,t):
+                    x,y,z=edge
+                    return (x+.004*(1-t*t),y,side*z*t)
+                points=[point(upper,a),point(upper,b),point(lower,b),point(lower,a)]
+                # The first and last rows meet at the center of the cover.
+                unique=list(dict.fromkeys(points))
+                if len(unique)>=3: fairing.add(unique,[tuple(range(len(unique)))],'TeamPaint')
+    # The dark lower skirt joins the rear cowl to the floor and covers the engine
+    # mounts. Its rising rear edge is part of the reference's diagonal silhouette.
+    skirt=[(-.795,.585),(-.670,.525),(-.480,.480),(-.290,.407),(-.105,.355),
+           (.170,.318),(.170,.220),(-.105,.217),(-.390,.249),(-.640,.310),(-.800,.500)]
+    for side in (-1,1):
+        rings=[]
+        # The middle ring is coplanar; Low spends those triangles on the nose.
+        for inset in ((.041,.009,0) if HIGH else (.041,0)):
+            rings.append([(x,y,side*(.203-inset if x>-.67 else .203-inset-(abs(x)-.67)*.43)) for x,y in skirt])
+        stitch(floorboard,rings,'Graphite')
+    # The inclined front keeps its broad planar faces. Narrow chamfers make
+    # the two converging pressed ribs legible, while the perimeter rolls over
+    # into a molded lip rather than ending as a knife edge above the wheel.
+    front_rows=[
+        [( .341,.811,-.125),(.350,.819,-.115),(.380,.835,0),(.350,.819,.115),(.341,.811,.125)],
+        [( .422,.687,-.169),(.477,.706,-.095),(.502,.706,0),(.477,.706,.095),(.422,.687,.169)],
+        [( .490,.641,-.189),(.616,.579,-.052),(.668,.532,0),(.616,.579,.052),(.490,.641,.189)],
+        [( .565,.517,-.186),(.675,.525,-.022),(.683,.517,0),(.675,.525,.022),(.565,.517,.186)],
+    ]
+    rear_rows=[.270,.286,.318,.320]
+    if HIGH:
+        front_rows.append([(.563,.514,-.186),(.683,.512,-.017),(.695,.507,0),(.683,.512,.017),(.563,.514,.186)])
+        rear_rows.append(.320)
+    front_rows.append([(.557,.504,-.185),(.676,.500,-.022),(.690,.495,0),(.676,.500,.022),(.557,.504,.185)])
+    rear_rows.append(.318)
+    rings=[]
+    for row,points in enumerate(front_rows):
+        rear_x=rear_rows[row]
+        center,shoulder,edge=points[2:]
+        x,y,z=edge
+        inside=mix(shoulder,center,.08)
+        crest=(shoulder[0]+(.005 if row<len(front_rows)-2 else .002),shoulder[1],shoulder[2])
+        outside=mix(shoulder,edge,.075)
+        half=[center,inside,crest,outside,edge,(x-.012,y-.004,z+.006),
+              (rear_x+.014,y-.008,z+.008),(rear_x,y-.010,z-.007),
+              (rear_x-.005,y-.010,z*.50),(rear_x-.005,y-.010,0)]
+        rings.append(half+[(x,y,-z) for x,y,z in reversed(half[1:-1])])
+    stitch(fairing,rings,'TeamPaint',lambda j,i:'Graphite' if 7<=i<=10 else 'TeamPaint',creases=(3,15))
+    # Lower wings continue the rolled rim around the fork opening.
+    for side in (-1,1):
+        outer=[(.557,.504,side*.185),(.392,.395,side*.220),(.267,.299,side*.224)]
+        inner=[(.523,.489,side*.105),(.348,.385,side*.157),(.234,.294,side*.179)]
+        rear=[(.370,.484,side*.183),(.300,.378,side*.218),(.223,.295,side*.222)]
+        rings=[]
+        for j in range(3):
+            rx,ry,rz=rear[j]
+            inner_rx=[.318,.240,.205][j]
+            x,y,z=outer[j];ix,iy,iz=inner[j]
+            rings.append([(x-.009,y+.003,z),(x,y,z-side*.010),(ix,iy,iz),
+                          (inner_rx,ry,iz),(rx-.005,ry,rz-side*.012),(rx,ry+.003,rz),
+                          (rx+.014,ry+.007,rz+side*.006),(x-.023,y+.008,z+side*.006)])
+        stitch(fairing,rings,'TeamPaint',lambda j,i:'Graphite' if i in (2,3,4) else 'TeamPaint')
+    # Rider-facing shield: the black back folds down to the flat mat, with a
+    # silver edge around the wheel opening and no gaps between these assemblies.
+    fairing.panel([(.270,.792),(.315,.537),(.205,.309),(.172,.313),(.280,.533),(.244,.778)],-.156,.156,'Graphite')
+    # Sculpted floor pan: a rounded, deep black perimeter rather than a thin plate.
+    shell(floorboard,[
+        (-.35,.330,.312,.263,.227,.155,.197,.195,.156),
+        (-.24,.314,.301,.253,.215,.197,.227,.224,.188),
+        (-.03,.312,.300,.246,.207,.203,.235,.231,.193),
+        (.17,.315,.303,.250,.213,.198,.230,.221,.181),
+        (.29,.335,.319,.275,.247,.160,.213,.199,.162),
+    ],'Graphite')
+    # Flat nonslip mat with pressed rectangles, quiet central channel and screws.
+    for side in (-1,1):
+        floorboard.block((-.008,.315,side*.115),(.476,.010,.179),'Textile')
+        for x in (-.193,-.101,-.009,.083,.175):
+            z=side*.115
+            floorboard.add([(x-.035,.322,z-.068),(x+.035,.322,z-.068),(x+.035,.322,z+.068),(x-.035,.322,z+.068)],[(0,1,2,3)],'Graphite')
+            if HIGH: floorboard.rod((x+.019,.323,z-.040),(x+.019,.323,z+.040),.0015,'Textile',seg=4)
+        floorboard.tube([(-.32,.312,side*.218),(-.10,.299,side*.237),(.16,.305,side*.231),(.27,.331,side*.207)],
+                     [.005]*4,'Graphite',seg=4)
+        # Narrow, flush molding follows the rear body's lower crease.
+        fairing.tube([(-.737,.540,side*.141),(-.60,.468,side*.155),(-.43,.413,side*.152),(-.27,.373,side*.145),(-.14,.341,side*.114)],
+                     [.005]*5,'TeamAccent',seg=5)
+        for x,y,z in [(-.105,.363,.126),(-.55,.59,.199)]:
+            fairing.ellipsoid((x,y,side*z),(.004,.004,.002),'Engine',seg=6,rings=3)
+    replace('Slot_fairing_core',fairing)
+    replace('Floorboard',floorboard)
+    # Thick, gently stepped two-person seat, fitted to the seated visual rig.
+    seat=Builder()
+    rings=[]
+    for x,top,bottom,w in [(-.750,.746,.689,.055),(-.710,.778,.690,.120),
+                          (-.650,.791,.690,.153),(-.520,.791,.686,.174),
+                          (-.390,.776,.676,.176),(-.250,.766,.661,.164),
+                          (-.110,.763,.641,.141),(-.065,.751,.640,.111),
+                          (-.025,.723,.646,.048)]:
+        if not HIGH and x==-.065: continue
+        half=[(x,top,0),(x,top-.001,w*.45),(x,top-.003,w*.80),
+              (x,top-.024,w*.95),(x,top-.052,w),(x,bottom+.010,w*.94),
+              (x,bottom,w*.73),(x,bottom,0)]
+        rings.append(half+[(x,y,-z) for x,y,z in reversed(half[1:-1])])
+    stitch(seat,rings,'Textile',creases=(2,12))
+    for side in (-1,1):
+        seat.tube([(-.695,.697,side*.124),(-.53,.691,side*.149),(-.39,.681,side*.150),(-.25,.666,side*.139),(-.11,.646,side*.117)],
+                  [.003]*5,'Graphite',seg=4)
+    replace('Slot_seat_core',seat)
+    chassis=Builder()
+    # Neutral black engine, fan housing and belt case alongside the rear wheel.
+    chassis.ellipsoid((-.40,.348,0),(.191,.102,.131),'Graphite',seg=10 if HIGH else 8,rings=5)
+    chassis.tube([(-.68,.278,-.115),(-.57,.298,-.120),(-.37,.299,-.133),(-.28,.341,-.139)],
+                 [.050,.061,.067,.047],'Graphite',seg=10 if HIGH else 6,oval=1.15)
+    chassis.rod((-.293,.341,.174),(-.293,.341,.214),.064,'Engine',seg=16 if HIGH else 10)
+    chassis.rod((-.293,.341,.215),(-.293,.341,.220),.049,'Graphite',seg=16 if HIGH else 10)
+    for i in range(8 if HIGH else 4):
+        a=i*2*math.pi/(8 if HIGH else 4)
+        chassis.rod((-.293+math.cos(a)*.022,.341+math.sin(a)*.022,.222),
+                    (-.293+math.cos(a+.16)*.043,.341+math.sin(a+.16)*.043,.222),.003,'Alloy',seg=4)
+    for x in (-.63,-.46): chassis.ellipsoid((x,.297,-.176),(.006,.006,.003),'Alloy',seg=6,rings=3)
+    # Rack, tail lamp and mud flap are visible above/behind the rear wheel.
+    for side in (-1,1):
+        chassis.tube([(-.69,.655,side*.108),(-.72,.722,side*.115),(-.88,.729,side*.134),(-.94,.718,side*.104)],
+                     [.008]*4,'Graphite',seg=6)
+    chassis.tube([(-.94,.718,-.104),(-.97,.714,-.075),(-.97,.714,.075),(-.94,.718,.104)],
+                 [.008]*4,'Graphite',seg=6)
+    for x in (-.83,-.89): chassis.rod((x,.726,-.128),(x,.726,.128),.006,'Graphite',seg=5)
+    chassis.block((-.813,.665,0),(.032,.059,.231),'Graphite')
+    for a,b in zip([-.112,-.073,0,.073],[-.073,0,.073,.112]):
+        def tail(z,y): return (-.841+.07*abs(z),y,z)
+        chassis.add([tail(a,.685),tail(b,.685),tail(b,.640),tail(a,.640)],[(0,1,2,3)],'Indicator' if abs((a+b)/2)>.073 else 'LampRear')
+    chassis.panel([(-.803,.628),(-.910,.288),(-.854,.291),(-.702,.577)],-.058,.058,'Graphite')
+    chassis.block((-.886,.374,0),(.006,.023,.057),'LampRear',angle=-.31)
+    replace('Chassis',chassis)
+    bpy.data.objects['TaillightAnchor'].location=v((-.845,.671,0))
+    exhaust=Builder()
+    exhaust.tube([(-.32,.358,-.13),(-.385,.289,-.166),(-.54,.265,-.181),(-.73,.312,-.182)],
+                 [.018,.028,.031,.024],'Graphite',seg=8)
+    # Broad angular black heat shield with silver fasteners, as in the reference.
+    profile=[(-.735,.369),(-.71,.401),(-.627,.406),(-.435,.341),(-.372,.295),(-.390,.262),(-.47,.254),(-.698,.317)]
+    rings=[];cx=-.556;cy=.331
+    for inset,z in [(0,-.213),(.04,-.242),(.09,-.251)]:
+        rings.append([(cx+(x-cx)*(1-inset),cy+(y-cy)*(1-inset),z) for x,y in profile])
+    stitch(exhaust,rings,'Graphite')
+    exhaust.rod((-.730,.313,-.182),(-.771,.325,-.182),.017,'Engine',seg=8)
+    exhaust.rod((-.773,.326,-.182),(-.777,.327,-.182),.011,'Rubber',seg=8)
+    for x,y in [(-.686,.360),(-.459,.306)]:
+        exhaust.ellipsoid((x,y,-.254),(.010,.010,.002),'Alloy',seg=8,rings=3)
+        exhaust.ellipsoid((x,y,-.257),(.004,.004,.001),'Graphite',seg=6,rings=3)
+    exhaust.panel([(-.658,.383),(-.614,.375),(-.591,.351),(-.637,.361)],-.254,-.252,'Engine')
+    # The turnaround's exhaust is on the visible right side in its rear view.
+    exhaust.verts=[(x,y,-z) for x,y,z in exhaust.verts]
+    replace('Slot_exhaust_core',exhaust)
+    # Rounded rectangular intake, flush with the inclined front. The lower lip
+    # and triangular screw layout follow the supplied front close-up.
+    plate=Builder()
+    intake=[(-.024,-.009),(.024,-.009),(.029,-.004),(.029,.004),
+            (.024,.009),(-.024,.009),(-.029,.004),(-.029,-.004)]
+    stitch(plate,[[(.424+depth-dy*.69,.790+dy*.725,.030+dz) for dz,dy in intake]
+                  for depth in (0,.002)],'Graphite',lambda j,i:'TeamAccent' if i==0 else 'Graphite')
+    for x,y,z in [(.548,.658,0),(.579,.628,-.024),(.579,.628,.024)]:
+        plate.rod((x-.0014,y-.0013,z),(x+.0006,y+.0006,z),.0035,'Alloy',seg=8 if HIGH else 4)
+    replace('Slot_plate_core',plate)
+    for component,x in [('Rear',-.53),('Front',.57)]:
+        guard=Builder()
+        if component=='Front':
+            # Flatter crown, small rounded shoulders and a short molded front
+            # lip; the previous profile drooped into two pointed side tabs.
+            sections=[(x-.157,.402,.087),(x-.119,.434,.096),(x-.065,.461,.102),
+                      (x+.018,.466,.103),(x+.110,.444,.094),(x+.161,.416,.079)]
+            profile=[(-1,-.022),(-.94,-.013),(-.72,0),(0,.011),(.72,0),(.94,-.013),(1,-.022)]
+            verts=[]
+            for j,(px,y,w) in enumerate(sections):
+                edge_scale=.70 if j==len(sections)-1 else .85 if j==len(sections)-2 else 1
+                for z,dy in profile:
+                    corner=-.011*abs(z)**4 if j==len(sections)-1 else 0
+                    verts.append((px+corner,y+dy*(edge_scale if dy<0 else 1),w*z))
+            faces=[(j*7+i,j*7+i+1,(j+1)*7+i+1,(j+1)*7+i)
+                   for j in range(len(sections)-1) for i in range(6)]
+            start=len(verts);verts += [(px,y-.010,z) for px,y,z in verts]
+            faces += [tuple(start+i for i in reversed(face)) for face in list(faces)]
+            faces += [(j*7+i,(j+1)*7+i,(j+1)*7+i+start,j*7+i+start)
+                      for j in range(len(sections)-1) for i in (0,6)]
+            faces += [(j*7+i,j*7+i+start,j*7+i+1+start,j*7+i+1)
+                      for j in (0,len(sections)-1) for i in range(6)]
+            guard.add(verts,faces,'TeamPaint')
+            for j in range(len(sections)-1):
+                for i in (2,4): guard.sharp_edges.append((j*7+i,(j+1)*7+i))
+        else:
+            fender(guard,[(x-.187,.337,.079),(x-.11,.420,.086),(x,.448,.091),(x+.12,.410,.087)],'Graphite')
+        replace(f'Slot_fender_core_{component}',guard,(.324,.94,0) if component=='Front' else (0,0,0))
+    for suffix in ('R','L'):
+        lower=Builder();lower.rod((0,0,0),(0,1,0),.018,'Alloy',seg=12 if HIGH else 8)
+        replace('ForkLower'+suffix,lower)
+        # The original dirt-bike fork guard is replaced by a small alloy axle collar.
+        guard=Builder();guard.rod((0,.005,0),(0,.10,0),.023,'Alloy',seg=8 if HIGH else 6)
+        replace('ForkGuard'+suffix,guard)
+        upper=Builder();upper.rod((0,0,0),(0,.35,0),.016,'Alloy',seg=10 if HIGH else 6)
+        replace('ForkUpper'+suffix,upper)
+    for name,x in [('RearWheel',-.53),('FrontWheel',.57)]:
+        wheel=Builder();c=(x,.22,0);segments=32 if HIGH else 20
+        wheel.torus(c,.165,.038,'Rubber',segments=segments,sides=8 if HIGH else 6,depth=1.22)
+        if HIGH:
+            # Shallow diagonal tire shoulders, readable in the garage close-up.
+            for j in range(32):
+                a=2*math.pi*j/32
+                for side in (-1,1):
+                    pts=[(x+math.cos(a+shift)*radius,.22+math.sin(a+shift)*radius,side*z)
+                         for shift,radius,z in [(0,.204,.003),(.025,.202,.017),(.055,.191,.032)]]
+                    wheel.tube(pts,[.0015]*3,'Graphite',seg=3)
+        for side in (-1,1):
+            wheel.torus((x,.22,side*.047),.142,.012,'Alloy',segments=segments if HIGH else 18,sides=5 if HIGH else 3)
+            if HIGH: wheel.torus((x,.22,side*.030),.195,.002,'Graphite',segments=segments,sides=3)
+        wheel.rod((x,.22,-.046),(x,.22,.046),.049,'Alloy',seg=12 if HIGH else 8)
+        wheel.rod((x,.22,.047),(x,.22,.053),.064,'Alloy',seg=16 if HIGH else 10)
+        for i in range(3):
+            a=i*2*math.pi/3
+            # Broad cast spokes with bent sides instead of round tubular rods.
+            pts=[]
+            for radius,offset,width in [(.045,0,.034),(.094,.18,.027),(.142,.28,.020)]:
+                theta=a+offset
+                pts.append((x+math.cos(theta)*radius,.22+math.sin(theta)*radius,width))
+            rings=[]
+            for px,py,width in pts:
+                theta=math.atan2(py-.22,px-x)
+                rings.append([(px-math.sin(theta)*width,py+math.cos(theta)*width,-.031),
+                              (px+math.sin(theta)*width,py-math.cos(theta)*width,-.031),
+                              (px+math.sin(theta)*width,py-math.cos(theta)*width,.031),
+                              (px-math.sin(theta)*width,py+math.cos(theta)*width,.031)])
+            stitch(wheel,rings,'Alloy')
+        replace(f'Slot_wheels_core_{name}',wheel,c)
+    bar=Builder()
+    # Wide faceted handlebar shell, raised top and flush wraparound headlamp.
+    zs=([-.205,-.178,-.126,-.095,-.080,-.065,0,.065,.080,.095,.126,.178,.205] if HIGH
+        else [-.205,-.178,-.126,-.065,0,.065,.126,.178,.205])
+    rings=[]
+    for z in zs:
+        t=abs(z)/.205
+        front=.474-.060*max(0,(abs(z)-.126)/.079);rear=.272+.037*t
+        top=1.047 if abs(z)<=.065 else 1.027-.032*(abs(z)-.065)/.140
+        bottom=.894+.027*t
+        rings.append([(rear,top-.018,z),(rear+.029,top,z),(front-.032,top-.009,z),
+                      (front,1.010-.010*t*t,z),(front,bottom+.009,z),
+                      (front-.019,bottom,z),(rear+.030,bottom+.009,z),(rear,bottom+.030,z)])
+    stitch(bar,rings,'TeamPaint',lambda j,i:None if i==3 and abs((zs[j]+zs[j-1])/2)<.178 else 'Graphite' if i in (0,4,5,6,7) else 'TeamPaint')
+    # Lamp lens follows the curved front of the shell; each strip is flat enough
+    # to catch highlights, with a dark gasket and amber indicators at the edges.
+    lamp_z=[-.176,-.146,-.096,-.050,0,.050,.096,.146,.176]
+    rings=[]
+    for z in lamp_z:
+        t=abs(z)/.176;x=.478-.060*max(0,(abs(z)-.126)/.079)
+        top=1.002-.009*t;bottom=.900+.018*t
+        rings.append([(x-.010,top+.005,z),(x+.002,top+.002,z),(x+.002,bottom-.002,z),(x-.010,bottom-.005,z)])
+    stitch(bar,rings,'Graphite',lambda j,i:None if i in (1,3) else 'Graphite')
+    # Recessed reflector dishes under a real translucent lens. The visible
+    # headlight is a window with depth, rather than a gray stripe on the shell.
+    reflector_z=[-.134,-.105,-.067,0,.067,.105,.134]
+    reflector=[]
+    for yrow in (0,1,2):
+        points=[]
+        for z in reflector_z:
+            t=abs(z)/.134
+            y=[.996-.009*t,.951+.005*t,.905+.018*t][yrow]
+            x=.480 if yrow!=1 else .462+.016*t
+            points.append((x,y,z))
+        reflector.append(points)
+    for j in range(2):
+        for i in range(len(reflector_z)-1):
+            bar.add([reflector[j][i],reflector[j][i+1],reflector[j+1][i+1],reflector[j+1][i]],[(0,1,2,3)],'LampReflector')
+    bar.ellipsoid((.469,.951,0),(.006,.029,.034),'LampReflector',seg=8 if HIGH else 6,rings=3)
+    # Shallow vertical flutes and the broad central reflector read through the
+    # clear cover, rather than presenting an exposed bead on a flat plate.
+    for z in ([-.107,-.090,-.052,.052,.090,.107] if HIGH else [-.070,.070]):
+        t=abs(z)/.134
+        bar.rod((.481,.918+.014*t,z),(.481,.988-.006*t,z),.001,'LampReflector',seg=4 if HIGH else 3)
+    for a,b in zip(lamp_z,lamp_z[1:]):
+        def lens_point(z,y_offset):
+            t=abs(z)/.176
+            return (.491-.060*max(0,(abs(z)-.126)/.079)-(.004 if abs(y_offset)>.02 else 0),.951+.008*t+y_offset*(1-.18*t),z)
+        for top,bottom,mat in [(.048,.044,'LampReflector'),(.044,-.044,'LampFront'),(-.044,-.048,'LampReflector')]:
+            va=[lens_point(a,top),lens_point(b,top),lens_point(b,bottom),lens_point(a,bottom)]
+            # Amber bulbs sit behind the same clear outer window.
+            bar.add(va,[(0,1,2,3)],mat)
+    for side in (-1,1):
+        a,b=side*.140,side*.174
+        def amber(z,offset):
+            t=abs(z)/.176
+            return (.480-.060*max(0,(abs(z)-.126)/.079),.951+.008*t+offset*(1-.18*t),z)
+        bar.add([amber(a,.043),amber(b,.043),amber(b,-.041),amber(a,-.041)],[(0,1,2,3)],'Indicator')
+    for z in (-.124,.124):
+        t=abs(z)/.176;x=.493-.060*max(0,(abs(z)-.126)/.079)
+        bar.rod((x,.908+.014*t,z),(x,.994-.006*t,z),.0014,'Alloy',seg=4)
+    # Neutral cockpit cover, instrument glass, switches, levers and grip sleeves.
+    bar.block((.282,1.011,0),(.045,.012,.091),'Graphite',angle=-.2)
+    bar.block((.276,1.020,0),(.032,.004,.072),'Lens',angle=-.2)
+    bar.block((.276,1.023,0),(.008,.003,.040),'Alloy',angle=-.2)
+    for side in (-1,1):
+        bar.rod((.32,.965,side*.177),(.32,.965,side*.272),.020,'Rubber',seg=10 if HIGH else 8)
+        bar.block((.329,.964,side*.187),(.036,.043,.031),'Graphite')
+        bar.rod((.369,.943,side*.187),(.377,.945,side*.266),.004,'Alloy',seg=5)
+        bar.rod((.32,.965,side*.273),(.32,.965,side*.279),.021,'Graphite',seg=8)
+        bar.tube([(.314,.991,side*.170),(.281,1.068,side*.207),(.297,1.120,side*.250)],
+                 [.007]*3,'Graphite',seg=6)
+        # Flattened polygonal mirrors, wider than the earlier spherical ones.
+        mirror=[(-.050,-.023),(-.049,.022),(-.035,.036),(.034,.039),(.051,.029),(.053,-.017),(.038,-.032),(-.032,-.033)]
+        layers=[(.282,.87),(.293,1),(.315,.93)] if HIGH else [(.282,.90),(.315,1)]
+        stitch(bar,[[(x,1.155+dy*scale,side*.255+dz*scale) for dz,dy in mirror] for x,scale in layers],'Graphite')
+        bar.add([(.280,1.155+dy*.80,side*.255+dz*.80) for dz,dy in mirror],[tuple(range(8))],'Alloy')
+    # Slim neck between the leg shield and the independent steering assembly.
+    bar.rod((.314,.814,0),(.314,.937,0),.042,'Graphite',seg=10 if HIGH else 8)
+    replace('Handlebar',bar,(.324,.94,0))
+    bpy.data.objects['HeadlightAnchor'].location=v((.492,.951,0))
+    bpy.data.objects['HeadlightTarget'].location=v((4.492,.258,0))
+
 def retarget_scooter_rider(specs):
     """Rebind the approved garments to the scooter's seated visual skeleton."""
     arm=bpy.data.objects['RiderRig']
@@ -888,6 +1314,19 @@ def retarget_scooter_rider(specs):
         hip=(-.24,.921,side*.115);knee=(.095,.644,side*.205);ankle=(.15,.348,side*.19)
         targets.update({f'UpperArm{suffix}':(shoulder,elbow),f'Forearm{suffix}':(elbow,hand),f'Hand{suffix}':(hand,(.36,.955,side*.222)),
                         f'Thigh{suffix}':(hip,knee),f'Shin{suffix}':(knee,ankle),f'Foot{suffix}':(ankle,(.259,.330,side*.19))})
+    if VEHICLE=='tanque':
+        # Fit the rider to the reference's lower saddle. Hand/foot anchors and
+        # the 15-bone hierarchy remain shared; only the seated torso/hips differ.
+        targets['Pelvis']=((-.24,.870,0),(-.24,.957,0))
+        targets['Spine']=((-.24,.870,0),(-.13,1.172,0))
+        targets['Head']=((-.03,1.267,0),(0,1.442,0))
+        for side,suffix in [(-1,'R'),(1,'L')]:
+            shoulder=(-.13,1.144,side*.154);elbow=(.08,1.036,side*.245)
+            hip=(-.24,.851,side*.115);knee=(.095,.619,side*.205)
+            targets[f'UpperArm{suffix}']=(shoulder,elbow)
+            targets[f'Forearm{suffix}']=(elbow,targets[f'Forearm{suffix}'][1])
+            targets[f'Thigh{suffix}']=(hip,knee)
+            targets[f'Shin{suffix}']=(knee,targets[f'Shin{suffix}'][1])
     bpy.context.view_layer.objects.active=arm;arm.select_set(True);bpy.ops.object.mode_set(mode='EDIT')
     for name,(head,tail) in targets.items():
         arm.data.edit_bones[name].head=v(head);arm.data.edit_bones[name].tail=v(tail)
@@ -926,7 +1365,7 @@ def make_rider():
     for name,a,tail,parent in specs:
         bone=arm.pose.bones[name]
         bone.bone['restHead']=list(a);bone.bone['restTail']=list(tail)
-    return retarget_scooter_rider(specs) if VEHICLE=='motoneta' else specs
+    return retarget_scooter_rider(specs) if VEHICLE in ('motoneta','tanque') else specs
 
 def position_studio_rig():
     def segment(name,a,b):
@@ -935,10 +1374,10 @@ def position_studio_rig():
         o.rotation_mode='QUATERNION';o.rotation_quaternion=Vector((0,0,1)).rotation_difference(direction.normalized())
         o.scale=(1,1,direction.length)
     for s,suffix in [(-1,'R'),(1,'L')]:
-        a=(.57,.22 if VEHICLE=='motoneta' else .29,s*.089);top=(.324,.94 if VEHICLE=='motoneta' else .89,s*.089);join=mix(a,top,.47)
+        a=(.57,.22 if VEHICLE in ('motoneta','tanque') else .29,s*.089);top=(.324,.94 if VEHICLE in ('motoneta','tanque') else .89,s*.089);join=mix(a,top,.47)
         segment('ForkLower'+suffix,a,join);segment('ForkUpper'+suffix,join,top)
-        bpy.data.objects['ForkGuard'+suffix].location=v((.559,.252 if VEHICLE=='motoneta' else .322,s*.089))
-    if VEHICLE=='motoneta':
+        bpy.data.objects['ForkGuard'+suffix].location=v((.559,.252 if VEHICLE in ('motoneta','tanque') else .322,s*.089))
+    if VEHICLE in ('motoneta','tanque'):
         segment('Shock',(-.51,.27,0),(-.40,.61,0));segment('Spring',(-.482,.355,0),(-.42,.548,0))
     else:
         segment('Shock',(-.32,.342,0),(-.245,.699,0));segment('Spring',(-.30,.432,0),(-.256,.639,0))
@@ -952,6 +1391,11 @@ def studio(render=False,quality='high'):
         palette=m.node_tree.nodes.new('ShaderNodeVertexColor')
         palette.layer_name='Palette'
         m.node_tree.links.new(palette.outputs['Color'],m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+    if VEHICLE=='tanque':
+        for name in ('MechanicalSurface','PlasticSurface'):
+            m=MATS[name]
+            palette=m.node_tree.nodes.new('ShaderNodeVertexColor');palette.layer_name='Wear'
+            m.node_tree.links.new(palette.outputs['Color'],m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
     model_collection=bpy.context.collection
     model_collection.name='Motocross - export'
     studio_collection=bpy.data.collections.new('Studio - do not export')
@@ -977,13 +1421,14 @@ def studio(render=False,quality='high'):
     floor.data.materials.append(m)
     data=bpy.data.cameras.new('StudioCamera');cam=bpy.data.objects.new('StudioCamera',data);studio_collection.objects.link(cam)
     scene.camera=cam;data.type='ORTHO';data.ortho_scale=2.25
-    render_directory=SOURCE/'review'/('essential' if VEHICLE=='motoneta' else 'cadera-natural')/'blender'
+    render_directory=SOURCE/'review'/('essential' if VEHICLE in ('motoneta','tanque') else 'cadera-natural')/'blender'
     if render: render_directory.mkdir(parents=True,exist_ok=True)
     presets=VARIANTS if '--render-all' in __import__('sys').argv else ('core',)
     for variant in presets:
         for obj in bpy.data.objects:
             if obj.type=='MESH' and obj.name.startswith('Slot_'):
-                obj.hide_render=f'_{variant}' not in obj.name
+                choice='core' if VEHICLE=='tanque' and obj.name.split('_')[1] in SLOTS[:6] else variant
+                obj.hide_render=f'_{choice}' not in obj.name
                 obj.hide_set(obj.hide_render)
         for name,loc in [('side',(0,-5,1.2)),('front',(5,-.001,1.1)),('rear',(-5,-.001,1.1)),('three-quarter',(3,-5,2.5)),('helmet',(2,-4,2.2))]:
             target=(.13,0,1.35) if name=='helmet' else (0,0,.76)
@@ -1016,12 +1461,16 @@ for HIGH in [False,True]:
         if collection.name.startswith('Studio - do not export'): bpy.data.collections.remove(collection)
     for m in list(bpy.data.materials): bpy.data.materials.remove(m)
     SEG,RINGS=(12,8) if HIGH else (8,5)
-    material('TeamPaint','c91c32',.34)
+    material('TeamPaint','bfc6cf' if VEHICLE=='tanque' else 'c91c32',.34)
     material('TeamCloth','c91c32',.83)
-    material('TeamAccent','eff0ec',.41)
+    material('TeamAccent','58616b' if VEHICLE=='tanque' else 'eff0ec',.41)
     material('Ceramic','eff0ec',.38)
     material('Graphite','24282d',.51,.12)
     material('Textile','22252a',.92)
+    if VEHICLE=='tanque':
+        material('ScooterGraphite','34393e',.51,.12)
+        material('ScooterUpholstery','34383e',.92)
+        material('ScooterMetal','c2c6ca',.32,.32)
     material('Seat','1c2023',.96)
     material('Boot','bcbdb8',.74)
     material('Rubber','15191c',.94)
@@ -1030,15 +1479,23 @@ for HIGH in [False,True]:
     material('Exhaust','a39b85',.43,.73)
     material('ForkCoating','b9a374',.3,.75)
     material('Lens','152d37',.13,.48)
-    material('LampFront','f4f5ed',.2)
+    material('LampFront','c7d0d7' if VEHICLE=='tanque' else 'f4f5ed',.18 if VEHICLE=='tanque' else .2,.18 if VEHICLE=='tanque' else 0)
+    if VEHICLE=='tanque':
+        MATS['LampFront'].diffuse_color=(*MATS['LampFront'].diffuse_color[:3],.32)
+        MATS['LampFront'].node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value=.32
+        MATS['LampFront'].node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.12
     material('LampRear','ed283f',.25)
+    material('Indicator','cf773c',.25)
+    material('LampReflector','d5dbe0' if VEHICLE=='tanque' else 'a5b3bf',.22,.18 if VEHICLE=='tanque' else .46)
+    material('MechanicalSurface','ffffff',.52,.20)
+    material('PlasticSurface','ffffff',.85)
     material('SlotSurfaceHard','ffffff',.59,.12)
     material('SlotSurfaceCloth','ffffff',.82)
     material('SlotSurfaceWheel','ffffff',.83,.08)
-    for slot,roughness,metallic in [('fairing',.4,.08),('seat',.87,0),('exhaust',.42,.68),('plate',.45,.04),('fender',.4,.08),
+    for slot,roughness,metallic in [('fairing',.4,.08),('seat',.87,0),('exhaust',.42,.68),('plate',.45,.04),('fender',.4,.08),('wheels',.83,.08),
                                      ('helmet',.36,.06),('visor',.22,.18),('torso',.86,0),('pants',.88,0),('gloves',.78,0),('boots',.7,0)]:
         material(f'SlotSurface_{slot}','ffffff',roughness,metallic)
-    (make_scooter if VEHICLE=='motoneta' else make_bike)();specs=make_rider();position_studio_rig()
+    {'motocross':make_bike,'motoneta':make_scooter,'tanque':make_tanque}[VEHICLE]();specs=make_rider();position_studio_rig()
     quality='high' if HIGH else 'low'
     # Low detail uses planar decimation, keeping silhouettes, skin weights and material borders.
     if not HIGH:
@@ -1068,7 +1525,7 @@ for HIGH in [False,True]:
                           'materials':[m.name for m in o.data.materials]})
     fixed=sum(part['triangles'] for part in parts if not part['id'].startswith('Slot_'))
     maximum=fixed+sum(max(sum(part['triangles'] for part in parts if part['id'].startswith(f'Slot_{slot}_{variant}') ) for variant in VARIANTS) for slot in SLOTS)
-    limit=30000 if HIGH else 8000
+    limit=(24000 if VEHICLE=='tanque' else 30000) if HIGH else 8000
     assert maximum<=limit,(quality,maximum,limit)
     filepath=OUT/f'{VEHICLE}-{quality}.glb'
     bpy.ops.export_scene.gltf(filepath=str(filepath),export_format='GLB',export_yup=True,export_skins=True,export_animations=False,export_extras=True,export_materials='EXPORT',export_vertex_color='ACTIVE')
@@ -1080,12 +1537,12 @@ for HIGH in [False,True]:
     if HIGH:
         rig_json=json.dumps({name:{'head':a,'tail':b,'parent':parent} for name,a,b,parent in specs},indent=2)+'\n'
         (SOURCE/'rig.json').write_text(rig_json)
-        (ROOT/'src'/('motoneta-rig.json' if VEHICLE=='motoneta' else 'bike-rig.json')).write_text(rig_json)
+        (ROOT/'src'/('bike-rig.json' if VEHICLE=='motocross' else f'{VEHICLE}-rig.json')).write_text(rig_json)
         for o in bpy.context.scene.objects:
             if o.name.startswith('Slot_') and '_core' not in o.name:
                 o.hide_set(True);o.hide_render=True
         studio('--render' in __import__('sys').argv)
         bpy.context.preferences.filepaths.save_version=0
         bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/f'{VEHICLE}.blend'))
-(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'classic-reference-v2; Essential approved; independent racing and touring families' if VEHICLE=='motoneta' else 'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'assets':report},indent=2)+'\n')
+(SOURCE/'manifest.json').write_text(json.dumps({'generator':'scripts/build-motocross.py','blender':bpy.app.version_string,'coordinateSystem':'+X forward, +Y up, +Z left in game/glTF','reviewStage':'classic-scooter-reference-v5; continuous front V ribs with chamfers, rolled nose and narrower lower wings; flatter molded fender; rounded flush intake and triangular fasteners; shared 15-bone hierarchy and wheel/hand/foot anchors; seated fit' if VEHICLE=='tanque' else 'classic-reference-v2; Essential approved; independent racing and touring families' if VEHICLE=='motoneta' else 'natural-hip-v6; single seated hip envelope without separate glute lobes; balanced thigh taper; approved rig and seat preserved','slots':SLOTS,'variants':VARIANTS,'bikeVariants':['core'] if VEHICLE=='tanque' else VARIANTS,'assets':report},indent=2)+'\n')
 print(f'{VEHICLE.upper()}_ASSETS',json.dumps({quality:{key:value for key,value in stats.items() if key!='parts'} for quality,stats in report.items()}))

@@ -1,0 +1,216 @@
+{
+  "baselineCommit": "5ce238adccf15999920c33b72c253fa43b540c66",
+  "baselineVehicle": "tanque",
+  "candidateVehicle": "tanque",
+  "candidateHashes": {
+    "public/models/tanque-low.glb": "1a2ec424bb4a74202cda193fdea9fff47ba4e8b94d0ef08a8ae74bc6c93a2ea3",
+    "public/models/tanque-high.glb": "8a014d793519ce8f5734e09e0fbcbe3baead12e603189af6dee39586259eb426",
+    "src/bike-model.ts": "e1d9ba537039bc99464407aaedd6f1f7e28e198e583e2d796fc0acbfb5c60ad6",
+    "src/vehicle-visual.ts": "861787f64a9a7718f45431fb046f9838d5b76f9fafc2b17520c9b72763f049ff"
+  },
+  "platform": "win32 10.0.26200",
+  "cpu": "Intel(R) Core(TM) Ultra 7 265",
+  "browser": "153.0.8010.12",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "seconds": 30,
+  "samples": 3,
+  "warmupSeconds": 6,
+  "method": "Same hardware GPU and Chromium/D3D11, six riders and five ghosts. Reference visual runtime and GLBs come from the recorded Git commit; unchanged dependencies use current sources. Sequential samples alternate AB/BA order after shader warmup. Selected conditions are recorded in comparisons and runs. Measure CPU render/submission without gl.finish; this does not measure GPU execution. Median of three run p95 values. Browser served by Vite; physical mobile performance is not measured.",
+  "stableResources": true,
+  "comparisons": [
+    {
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95Ms": 5.700000002980232,
+      "candidateP95Ms": 5.700000002980232,
+      "changePercent": 0,
+      "limitPercent": 10,
+      "passes": true
+    }
+  ],
+  "runs": [
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1801,
+        "medianMs": 4,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 1800,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999995634
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 1,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1801,
+        "medianMs": 4,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 1800,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.700000000004366
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1800,
+        "medianMs": 4,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 1799,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 2,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1801,
+        "medianMs": 4,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 1800,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.799999999999272
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "baseline",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1801,
+        "medianMs": 4,
+        "p95Ms": 5.799999997019768
+      },
+      "frameIntervals": {
+        "count": 1800,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.700000000004366
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    },
+    {
+      "kind": "candidate",
+      "quality": "high",
+      "environment": {
+        "timeOfDay": "morning",
+        "weather": "clear"
+      },
+      "sample": 3,
+      "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cpu": {
+        "count": 1801,
+        "medianMs": 3.9000000059604645,
+        "p95Ms": 5.700000002980232
+      },
+      "frameIntervals": {
+        "count": 1800,
+        "medianMs": 16.69999999999891,
+        "p95Ms": 16.700000000004366
+      },
+      "memory": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "after": {
+        "geometries": 226,
+        "textures": 88
+      },
+      "stableResources": true,
+      "drawCalls": 824
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { GameAudio } from './audio';
-import { defaultAppearance, editGarage, garageAppearance, initialGarage, type GarageState, type VehicleId, type Appearance, type SlotId, type VariantId } from './appearance';
+import { BIKE_SLOTS, defaultAppearance, defaultVehicleAppearance, editGarage, garageAppearance, initialGarage, normalizeAppearance, slotVariants, vehicleUnlocked, type GarageState, type VehicleId, type Appearance, type SlotId, type VariantId } from './appearance';
 import { CinematicCamera } from './cinematic-camera';
 import { analyzeRecording, type CinematicTimeline } from './cinematic-timeline';
 import { audioCreditsView } from './audio/credits';
@@ -49,6 +49,7 @@ import {
 } from './core/types';
 import { WEATHER_LABELS } from './core/weather';
 import { motonetaTournament } from './core/motoneta-tournament';
+import { tanqueDay, tanqueTournament } from './core/tanque-tournament';
 import { loadCrowdAssets } from './crowd-assets';
 import { DEBUG_KEY, GAME_ID, mapFilename } from './identity';
 import { Controls } from './input';
@@ -60,7 +61,7 @@ import { patch } from './ui/dom';
 import { Editor } from './ui/editor';
 import { FocusedField } from './ui/focused-field';
 import { garageView } from './ui/garage';
-import { motonetaTournamentView, tournamentMenu } from './ui/tournament-view';
+import { motonetaTournamentView, tanqueTournamentView, tournamentMenu } from './ui/tournament-view';
 import { profilesDialog } from './ui/profile-view';
 import { applyImageSetting } from './ui/settings-input';
 import { modeSetup } from './ui/setup-state';
@@ -155,6 +156,10 @@ export async function startApp() {
     storageReady = false;
   let activeTimeOfDay: TimeOfDay = settings.timeOfDay,
     activeWeather: Weather = settings.weather;
+  let renderedTanqueDay = '', nextCalendarCheck = 0;
+  function refreshDailyCalendar() {
+    if (screen === 'tanque-tournament' && tanqueDay() !== renderedTanqueDay) render();
+  }
   const canvas = $<HTMLCanvasElement>('#world');
   const viewport = new SceneViewport(canvas, () => world);
   const dialogs = new Dialogs(modal);
@@ -268,10 +273,14 @@ export async function startApp() {
     let course = BUILTINS[0];
     if (screen === 'garage' && garage) {
       const owner = store.state.profiles.find((p) => p.id === garage!.profileId);
-      content = garageView(owner?.name ?? 'Jugador', garage.draft, garage.selected, owner?.unlockedMotoneta);
+      content = garageView(owner?.name ?? 'Jugador', garage.draft, garage.selected, owner?.unlockedMotoneta, owner?.unlockedTanque);
     } else if (screen === 'home') content = homeView(store.state);
-    else if (screen === 'tournament') content = tournamentMenu();
+    else if (screen === 'tournament') content = tournamentMenu(currentLocalProfile().unlockedMotoneta);
     else if (screen === 'motoneta-tournament') content = motonetaTournamentView(store.state, models === 'ready' && !startBusy);
+    else if (screen === 'tanque-tournament') {
+      renderedTanqueDay = tanqueDay();
+      content = tanqueTournamentView(store.state, models === 'ready' && !startBusy, renderedTanqueDay);
+    }
     else if (screen === 'editor') {
       content = editor.html();
       course = mapCourse(editor.design);
@@ -398,10 +407,11 @@ export async function startApp() {
     window.scrollTo(0, 0);
   }
   function savedSession(value: CompetitionSession) {
-    return value.presetId === 'motoneta' ? store.state.motonetaSessions[value.players[0].id] : store.state.sessions[value.mode];
+    return value.presetId ? store.state[`${value.presetId}Sessions`][value.players[0].id] : store.state.sessions[value.mode];
   }
-  function refreshSession(mode: 'tournament' | 'versus' | 'motoneta', ownerId = store.state.activeProfile) {
-    session = mode === 'motoneta' ? store.state.motonetaSessions[ownerId] ?? null : store.state.sessions[mode] ?? null;
+  function refreshSession(mode: 'tournament' | 'versus' | 'motoneta' | 'tanque', ownerId = store.state.activeProfile) {
+    if (mode === 'tanque' && !store.state.profiles.find((p) => p.id === ownerId)?.unlockedMotoneta) return;
+    session = mode === 'motoneta' || mode === 'tanque' ? store.state[`${mode}Sessions`][ownerId] ?? null : store.state.sessions[mode] ?? null;
     navigation.enter('session');
     screen = 'session';
     closeModal();
@@ -833,6 +843,7 @@ export async function startApp() {
   }
   async function beginTurn() {
     if (startBusy || !session || session.phase !== 'ready') return;
+    if (session.presetId === 'tanque' && !store.state.profiles.find((p) => p.id === session!.players[0].id)?.unlockedMotoneta) return;
     startBusy = true;
     try {
       const recordings: Recording[] = [];
@@ -861,7 +872,7 @@ export async function startApp() {
       const { profileId, draft, state: garageState } = garage;
       await store.update((state) => {
         const owner = state.profiles.find((p) => p.id === profileId);
-        if (owner && (draft.vehicle !== 'motoneta' || owner.unlockedMotoneta)) {
+        if (owner && vehicleUnlocked(draft.vehicle, owner)) {
           editGarage(garageState, draft);
           garageState.vehicle = draft.vehicle;
           owner.garage = structuredClone(garageState);
@@ -961,7 +972,7 @@ export async function startApp() {
     controls.clear();
     controls.enabled = false;
     if (session) {
-      refreshSession(session.presetId === 'motoneta' ? 'motoneta' : session.mode, session.players[0].id);
+      refreshSession(session.presetId ?? session.mode, session.players[0].id);
       race = null;
     } else navigate((returnScreen === 'session' ? 'home' : returnScreen) as Screen, false);
   }
@@ -1092,18 +1103,22 @@ export async function startApp() {
             await startSetup();
             break;
           case 'start-motoneta':
-          case 'replace-motoneta': {
+          case 'replace-motoneta':
+          case 'start-tanque':
+          case 'replace-tanque': {
             if (startBusy || models !== 'ready') break;
-            const old = store.state.motonetaSessions[store.state.activeProfile];
-            if (old && old.phase !== 'complete' && action !== 'replace-motoneta') {
-              showModal(`<h2>Empezar un nuevo Torneo Motoneta</h2><p>Se reemplazará el progreso de este intento. Tu desbloqueo se conserva.</p><div class="actions">${b('replace-motoneta', 'Reemplazar intento', '', 'class="primary"')}${b('close-modal', 'Cancelar')}</div>`);
+            const preset = action.endsWith('tanque') ? 'tanque' : 'motoneta';
+            if (preset === 'tanque' && !currentLocalProfile().unlockedMotoneta) break;
+            const old = store.state[`${preset}Sessions`][store.state.activeProfile];
+            if (old && old.phase !== 'complete' && !action.startsWith('replace-')) {
+              showModal(`<h2>Empezar un nuevo Torneo ${preset === 'tanque' ? 'Tanque' : 'Motoneta'}</h2><p>Se reemplazará el progreso de este intento. Tu desbloqueo se conserva.</p><div class="actions">${b(`replace-${preset}`, 'Reemplazar intento', '', 'class="primary"')}${b('close-modal', 'Cancelar')}</div>`);
               break;
             }
             startBusy = true;
             try {
-              const created = motonetaTournament(profile());
-              await store.update((state) => { state.motonetaSessions[created.players[0].id] = created; });
-              refreshSession('motoneta');
+              const created = preset === 'tanque' ? tanqueTournament(currentLocalProfile()) : motonetaTournament(profile());
+              await store.update((state) => { state[`${preset}Sessions`][created.players[0].id] = created; });
+              refreshSession(preset);
             } finally { startBusy = false; }
             break;
           }
@@ -1111,17 +1126,17 @@ export async function startApp() {
             await startSetup(true);
             break;
           case 'resume-session':
-            refreshSession(value as 'tournament' | 'versus' | 'motoneta');
+            refreshSession(value as 'tournament' | 'versus' | 'motoneta' | 'tanque');
             break;
           case 'begin-turn':
             await beginTurn();
             break;
           case 'advance':
             if (session) {
-              const mode = session.presetId === 'motoneta' ? 'motoneta' : session.mode;
+              const mode = session.presetId ?? session.mode;
               const ownerId = session.players[0].id;
               await store.update((s) => {
-                if (mode === 'motoneta') s.motonetaSessions[ownerId] = advanceSession(s.motonetaSessions[ownerId]);
+                if (mode === 'motoneta' || mode === 'tanque') s[`${mode}Sessions`][ownerId] = advanceSession(s[`${mode}Sessions`][ownerId]);
                 else s.sessions[mode] = advanceSession(s.sessions[mode]!);
               });
               refreshSession(mode, ownerId);
@@ -1316,22 +1331,24 @@ export async function startApp() {
             if (!owner) break;
             selectedProfile = owner.id;
             garage = { profileId: owner.id, draft: raceProfile(owner).appearance, state: structuredClone(owner.garage), selected: 'fairing', profilesOnReturn: action === 'garage-open', returnSession: session };
+            if (action === 'reward-garage' && session?.presetId === 'tanque') garage.draft = garageAppearance(garage.state, 'tanque');
             navigate('garage');
             break;
           }
           case 'garage-vehicle':
             if (garage) {
               const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
-              if (garage.draft.vehicle !== 'motoneta' || owner.unlockedMotoneta) editGarage(garage.state, garage.draft);
+              if (vehicleUnlocked(garage.draft.vehicle, owner)) editGarage(garage.state, garage.draft);
               garage.draft = garageAppearance(garage.state, value as VehicleId);
+              if (garage.draft.vehicle === 'tanque' && (BIKE_SLOTS as readonly SlotId[]).includes(garage.selected)) garage.selected = 'fairing';
               render();
             }
             break;
           case 'garage-slot':
-            if (garage) { garage.selected = value as SlotId; render(); }
+            if (garage) { garage.selected = garage.draft.vehicle === 'tanque' && (BIKE_SLOTS as readonly string[]).includes(value) ? 'fairing' : value as SlotId; render(); }
             break;
           case 'garage-variant':
-            if (garage) { garage.draft.parts[garage.selected] = value as VariantId; render(); }
+            if (garage && slotVariants(garage.draft.vehicle, garage.selected).includes(value as VariantId)) { garage.draft.parts[garage.selected] = value as VariantId; render(); }
             break;
           case 'garage-left':
           case 'garage-right':
@@ -1345,7 +1362,8 @@ export async function startApp() {
             if (garage) {
               const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
               garage.draft.parts[garage.selected] = 'core';
-              garage.draft.paints[garage.selected] = defaultAppearance(owner.color).paints[garage.selected];
+              garage.draft.paints[garage.selected] = defaultVehicleAppearance(garage.draft.vehicle, owner.color).paints[garage.selected];
+              garage.draft = normalizeAppearance(garage.draft);
               render();
             }
             break;
@@ -1353,8 +1371,7 @@ export async function startApp() {
             if (garage) {
               const owner = store.state.profiles.find((p) => p.id === garage!.profileId)!;
               const vehicle = garage.draft.vehicle;
-              garage.draft = defaultAppearance(owner.color);
-              garage.draft.vehicle = vehicle;
+              garage.draft = defaultVehicleAppearance(vehicle, owner.color);
               render();
             }
             break;
@@ -1378,7 +1395,7 @@ export async function startApp() {
             break;
           case 'delete-profile':
             showModal(
-              `<h2>Eliminar perfil</h2><p>Se eliminarán sus marcas personales, la Motoneta desbloqueada y su intento de Torneo Motoneta. Las otras competiciones iniciadas conservarán el participante.</p>${b('confirm-delete-profile', 'Eliminar', value)}${b('profiles', 'Cancelar')}`,
+              `<h2>Eliminar perfil</h2><p>Se eliminarán sus marcas personales, vehículos desbloqueados e intentos de Torneo Motoneta y Torneo Tanque. Las otras competiciones iniciadas conservarán el participante.</p>${b('confirm-delete-profile', 'Eliminar', value)}${b('profiles', 'Cancelar')}`,
             );
             break;
           case 'confirm-delete-profile':
@@ -1387,11 +1404,12 @@ export async function startApp() {
               s.profiles = s.profiles.filter((p) => p.id !== value);
               s.records = s.records.filter((r) => r.profileId !== value);
               delete s.motonetaSessions[value];
+              delete s.tanqueSessions[value];
               if (s.activeProfile === value) s.activeProfile = s.profiles[0].id;
             });
             setup.players = setup.players.filter((id) => id !== value);
             if (!store.state.profiles.some((p) => p.id === value) &&
-                (garage?.profileId === value || (session?.presetId === 'motoneta' && session.players[0].id === value)))
+                (garage?.profileId === value || (session?.presetId && session.players[0].id === value)))
               navigate('home', false);
             profilesView();
             break;
@@ -1557,7 +1575,10 @@ export async function startApp() {
     const el = event.target as HTMLInputElement;
     if (focusedField.owns(el)) return;
     if (el.dataset.garageColor && garage) {
+      const owner = store.state.profiles.find((p) => p.id === garage!.profileId);
+      if (!owner || !vehicleUnlocked(garage.draft.vehicle, owner)) return;
       garage.draft.paints[garage.selected][el.dataset.garageColor as 'primary' | 'accent'] = el.value;
+      garage.draft = normalizeAppearance(garage.draft);
       world?.setGarage(garage.draft);
       return;
     }
@@ -1756,12 +1777,14 @@ export async function startApp() {
   window.addEventListener('focus', () => {
     idleSince = audio.unlocked ? performance.now() : null;
     updateAttractFocus();
+    refreshDailyCalendar();
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) idleSince = null;
     if (replayPresentation === 'attract') updateAttractFocus();
     else if (document.hidden && screen === 'race' && activity === 'running' && !paused) pause();
     audio.setHidden(document.hidden);
+    if (!document.hidden) refreshDailyCalendar();
     if (!document.hidden && screen === 'home') idleSince = audio.unlocked ? performance.now() : null;
   });
   window.addEventListener('pagehide', () => audio.setHidden(true));
@@ -1886,6 +1909,10 @@ export async function startApp() {
   document.body.dataset.reducedMotion = String(settings.reducedMotion);
   checkSize();
   function loop(now: number) {
+    if (now >= nextCalendarCheck) {
+      nextCalendarCheck = now + 1000;
+      refreshDailyCalendar();
+    }
     const delta = Math.min(now - lastFrame, 150);
     lastFrame = now;
     audio.setScene(

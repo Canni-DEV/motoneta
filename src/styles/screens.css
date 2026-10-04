@@ -1020,7 +1020,7 @@ td {
     max-height: 150px;
   }
 }
-.tournament-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.tournament-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .tournament-choices .panel { display: flex; flex-direction: column; align-items: start; gap: 16px; }
 .preset-calendar { margin: 16px 0; padding-left: 26px; }
 .preset-calendar li { padding: 12px 0; }

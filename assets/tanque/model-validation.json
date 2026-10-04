@@ -1,0 +1,58 @@
+{
+  "rigBones": 15,
+  "rigMatchesDefinition": true,
+  "surfaces": {
+    "Slot_helmet_core": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_helmet_sprint": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_helmet_trail": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_pants_core": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_pants_sprint": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_pants_trail": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_torso_core": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_torso_sprint": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    },
+    "Slot_torso_trail": {
+      "components": 1,
+      "nonManifoldEdges": 0,
+      "selfIntersections": 0
+    }
+  },
+  "slotMeshes": 26,
+  "weightedVertices": 7845,
+  "trianglesSelectedMax": {
+    "low": 7998,
+    "high": 15386
+  },
+  "fixedBikeMeshes": 8
+}

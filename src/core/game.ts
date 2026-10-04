@@ -15,13 +15,16 @@ export interface PlayerProfile {
 export interface LocalProfile extends PlayerProfile {
   garage: GarageState;
   unlockedMotoneta: boolean;
+  unlockedTanque: boolean;
 }
 export function localProfile(value: PlayerProfile & Partial<LocalProfile>): LocalProfile {
   const appearance = normalizeAppearance(value.appearance);
   const garage = value.garage ? structuredClone(value.garage) : initialGarage(appearance, value.color);
+  garage.bikes.tanque ??= initialGarage(appearance, value.color).bikes.tanque;
   const unlockedMotoneta = value.unlockedMotoneta === true;
-  if (!unlockedMotoneta) garage.vehicle = 'motocross';
-  return { id: value.id, name: value.name, color: value.color, garage, unlockedMotoneta, appearance: garageAppearance(garage) };
+  const unlockedTanque = value.unlockedTanque === true;
+  if (garage.vehicle === 'motoneta' && !unlockedMotoneta || garage.vehicle === 'tanque' && !unlockedTanque) garage.vehicle = 'motocross';
+  return { id: value.id, name: value.name, color: value.color, garage, unlockedMotoneta, unlockedTanque, appearance: garageAppearance(garage) };
 }
 export function raceProfile(value: PlayerProfile | LocalProfile): PlayerProfile {
   return { id: value.id, name: value.name, color: value.color,
@@ -68,7 +71,9 @@ export interface Recording {
   termination?: 'finished' | 'abandoned';
 }
 export interface CompetitionSession {
-  presetId?: 'motoneta';
+  presetId?: 'motoneta' | 'tanque';
+  calendarDate?: string;
+  calendarVersion?: 1;
   reward?: 'unlocked' | 'already-unlocked' | 'not-earned';
   id: string;
   mode: 'tournament' | 'versus';

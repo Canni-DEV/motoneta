@@ -6,9 +6,16 @@ export const VARIANTS = ['core', 'sprint', 'trail'] as const;
 export type SlotId = (typeof SLOTS)[number];
 export type VariantId = (typeof VARIANTS)[number];
 export type Paint = { primary: string; accent: string };
-export const VEHICLES = ['motocross', 'motoneta'] as const;
+export const VEHICLES = ['motocross', 'motoneta', 'tanque'] as const;
 export type VehicleId = (typeof VEHICLES)[number];
-export const VEHICLE_LABELS: Record<VehicleId, string> = { motocross: 'Motocross', motoneta: 'Motoneta' };
+export const VEHICLE_LABELS: Record<VehicleId, string> = { motocross: 'Motocross', motoneta: 'Motoneta', tanque: 'Tanque' };
+export const TANQUE_PAINT: Readonly<Paint> = { primary: '#bfc6cf', accent: '#58616b' };
+export function slotVariants(vehicle: VehicleId, slot: SlotId): readonly VariantId[] {
+  return vehicle === 'tanque' && (BIKE_SLOTS as readonly SlotId[]).includes(slot) ? ['core'] : VARIANTS;
+}
+export function vehicleUnlocked(vehicle: VehicleId, profile: { unlockedMotoneta: boolean; unlockedTanque: boolean }) {
+  return vehicle === 'motocross' || (vehicle === 'motoneta' ? profile.unlockedMotoneta : profile.unlockedTanque);
+}
 export interface Appearance {
   vehicle: VehicleId;
   parts: Record<SlotId, VariantId>;
@@ -73,7 +80,19 @@ export function sameAppearance(a: Appearance, b: Appearance): boolean {
 }
 
 export function normalizeAppearance(value: Appearance): Appearance {
-  return { ...structuredClone(value), vehicle: value.vehicle ?? 'motocross' };
+  const normalized = { ...structuredClone(value), vehicle: value.vehicle ?? 'motocross' };
+  if (normalized.vehicle === 'tanque') for (const slot of BIKE_SLOTS) {
+    normalized.parts[slot] = 'core';
+    normalized.paints[slot] = { ...normalized.paints.fairing };
+  }
+  return normalized;
+}
+
+export function defaultVehicleAppearance(vehicle: VehicleId, color = '#e05a3b'): Appearance {
+  const appearance = defaultAppearance(color);
+  appearance.vehicle = vehicle;
+  if (vehicle === 'tanque') for (const slot of BIKE_SLOTS) appearance.paints[slot] = { ...TANQUE_PAINT };
+  return appearance;
 }
 
 export type BikeAppearance = {
@@ -98,18 +117,19 @@ function selectSlots<T extends readonly SlotId[]>(appearance: Appearance, slots:
 export function initialGarage(appearance: Appearance, color: string): GarageState {
   return {
     vehicle: appearance.vehicle ?? 'motocross',
-    bikes: { motocross: selectSlots(appearance, BIKE_SLOTS), motoneta: selectSlots(defaultAppearance(color), BIKE_SLOTS) },
+    bikes: { motocross: selectSlots(appearance, BIKE_SLOTS), motoneta: selectSlots(defaultAppearance(color), BIKE_SLOTS), tanque: selectSlots(defaultVehicleAppearance('tanque', color), BIKE_SLOTS) },
     rider: selectSlots(appearance, RIDER_SLOTS),
   };
 }
 export function garageAppearance(garage: GarageState, vehicle = garage.vehicle): Appearance {
-  return {
+  return normalizeAppearance({
     vehicle,
     parts: { ...garage.bikes[vehicle].parts, ...garage.rider.parts },
     paints: structuredClone({ ...garage.bikes[vehicle].paints, ...garage.rider.paints }),
-  };
+  });
 }
 export function editGarage(garage: GarageState, appearance: Appearance) {
+  appearance = normalizeAppearance(appearance);
   garage.bikes[appearance.vehicle] = selectSlots(appearance, BIKE_SLOTS);
   garage.rider = selectSlots(appearance, RIDER_SLOTS);
 }

@@ -4,6 +4,7 @@ export type Screen =
   | 'tournament'
   | 'tournament-custom'
   | 'motoneta-tournament'
+  | 'tanque-tournament'
   | 'versus'
   | 'records'
   | 'editor'
