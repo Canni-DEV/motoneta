@@ -1,6 +1,6 @@
 import { updateWheelie, DRIVE } from './handling';
 import { heightAt, segmentAt } from './tracks';
-import { clamp, Input, q, type Race, type Rider } from './types';
+import { clamp, HZ, Input, q, type Race, type Rider } from './types';
 import { add, dot, loopInstances, loopPosition, loopSupportMargin, mul, norm, sampleLoop, sub, wrapAngle, LOOP_DISTANCE, LOOP_EDGE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_LENGTH, LOOP_MANIFEST, LOOP_OFFSET, LOOP_SAMPLES, LOOP_WIDTH, riderBasis, riderLocalTilt, unit, type Vec3 } from './loop-geometry';
 import { WORLD_SCALE } from '../world-space';
 // Per simulation frame, in the same coordinates as ordinary riding. Local gravity
@@ -9,6 +9,10 @@ export const LOOP_GRAVITY = 0.026;
 export const LOOP_STEERING = 11 / 256; // 22% over the quantized floor response (9/256).
 export const LOOP_IMPULSE = 4.25;
 export const MAX_SPEED = 7.25;
+const CONTACT_SKIN = 1 / 32;
+const CONTACT_GRACE = 12;
+const STUCK_FRAMES = Math.ceil(HZ);
+const STUCK_DISTANCE = 12;
 export const jumpVelocity = (speed: number, tilt: number) => tilt > 0.1 ? 1.2 + speed * 0.28 + Math.max(0, tilt) * 1.5 : 0;
 type Crash = (r: Race, p: Rider, kind?: Rider['crashKind'], speed?: number) => void;
 const emit = (r: Race, p: Rider, type: 'jump' | 'land', speed?: number) => r.events.push({ type, rider: p.id, frame: r.frame, impactSpeed: speed, surface: segmentAt(r.track, p.x, p.lane)?.surface ?? 'dirt' });
@@ -30,7 +34,7 @@ export function detachLoop(p: Rider, pendingCrash: Rider['crashKind'] | null = n
   if (p.motion.kind !== 'loop')
     return;
   const m = p.motion, s = sampleLoop(m.distance);
-  p.motion = { kind: 'loop-air', origin: m.origin, age: 0, vx: m.vx, vlane: m.vlane, basis: [s.tangent, s.normal, s.lateral], basisPitch: s.pitch, pendingCrash, ignoreRoad: 6, stuck: 0 };
+  p.motion = { kind: 'loop-air', origin: m.origin, age: 0, vx: m.vx, vlane: m.vlane, basis: [s.tangent, s.normal, s.lateral], basisPitch: s.pitch, pendingCrash, ignoreRoad: 6, contact: null };
   p.vy = m.vy;
   p.grounded = false;
   p.wheelie = 0;
@@ -83,21 +87,36 @@ export function stepLoop(r: Race, p: Rider, input: number) {
     emit(r, p, 'jump');
   }
 }
-/** Swept bike-envelope test against both faces of the thin ribbon. */
+interface LoopImpact { origin: number; normal: Vec3; correction: Vec3 }
+/** Swept bike-envelope test against both ribbon faces and the supports. The
+ * correction removes penetration along the contact normal, preserving travel
+ * along the surface instead of rewinding the entire simulation step. */
 export function roadImpact(r: Race, from: Vec3, to: Vec3) {
+  const travel = sub(to, from);
   for (const { origin } of loopInstances(r.track, to[0])) {
     if (Math.max(to[0], from[0]) < origin - 24 || Math.min(to[0], from[0]) > origin + LOOP_LENGTH + 24)
       continue;
     const steps = Math.max(1, Math.ceil(norm(sub(to, from)) / 3));
     for (let j = 0; j <= steps; j++) {
-      const point = add(from, mul(sub(to, from), j / steps));
+      const worldPoint = add(from, mul(travel, j / steps));
+      const point = [...worldPoint] as Vec3;
       point[0] -= origin;
+      const contact = (normal: Vec3, depth: number): LoopImpact | null => {
+        const remainingDepth = depth - dot(sub(to, worldPoint), normal);
+        // A separating envelope already outside the solid needs no new impact.
+        if (dot(travel, normal) >= 0 && remainingDepth <= 0)
+          return null;
+        return { origin, normal, correction: mul(normal, Math.max(0, remainingDepth) + CONTACT_SKIN) };
+      };
       for (const beam of LOOP_MANIFEST.beams) {
         const a: Vec3 = [(beam.a[0] + LOOP_OFFSET) / WORLD_SCALE, beam.a[1] / WORLD_SCALE, beam.a[2] / WORLD_SCALE];
         const b: Vec3 = [(beam.b[0] + LOOP_OFFSET) / WORLD_SCALE, beam.b[1] / WORLD_SCALE, beam.b[2] / WORLD_SCALE], ab = sub(b, a);
         const t = clamp(dot(sub(point, a), ab) / dot(ab, ab), 0, 1), delta = sub(point, add(a, mul(ab, t)));
-        if (norm(delta) < 5 + beam.radius / WORLD_SCALE)
-          return unit(delta);
+        const depth = 5 + beam.radius / WORLD_SCALE - norm(delta);
+        if (depth > 0) {
+          const hit = contact(norm(delta) > 1e-8 ? unit(delta) : unit(mul(travel, -1)), depth);
+          if (hit) return hit;
+        }
       }
       for (let i = 1; i < LOOP_SAMPLES.length; i++) {
         const a = LOOP_SAMPLES[i - 1], b = LOOP_SAMPLES[i], ab = sub(b.position, a.position);
@@ -105,8 +124,11 @@ export function roadImpact(r: Race, from: Vec3, to: Vec3) {
         const delta = sub(point, add(a.position, mul(ab, t)));
         const normalDistance=dot(delta,a.normal),thickness=LOOP_MANIFEST.thickness/WORLD_SCALE;
         const width = a.width + (b.width - a.width) * t;
-        if (normalDistance < 5 && normalDistance > -thickness-5 && Math.abs(dot(delta, a.lateral)) < width / 2 + 3 && Math.abs(dot(delta, a.tangent)) < 4)
-          return mul(a.normal, normalDistance >= -thickness/2 ? 1 : -1);
+        if (normalDistance < 5 && normalDistance > -thickness-5 && Math.abs(dot(delta, a.lateral)) < width / 2 + 3 && Math.abs(dot(delta, a.tangent)) < 4) {
+          const top = normalDistance >= -thickness / 2;
+          const hit = contact(mul(a.normal, top ? 1 : -1), top ? 5 - normalDistance : thickness + 5 + normalDistance);
+          if (hit) return hit;
+        }
       }
     }
   }
@@ -142,30 +164,39 @@ export function stepLoopAir(r: Race, p: Rider, input: number, crash: Crash) {
   const angle = riderLocalTilt(p), [tangent, normal] = m.basis;
   const offset = add(mul(tangent, -Math.sin(angle)), mul(normal, Math.cos(angle)));
   const center = (x: number, y: number, lane: number): Vec3 => add([x, y, (lane - 1.5) * LOOP_WIDTH], mul(offset, 10));
+  let hit: LoopImpact | null = null;
   if (m.ignoreRoad > 0)
     m.ignoreRoad--;
   else {
-    const normal = roadImpact(r, center(oldX, oldY, oldLane), center(p.x, p.height, p.lane));
-    if (normal) {
+    hit = roadImpact(r, center(oldX, oldY, oldLane), center(p.x, p.height, p.lane));
+    if (hit) {
       m.pendingCrash ??= 'impact';
+      const { normal, correction } = hit;
       const velocity: Vec3 = [m.vx, p.vy, m.vlane * LOOP_WIDTH], inward = Math.min(0, dot(velocity, normal));
-      const reflected = mul(sub(velocity, mul(normal, inward * 1.05)), 0.55);
-      m.vx = q(reflected[0]);
+      const sliding = sub(velocity, mul(normal, inward));
+      m.vx = q(sliding[0]);
       p.speed = q(Math.abs(m.vx));
-      p.vy = q(reflected[1]);
-      m.vlane = q(reflected[2] / LOOP_WIDTH);
-      p.x = q(oldX + normal[0] * 0.5);
-      p.height = q(oldY + normal[1] * 0.5);
-      p.lane = q(oldLane + normal[2] * 0.5 / LOOP_WIDTH);
-      m.stuck++;
+      p.vy = q(sliding[1]);
+      m.vlane = q(sliding[2] / LOOP_WIDTH);
+      p.x = q(p.x + correction[0]);
+      p.height = q(p.height + correction[1]);
+      p.lane = q(p.lane + correction[2] / LOOP_WIDTH);
     }
-    else
-      m.stuck = 0;
   }
+  const position: Vec3 = [p.x, p.height, (p.lane - 1.5) * LOOP_WIDTH];
+  if (m.contact) {
+    m.contact.age++;
+    m.contact.gap = hit ? 0 : m.contact.gap + 1;
+    // Sliding away or clearing the structure is progress, not a blocked fall.
+    if (m.contact.gap > CONTACT_GRACE || norm(sub(position, m.contact.anchor)) > STUCK_DISTANCE)
+      m.contact = null;
+  }
+  if (hit && (!m.contact || m.contact.origin !== hit.origin))
+    m.contact = { origin: hit.origin, age: 1, gap: 0, anchor: position };
   const ground = heightAt(r.track, p.x, p.lane);
   const outside = p.lane < -0.5 || p.lane > 3.5;
-  if (outside || p.height < ground - 16 || m.age > 600 || m.stuck >= 30) {
-    p.x = Math.min(p.x, m.origin - 16);
+  if (outside || p.height < ground - 16 || m.age > 600 || (m.pendingCrash && m.contact && m.contact.age >= STUCK_FRAMES)) {
+    p.x = Math.min(oldX, p.x, (m.contact?.origin ?? m.origin) - 16);
     p.lane = p.lane < 1.5 ? 1 : 2;
     // Search backwards if the approach contains an elevated piece. Recovery
     // must settle on floor and can never move the racer ahead of the failure.

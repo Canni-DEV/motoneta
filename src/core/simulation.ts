@@ -181,9 +181,13 @@ function moveInternal(r: Race, p: Rider, input: number) {
   } else {
     p.vy -= 0.105;
     p.height = q(p.height + p.vy);
-    if (roadImpact(r,[oldX,oldY+10,(p.lane-1.5)*LOOP_WIDTH],[p.x,p.height+10,(p.lane-1.5)*LOOP_WIDTH])) {
-      p.motion={kind:'loop-air',origin:oldX,age:0,vx:p.speed,vlane:0,basis:[[1,0,0],[0,1,0],[0,0,1]],basisPitch:0,pendingCrash:'impact',ignoreRoad:0,stuck:0};
-      p.speed=q(p.speed*0.45); p.motion.vx=p.speed; p.vy=Math.min(p.vy,-0.5); return;
+    const hit = roadImpact(r,[oldX,oldY+10,(p.lane-1.5)*LOOP_WIDTH],[p.x,p.height+10,(p.lane-1.5)*LOOP_WIDTH]);
+    if (hit) {
+      p.motion={kind:'loop-air',origin:hit.origin,age:0,vx:p.speed,vlane:0,basis:[[1,0,0],[0,1,0],[0,0,1]],basisPitch:0,pendingCrash:'impact',ignoreRoad:0,contact:null};
+      p.x=q(p.x+hit.correction[0]); p.height=q(p.height+hit.correction[1]); p.lane=q(p.lane+hit.correction[2]/LOOP_WIDTH);
+      const inward = Math.min(0, p.speed * hit.normal[0] + p.vy * hit.normal[1]);
+      p.motion.vx=q(p.speed-hit.normal[0]*inward); p.speed=Math.abs(p.motion.vx); p.vy=q(p.vy-hit.normal[1]*inward);
+      p.motion.vlane=q(-hit.normal[2]*inward/LOOP_WIDTH); return;
     }
     p.tilt = clamp(
       p.tilt + (input & Input.LEFT ? 0.037 : 0) - (input & Input.RIGHT ? 0.037 : 0) - 0.005,

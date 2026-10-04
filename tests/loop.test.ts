@@ -322,7 +322,7 @@ describe('loop route and driving', () => {
     air.height = 4;
     air.grounded = false;
     air.vy = -0.2;
-    air.motion = { kind: 'loop-air', origin, age: 0, vx: 0, vlane: 0, basis: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], basisPitch: 0, pendingCrash, ignoreRoad: 0, stuck: 0 };
+    air.motion = { kind: 'loop-air', origin, age: 0, vx: 0, vlane: 0, basis: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], basisPitch: 0, pendingCrash, ignoreRoad: 0, contact: null };
     stepRace(r, 0);
     expect(floor.crashes).toBe(1);
     expect(air.motion.kind).toBe('loop-air');
@@ -348,7 +348,7 @@ describe('loop route and driving', () => {
     air.height = 4;
     air.grounded = false;
     air.vy = -0.2;
-    air.motion = { kind: 'loop-air', origin, age: 0, vx: 0, vlane: 0, basis: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], basisPitch: 0, pendingCrash: null, ignoreRoad: 0, stuck: 0 };
+    air.motion = { kind: 'loop-air', origin, age: 0, vx: 0, vlane: 0, basis: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], basisPitch: 0, pendingCrash: null, ignoreRoad: 0, contact: null };
     stepRace(r, 0);
     expect(floor.crashes).toBe(0);
     if (air.motion.kind === 'loop-air')

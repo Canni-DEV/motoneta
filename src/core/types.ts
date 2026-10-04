@@ -86,7 +86,8 @@ export type RiderMotion = { kind: 'track' } | {
   kind: 'loop-air'; origin: number; age: number; vx: number; vlane: number;
   basis: [number, number, number][]; basisPitch: number;
   pendingCrash: 'impact' | 'backflip' | null; ignoreRoad: number;
-  stuck: number;
+  /** Persistent contact cluster; short gaps must not restart a blocked fall. */
+  contact: { origin: number; age: number; gap: number; anchor: [number, number, number] } | null;
 };
 export type RacePhase = 'countdown' | 'racing' | 'finished';
 export type GameEvent = {
