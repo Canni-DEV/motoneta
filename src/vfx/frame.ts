@@ -1,6 +1,6 @@
 import { VEHICLE_VISUALS, type VehicleVisual } from '../vehicle-visual';
 import { bikePose, crashPose } from '../bike-pose';
-import { heightAt, segmentAt } from '../core/tracks';
+import { heightAt, surfaceAt } from '../core/tracks';
 import type { Race, Rider, GameEvent, Track, Weather } from '../core/types';
 import { SCALE, LANE } from './config';
 import { dot,sub,loopPosition,sampleLoop,riderBasis,riderLocalTilt } from '../core/loop-geometry';
@@ -110,7 +110,7 @@ export function captureVfxFrame(race: Race, weather: Weather): VfxFrame {
     riders: race.riders.map((p, index) => ({
       ...p,
       anchors: effectAnchors(p, race.track, VEHICLE_VISUALS[(index === 0 ? race.config.player?.appearance?.vehicle : race.config.bots[index - 1]?.appearance?.vehicle) ?? 'motocross']),
-      surface: p.motion.kind==='loop' ? 'dirt' : segmentAt(race.track, p.x, p.lane)?.surface ?? 'dirt',
+      surface: p.motion.kind==='loop' ? 'dirt' : surfaceAt(race.track, p.x, p.lane)?.surface ?? 'dirt',
       clearance: p.motion.kind==='loop' ? 0 : p.height - heightAt(race.track, p.x, p.lane),
     })),
     events: race.events.map((e) => ({ ...e })),

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
 import { box, mat, roadTexture, soilNoise, disposeResources } from './rendering/scene-geometry';
 import { buildCourse, type CoursePiece } from './rendering/course';
+import { setTerrainQuality, disposeTerrainInstances } from './rendering/terrain';
 import type { Appearance, VehicleId } from './appearance';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -259,6 +260,7 @@ export class World {
       this.settings.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.stadium.setQuality(this.settings.quality);
     this.bikes.forEach((bike) => bike.setQuality(this.settings.quality));
+    this.pieces.forEach((piece) => setTerrainQuality(piece.group, this.settings.quality));
     this.renderer.setPixelRatio(
       Math.min(devicePixelRatio, this.settings.quality === 'high' ? 1.8 : 1),
     );
@@ -296,13 +298,14 @@ export class World {
     this.weatherEffects.reset();
     this.flags.setTrack(track);
     this.stadium.setTrack(track);
+    this.pieces.forEach((piece) => disposeTerrainInstances(piece.group));
     this.course.clear();
     this.surfaces.clearTrack();
     this.surfaces.setTrack(track.length);
     disposeResources(this.disposables);
     this.disposables = [];
     this.pieces = [];
-    this.pieces = buildCourse(track, this.course, this.dirt, this.surfaces, this.disposables);
+    this.pieces = buildCourse(track, this.course, this.dirt, this.surfaces, this.disposables, this.settings.quality);
     this.focus = 80 * SCALE;
     this.last = 0;
     this.previous = [];
@@ -559,6 +562,7 @@ export class World {
     this.composer.render();
   }
   dispose() {
+    this.pieces.forEach((piece) => disposeTerrainInstances(piece.group));
     window.removeEventListener('resize', this.onResize);
     this.vfx?.dispose();
     this.flags.dispose();

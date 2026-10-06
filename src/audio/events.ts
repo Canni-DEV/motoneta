@@ -1,4 +1,4 @@
-import { heightAt, segmentAt } from '../core/tracks';
+import { heightAt, surfaceAt } from '../core/tracks';
 import type { Race, Weather } from '../core/types';
 import {
   landingLevel,
@@ -78,7 +78,7 @@ export class AudioEvents {
     }
     for (const p of r.riders) {
       const previous = this.riders.get(p.id);
-      const s = p.motion.kind === 'loop' ? undefined : segmentAt(r.track, p.x, p.lane);
+      const s = p.motion.kind === 'loop' ? undefined : surfaceAt(r.track, p.x, p.lane);
       let bumpAt = previous?.bumpAt ?? -100;
       const position =
         p.id === 0 ? { gain: 1, pan: 0 } : relativeSound(p.x, r.riders[0].x, r.track.length);

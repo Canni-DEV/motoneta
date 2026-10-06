@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { editorTab, nav, ready } from './ui-helpers';
 
-test('first launch of ruleset 3 clears old local game data and retired settings', async ({ page }) => {
+test('first launch retires pre-format-3 development data and settings', async ({ page }) => {
   const url = 'http://127.0.0.1:5173/';
   await page.route(url, (route) => route.fulfill({ contentType: 'text/html', body: '<title>seed</title>' }));
   await page.goto('/');
@@ -31,7 +31,7 @@ test('first launch of ruleset 3 clears old local game data and retired settings'
   await page.reload();
   await expect(page.locator('#model-status')).toBeHidden();
   const fresh = await page.evaluate(async () => {
-    const request = indexedDB.open('motoneta-game', 4);
+    const request = indexedDB.open('motoneta-game', 5);
     const db = await new Promise<IDBDatabase>((resolve) => (request.onsuccess = () => resolve(request.result)));
     const state = await new Promise<any>((resolve) => {
       const get = db.transaction('data').objectStore('data').get('state');
@@ -70,7 +70,7 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
     foreign: localStorage.getItem('retired-game.settings'),
   }));
   expect(initial.keys.sort()).toEqual(['motoneta.settings.v3', 'retired-game.settings']);
-  expect(initial.databases).toEqual([{ name: 'motoneta-game', version: 4 }]);
+  expect(initial.databases).toEqual([{ name: 'motoneta-game', version: 5 }]);
   expect(initial.foreign).toBe('{"volume":0.73}');
   await nav(page, 'editor');
   await editorTab(page, 'track');
@@ -82,7 +82,7 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
   const map = await mapDownload;
   expect(map.suggestedFilename()).toBe('motoneta-mapa-ruta-nandu-rio.json');
   const payload = JSON.parse(await readFile((await map.path())!, 'utf8'));
-  expect(payload).toMatchObject({ game: 'motoneta', version: 3, name: 'Ruta Ñandú / Río' });
+  expect(payload).toMatchObject({ game: 'motoneta', version: 4, name: 'Ruta Ñandú / Río' });
   await nav(page, 'records');
   await expect(page.getByRole('button', { name: 'Anteriores', exact: true })).toHaveCount(0);
   const backupDownload = page.waitForEvent('download');
@@ -92,8 +92,8 @@ test('MotoNeta identity, isolated saves, portable maps and backups', async ({ pa
   const data = JSON.parse(await readFile((await backup.path())!, 'utf8'));
   expect(data).toMatchObject({
     game: 'motoneta',
-    version: 3,
-    state: { game: 'motoneta', version: 3 },
+    version: 4,
+    state: { game: 'motoneta', version: 4 },
   });
   expect(data.state).not.toHaveProperty('legacy');
   await page.reload();
@@ -154,8 +154,8 @@ test('current replay imports and exports; mismatched contracts leave the UI inta
   const exported = JSON.parse(await readFile((await replay.path())!, 'utf8'));
   expect(exported).toMatchObject({
     game: 'motoneta',
-    version: 3,
-    ruleset: 'motoneta-3',
+    version: 4,
+    ruleset: 'motoneta-4',
     inputs: recording.inputs,
   });
 });

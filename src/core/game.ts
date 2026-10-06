@@ -63,7 +63,7 @@ export interface RaceResult {
 }
 export interface Recording {
   game: typeof GAME_ID;
-  version: 3;
+  version: 4;
   ruleset: typeof RULESET;
   config: RaceConfig;
   inputs: [number, number][];
@@ -73,7 +73,7 @@ export interface Recording {
 export interface CompetitionSession {
   presetId?: 'motoneta' | 'tanque';
   calendarDate?: string;
-  calendarVersion?: 1;
+  calendarVersion?: 1 | 2;
   reward?: 'unlocked' | 'already-unlocked' | 'not-earned';
   id: string;
   mode: 'tournament' | 'versus';

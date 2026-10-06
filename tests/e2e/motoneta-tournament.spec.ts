@@ -150,7 +150,7 @@ test('deleting the owner closes the active preset instead of leaving an orphaned
   expect(await page.evaluate(()=>(window as any).__motoneta.session)).toBeNull();
 });
 
-test('reads older format-3 profile data without losing customization, maps, sessions, records or replay inputs', async({page}) => {
+test('reads current profile data without losing customization, maps, sessions, records or replay inputs', async({page}) => {
   await ready(page);const module=await setupStore(page);
   const result=await page.evaluate(async(module)=>{
     const source=(p:string)=>import(/* @vite-ignore */ p);
@@ -170,7 +170,7 @@ test('reads older format-3 profile data without losing customization, maps, sess
     const replayId=legacy.records[0].replayId;
     delete replay.config.player.appearance.vehicle;delete replay.result.config.player.appearance.vehicle;
     const {DATABASE_NAME}=await source('/src/identity.ts');
-    const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(DATABASE_NAME,4);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+    const db=await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open(DATABASE_NAME,5);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
     await new Promise<void>((resolve,reject)=>{const tx=db.transaction(['data','replays'],'readwrite');tx.objectStore('data').put(legacy,'state');tx.objectStore('replays').put(replay,replayId);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});db.close();
     await store.open();const loaded=await store.replay(replayId);const backup=await store.backup();
     return {parts:store.state.profiles[0].garage.bikes.motocross.parts.fairing,vehicle:store.state.profiles[0].garage.vehicle,unlocked:store.state.profiles[0].unlockedMotoneta,sessions:JSON.stringify(store.state.sessions)===sessions,records:JSON.stringify(store.state.records)===records,maps:JSON.stringify(store.state.maps)===maps,inputs:JSON.stringify(loaded.inputs)===JSON.stringify(replay.inputs),replayVehicle:loaded.config.player.appearance.vehicle,backupNewData:!!backup.state.profiles[0].garage&&!!backup.state.motonetaSessions&&!!backup.state.tanqueSessions};

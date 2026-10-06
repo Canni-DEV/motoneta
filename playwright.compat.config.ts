@@ -4,7 +4,7 @@ import base from './playwright.config';
 export default defineConfig({
   ...base,
   testMatch:
-    /(?:ui-compat|audio-lifecycle|audio-music|vfx|weather-surfaces|weather-render|motoneta)\.spec\.ts/,
+    /(?:ui-compat|audio-lifecycle|audio-music|vfx|weather-surfaces|weather-render|motoneta|terrain)\.spec\.ts/,
   outputDir: 'test-results/compat',
   use: { ...base.use, launchOptions: {} },
   projects: [

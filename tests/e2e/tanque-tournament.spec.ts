@@ -200,12 +200,12 @@ test('old format-3 save gains a locked Tanque without losing data; obsolete loop
     await store.update((s: any) => { s.profiles[0].unlockedMotoneta = true; s.profiles[0].garage.bikes.motoneta.parts.fairing = 'trail'; s.maps = [{ ...emptyDesign(), name: 'Conservado' }]; s.draft.name = 'Borrador conservado'; });
     const legacy = structuredClone(store.state); delete legacy.tanqueSessions; delete legacy.profiles[0].unlockedTanque; delete legacy.profiles[0].garage.bikes.tanque;
     await new Promise<void>((resolve, reject) => {
-      const req = indexedDB.open('motoneta-game', 4); req.onerror = () => reject(req.error);
+      const req = indexedDB.open('motoneta-game', 5); req.onerror = () => reject(req.error);
       req.onsuccess = () => { const db = req.result, tx = db.transaction('data', 'readwrite'); tx.objectStore('data').put(legacy, 'state'); tx.oncomplete = () => { db.close(); resolve(); }; };
     });
     const restored = new GameStore(); await restored.open(); const p = restored.state.profiles[0];
     const persisted = await new Promise<any>((resolve, reject) => {
-      const req = indexedDB.open('motoneta-game', 4); req.onerror = () => reject(req.error);
+      const req = indexedDB.open('motoneta-game', 5); req.onerror = () => reject(req.error);
       req.onsuccess = () => { const db = req.result, get = db.transaction('data').objectStore('data').get('state'); get.onsuccess = () => { db.close(); resolve(get.result); }; };
     });
     const migration = !p.unlockedTanque && !!p.garage.bikes.tanque && p.unlockedMotoneta && p.garage.bikes.motoneta.parts.fairing === 'trail' && restored.state.maps[0].name === 'Conservado' && restored.state.draft.name === 'Borrador conservado';
@@ -216,5 +216,5 @@ test('old format-3 save gains a locked Tanque without losing data; obsolete loop
     const clean = new GameStore(); await clean.open();
     return { migration, persisted: !!persisted.tanqueSessions && persisted.profiles[0].unlockedTanque === false && !!persisted.profiles[0].garage.bikes.tanque, removed: !clean.state.tanqueSessions[p.id], progression: clean.state.profiles[0].unlockedMotoneta, version: clean.state.version, defaultColor: p.garage.bikes.tanque.paints.fairing.primary };
   }, module);
-  expect(result).toEqual({ migration: true, persisted: true, removed: true, progression: true, version: 3, defaultColor: '#bfc6cf' });
+  expect(result).toEqual({ migration: true, persisted: true, removed: true, progression: true, version: 4, defaultColor: '#bfc6cf' });
 });

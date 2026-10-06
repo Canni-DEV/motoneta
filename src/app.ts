@@ -444,6 +444,10 @@ export async function startApp() {
       $('#model-status').hidden = true;
       previewKey = '';
       render();
+      if (storageReady && store.state.terrainNoticePending) {
+        showModal('<h2>Nueva etapa de marcas</h2><p>Renovamos los terrenos y sus reglas. Conservamos tus mapas, perfiles, vehículos y ajustes. Las marcas, fantasmas, repeticiones y competencias anteriores se retiraron para comenzar una nueva etapa.</p>' + b('close-modal', 'Entendido', '', 'class="primary"'));
+        safely(store.consumeTerrainNotice());
+      }
     } catch (e) {
       models = 'error';
       $('#model-status').innerHTML =
@@ -1479,7 +1483,7 @@ export async function startApp() {
           case 'help':
             if (screen === 'race' && activity === 'running') paused = true;
             showModal(
-              `<h2>Controles</h2><p>Acelerá con ${esc(settings.bindings.A.replace('Key', ''))} y usá ${esc(settings.bindings.B.replace('Key', ''))} para el turbo. El turbo calienta el motor; las franjas claras lo enfrían.</p><p>Arriba y abajo cambian de carril. Izquierda levanta la rueda y derecha baja el morro. Los saltos se producen al pasar por las rampas. Aterrizá alineado con el terreno.</p><p>Después de una caída, pulsá acelerar repetidamente. La rueda del mouse ajusta el zoom. Escape pausa la carrera.</p><p>En Torneo y Versus hay un intento por carrera. Los fantasmas no producen colisiones.</p>${b('close-modal', 'Cerrar')}`,
+              `<h2>Controles</h2><p>Acelerá con ${esc(settings.bindings.A.replace('Key', ''))} y usá ${esc(settings.bindings.B.replace('Key', ''))} para el turbo. El turbo calienta el motor; los sectores de aspersores llevan su temperatura a cero al tocarlos en el suelo.</p><p>Arriba y abajo cambian de carril. Izquierda levanta la rueda y derecha baja el morro. Los saltos se producen al pasar por las rampas. Aterrizá alineado con el terreno.</p><p>El barro frena más que el césped. La arena dificulta acelerar; la grava hace más lentos los cambios de carril. El caballito reduce parte de la resistencia de barro, césped y arena. Saltar permite evitar los efectos del suelo.</p><p>Después de una caída, pulsá acelerar repetidamente. La rueda del mouse ajusta el zoom. Escape pausa la carrera.</p><p>En Torneo y Versus hay un intento por carrera. Los fantasmas no producen colisiones.</p>${b('close-modal', 'Cerrar')}`,
             );
             break;
           case 'close-modal':
@@ -1615,7 +1619,7 @@ export async function startApp() {
         if (screen === 'editor' && editor.change(el)) return;
         if (el.dataset.generator) {
           const k = el.dataset.generator as keyof GeneratorOptions;
-          (generator as unknown as Record<string, unknown>)[k] = ['ramps', 'mud', 'cool', 'loops'].includes(
+          (generator as unknown as Record<string, unknown>)[k] = ['ramps', 'mud', 'cool', 'grass', 'sand', 'gravel', 'loops'].includes(
             k,
           )
             ? Number(el.value)
@@ -1624,10 +1628,10 @@ export async function startApp() {
             Object.assign(
               generator,
               generator.difficulty === 'easy'
-                ? { ramps: 35, mud: 10, cool: 40, loops: 0 }
+                ? { ramps: 35, mud: 10, cool: 40, grass: 5, sand: 5, gravel: 5, loops: 0 }
                 : generator.difficulty === 'normal'
-                  ? { ramps: 55, mud: 20, cool: 25, loops: 1 }
-                  : { ramps: 75, mud: 35, cool: 15, loops: 2 },
+                  ? { ramps: 55, mud: 20, cool: 25, grass: 10, sand: 10, gravel: 10, loops: 1 }
+                  : { ramps: 75, mud: 35, cool: 15, grass: 15, sand: 15, gravel: 15, loops: 2 },
             );
             render();
           }

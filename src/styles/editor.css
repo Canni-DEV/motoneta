@@ -3,6 +3,26 @@
   padding: 12px 20px 10px;
   gap: 10px;
 }
+.terrain-outline { fill: currentColor; width: 100%; height: 48px; flex: none; }
+.piece .terrain-outline { height: 36px; opacity: 0.85; fill: currentColor; stroke: none; }
+.piece .terrain-effect { font-size: 10px; line-height: 1.35; color: var(--muted); }
+.piece.sand, .surface-sand { color: #d3b777; }
+.piece.gravel, .surface-gravel { color: #a5aba3; }
+.piece.grass { color: #8da757; }
+.piece.mud { color: #ad7d57; }
+.piece.cool { color: #80b9c5; }
+.placed.terrain-placement { background: transparent; border: 0; overflow: hidden; }
+.placed.terrain-placement .terrain-outline { position: absolute; inset: 0; height: 100%; }
+.placed.terrain-placement span { position: relative; z-index: 1; color: #fff5e2; text-shadow: 0 1px 2px #17231d; }
+.placed.terrain-placement.surface-mud { color: #ad7d57; }
+.placed.terrain-placement.surface-cool { color: #80b9c5; }
+.placed.terrain-placement.surface-grass { color: #8da757; }
+.placed.terrain-placement.surface-sand { color: #d3b777; }
+.placed.terrain-placement.surface-gravel { color: #93938a; }
+.placed.terrain-placement.selected { outline: 2px solid var(--ivory); background: transparent; }
+.insertion-preview .terrain-outline { position: absolute; inset: 0; height: 100%; fill: currentColor; opacity: 0.55; }
+.placement-ghost.terrain-ghost { border: 0; }
+.placement-ghost .terrain-outline { height: 100%; }
 .editor-heading {
   display: flex;
   justify-content: space-between;

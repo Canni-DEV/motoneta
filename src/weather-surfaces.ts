@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { Settings } from './core/types';
 import { WORLD_SCALE } from './world-space';
 
-export type SurfaceProfile = 'track' | 'dirt' | 'field' | 'mud' | 'grass' | 'cool' | 'bump';
+export type SurfaceProfile = 'track' | 'dirt' | 'field' | 'mud' | 'grass' | 'cool' | 'bump' | 'sand' | 'gravel';
 
 // Darkening, wet soil roughness, locally wetter roughness; snow coverage,
 // existing wheel compaction, transverse texture scale. Appearance only.
@@ -17,6 +17,8 @@ const profiles: Record<
   grass: { wet: [0.14, 0.94, 0.82], snow: [0.48, 0.1, 1] },
   cool: { wet: [0.08, 0.64, 0.52], snow: [0.1, 0, 1] },
   bump: { wet: [0.22, 0.88, 0.68], snow: [0.85, 0.2, 1] },
+  sand: { wet: [0.21, 0.91, 0.81], snow: [0.40, 0.15, 1] },
+  gravel: { wet: [0.13, 0.80, 0.63], snow: [0.38, 0.1, 1] },
 };
 
 /** One seamless, deterministic data texture: moisture, snow, compaction, grain. */
@@ -77,6 +79,7 @@ interface SurfaceMaterial {
 /** Appearance only. Weather changes only uniforms; clear uses the original material. */
 export class WeatherSurfaces {
   private materials: SurfaceMaterial[] = [];
+  private trackTextures: THREE.Texture[] = [];
   private detail: Settings['surfaceDetail'] = 'detailed';
   readonly control = weatherControlTexture();
   readonly rain = { value: 0 };
@@ -124,6 +127,9 @@ export class WeatherSurfaces {
           '#include <begin_vertex>',
           `#include <begin_vertex>
           vec3 weatherPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
+          #ifdef USE_INSTANCING
+          weatherPosition = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+          #endif
           vWeatherUv = vec2(weatherPosition.x * weatherCoordinates.x,
             0.5 - weatherPosition.z * weatherCoordinates.y * weatherSnowProfile.z);
           vec3 weatherNormal = inverseTransformDirection(transformedNormal, viewMatrix);
@@ -177,8 +183,14 @@ export class WeatherSurfaces {
       `weather-surface-v2-${profile === 'track' ? 'road' : 'solid'}-${this.detail}`;
     return material;
   }
+  ownTrackTexture<T extends THREE.Texture>(texture: T): T {
+    this.trackTextures.push(texture);
+    return texture;
+  }
 
   clearTrack() {
+    this.trackTextures.forEach((texture) => texture.dispose());
+    this.trackTextures = [];
     this.materials = this.materials.filter((entry) => {
       if (!entry.temporary) return true;
       entry.material.onBeforeCompile = () => {};
@@ -193,6 +205,8 @@ export class WeatherSurfaces {
   }
 
   dispose() {
+    this.trackTextures.forEach((texture) => texture.dispose());
+    this.trackTextures = [];
     for (const entry of this.materials) {
       entry.material.onBeforeCompile = () => {};
       entry.material.customProgramCacheKey = THREE.Material.prototype.customProgramCacheKey;

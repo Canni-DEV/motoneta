@@ -1,6 +1,7 @@
 import { type Race, type RaceConfig, type RaceResult } from './game';
 import { crash, move, START_X } from './simulation';
-import { heightAt, segmentAt } from './tracks';
+import { heightAt, surfaceAt } from './tracks';
+import { terrainFactors } from './terrain';
 import { clamp, Input, type Rider } from './types';
 import { loopGeometryMetadata, loopInstances, sampleLane, sampleLoop, wrapAngle } from './loop-geometry';
 import { canAimForLoop, ridersTouch } from './loop-physics';
@@ -102,8 +103,9 @@ function ai(r: Race, p: Rider): number {
     const scores = Array.from({ length: 4 }, (_, lane) => {
       let cost = Math.abs(lane - p.lane) * 8;
       for (let dx = 20; dx <= look; dx += 24) {
-        const s = segmentAt(r.track, p.x + dx, lane);
-        if (s?.surface === 'mud' || s?.surface === 'grass') cost += 40;
+        const s = surfaceAt(r.track, p.x + dx, lane);
+        const factors = terrainFactors(s?.surface);
+        cost += (1 - factors.speed) * 65 + (1 - factors.acceleration) * 25 + (1 - factors.lateral) * 18;
         if (s?.surface === 'cool') cost -= p.heat / 12;
         cost += heightAt(r.track, p.x + dx, lane) * 0.08;
       }

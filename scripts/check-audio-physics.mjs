@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import { readFile } from 'node:fs/promises';
 import { deepStrictEqual } from 'node:assert';
-const baseline = JSON.parse(await readFile('tests/fixtures/motoneta-physics.json', 'utf8'));
+const baseline = JSON.parse(await readFile('tests/fixtures/motoneta-4-physics.json', 'utf8'));
 const result = await build({
   entryPoints: ['tests/physics-fixture.ts'],
   bundle: true,
@@ -14,4 +14,4 @@ const { physicsTrace } = await import(
 );
 for (const expected of baseline)
   deepStrictEqual(physicsTrace(expected.track, expected.bots), expected);
-console.log('MotoNeta: ten complete races match the ruleset 2 physics and results.');
+console.log('MotoNeta: ten complete races match the motoneta-4 physics and results.');

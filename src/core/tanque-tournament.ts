@@ -33,8 +33,8 @@ export function tanqueCourses(day = tanqueDay()): RaceCourse[] {
   const revisions = new Set<string>();
   return loops.map((count, index) => {
     for (let retry = 0; retry < 100; retry++) {
-      const map = generateMap({ version: 2, seed: `tanque-v1:${day}:pista-${index + 1}:${retry}`,
-        size: 'long', difficulty: 'hard', ramps: 75, mud: 35, cool: 15, loops: count });
+      const map = generateMap({ version: 3, seed: `tanque-v2:${day}:pista-${index + 1}:${retry}`,
+        size: 'long', difficulty: 'hard', ramps: 75, mud: 35, cool: 15, grass: 15, sand: 15, gravel: 15, loops: count });
       if (revisions.has(map.revision)) continue;
       revisions.add(map.revision);
       map.name = `Tanque · Pista ${index + 1}`;
@@ -49,7 +49,7 @@ export function tanqueCourses(day = tanqueDay()): RaceCourse[] {
 export function tanqueTournament(player: LocalProfile, now = new Date()): CompetitionSession {
   if (!player.unlockedMotoneta) throw new Error('Desbloqueá la Motoneta para participar.');
   const day = tanqueDay(now);
-  return { id: crypto.randomUUID(), mode: 'tournament', presetId: 'tanque', calendarDate: day, calendarVersion: 1,
+  return { id: crypto.randomUUID(), mode: 'tournament', presetId: 'tanque', calendarDate: day, calendarVersion: 2,
     players: [raceProfile(player)], bots: makeBots(3), difficulty: 'hard', courses: tanqueCourses(day),
     courseIndex: 0, turnIndex: 0, results: [], phase: 'ready', seed: seedFor(day, 'bots') };
 }

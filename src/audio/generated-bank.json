@@ -318,5 +318,25 @@
     "id": "rain",
     "file": "rain.wav",
     "loop": true
+  },
+  {
+    "id": "roll-sand",
+    "file": "roll-sand.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-sand",
+    "file": "touch-sand.wav",
+    "loop": false
+  },
+  {
+    "id": "roll-gravel",
+    "file": "roll-gravel.wav",
+    "loop": true
+  },
+  {
+    "id": "touch-gravel",
+    "file": "touch-gravel.wav",
+    "loop": false
   }
 ]

@@ -42,7 +42,7 @@ test('loop editor operations, fixed properties and generator counts', async ({ p
   await page.getByRole('button', { name: 'Exportar', exact: true }).click();
   const exported = await download, path = await exported.path();
   const data = JSON.parse(await readFile(path!, 'utf8'));
-  expect(data.version).toBe(3);
+  expect(data.version).toBe(4);
   expect(data.items[0].piece).toBe('T');
   await page.getByRole('button', { name: 'Nuevo', exact: true }).click();
   await page.locator('#import-file').setInputFiles(path!);
@@ -126,7 +126,7 @@ test('selective loop cleanup preserves maps, progression and current or unrelate
     localStorage.setItem('motoneta.settings.v3', settings);
     const preserved = JSON.stringify([state.profiles, state.activeProfile, state.maps, state.draft]);
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('motoneta-game', 4);
+      const request = indexedDB.open('motoneta-game', 5);
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
     await new Promise<void>((resolve, reject) => {
@@ -150,7 +150,7 @@ test('selective loop cleanup preserves maps, progression and current or unrelate
       IDBCursor.prototype.delete = originalDelete;
     }
     const rawDb = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('motoneta-game', 4);
+      const request = indexedDB.open('motoneta-game', 5);
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
     const rawTx = rawDb.transaction(['data', 'replays'], 'readonly');
@@ -180,7 +180,7 @@ test('selective loop cleanup preserves maps, progression and current or unrelate
     motoneta: ['flat', 'current'], replayIds: ['current', 'flat', 'orphan-flat'], missing: true, old: true,
     current: 2, unchangedSecondLoad: true, atomicRollback: true });
 });
-test('storage upgrade removes development data and accepts only format 3', async ({ page }) => {
+test('storage upgrade removes development data and accepts format 4 and migrates format 3', async ({ page }) => {
   await page.goto('/loop-prototype.html');
   await page.evaluate(async () => {
     await new Promise<void>((resolve, reject) => {
@@ -198,7 +198,7 @@ test('storage upgrade removes development data and accepts only format 3', async
     const [{ GameStore }, { emptyDesign, validateMap }] = await Promise.all([source('/src/persistence.ts'), source('/src/core/maps.ts')]);
     const store = new GameStore();
     await store.open();
-    if (store.state.version !== 3 || store.state.maps.length || store.state.profiles.some((p: any) => p.id === 'old-test') || await store.replay('old-replay'))
+    if (store.state.version !== 4 || store.state.maps.length || store.state.profiles.some((p: any) => p.id === 'old-test') || await store.replay('old-replay'))
       throw new Error('No se reinició el guardado');
     let rejected = false;
     try {

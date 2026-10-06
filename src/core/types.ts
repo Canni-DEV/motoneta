@@ -24,8 +24,11 @@ export type PieceId =
   | 'Q'
   | 'R'
   | 'S'
-  | 'T';
-export type Surface = 'dirt' | 'mud' | 'grass' | 'cool' | 'bump';
+  | 'T'
+  | 'U'
+  | 'V';
+export type Surface = 'dirt' | 'mud' | 'grass' | 'cool' | 'bump' | 'sand' | 'gravel';
+export interface TerrainShape { version: 1; variant: number }
 export interface Segment {
   x: number;
   length: number;
@@ -34,6 +37,7 @@ export interface Segment {
   surface: Surface;
   boost: boolean;
   piece: string;
+  terrainShape?: TerrainShape;
 }
 export interface Track {
   id: string;
