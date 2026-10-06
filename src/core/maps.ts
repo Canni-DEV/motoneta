@@ -4,6 +4,7 @@ import { readTimeOfDay } from './time-of-day';
 import { PIECES, getTrack } from './tracks';
 import type { Segment, TimeOfDay, Track, Weather } from './types';
 import { readWeather } from './weather';
+import { isFlatTerrain, withTerrainShape, terrainShape } from './terrain';
 import { isLoop, loopGeometryMetadata, loopPlacementError, LOOP_APPROACH, LOOP_LENGTH, LOOP_RUNOUT, LOOP_SPACING, maximumLoops } from './loop-geometry';
 
 export interface PlacedPiece extends Segment {
@@ -11,7 +12,7 @@ export interface PlacedPiece extends Segment {
 }
 export interface MapDesign {
   game: typeof GAME_ID;
-  version: 3;
+  version: 4;
   id: string;
   revision: string;
   name: string;
@@ -32,7 +33,7 @@ export function revision(d: Pick<MapDesign, 'items' | 'length'>) {
       d.length,
       [...d.items]
         .sort((a, b) => a.x - b.x || a.lanes - b.lanes)
-        .map(({ x, length, profile, lanes, surface, boost, piece }) => [
+        .map(({ x, length, profile, lanes, surface, boost, piece, terrainShape }) => [
           x,
           length,
           profile,
@@ -40,6 +41,7 @@ export function revision(d: Pick<MapDesign, 'items' | 'length'>) {
           surface,
           boost,
           piece,
+          terrainShape,
         ]),
     ]),
   );
@@ -78,7 +80,8 @@ export function designFromTrack(track: Track, id: string = crypto.randomUUID()):
 }
 export function validateMap(value: unknown): MapDesign {
   const d = value as MapDesign;
-  if (!d || d.game !== GAME_ID || d.version !== FORMAT_VERSION)
+  const version = (value as { version?: number } | null)?.version;
+  if (!d || d.game !== GAME_ID || (version !== FORMAT_VERSION && version !== 3))
     throw new Error(`El archivo no es un mapa compatible con ${GAME_NAME}.`);
   const num = (v: unknown, min: number, max: number) =>
     typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
@@ -109,7 +112,7 @@ export function validateMap(value: unknown): MapDesign {
         s.x + s.length > d.length ||
         !Number.isInteger(s.lanes) ||
         !num(s.lanes, 1, 15) ||
-        !['dirt', 'mud', 'grass', 'cool', 'bump'].includes(s.surface) ||
+        !(version === 3 ? ['dirt', 'mud', 'grass', 'cool', 'bump'] : ['dirt', 'mud', 'grass', 'cool', 'bump', 'sand', 'gravel']).includes(s.surface) ||
         typeof s.boost !== 'boolean' ||
         typeof s.piece !== 'string' ||
         s.piece.length > 20 ||
@@ -134,7 +137,11 @@ export function validateMap(value: unknown): MapDesign {
       }
       if (s.profile[0][0] !== 0 || s.profile.at(-1)![0] !== 1)
         throw new Error('Perfil incompleto.');
-      return {
+      if (s.terrainShape !== undefined && (!isFlatTerrain(s) || s.terrainShape === null ||
+        s.terrainShape.version !== 1 || !Number.isInteger(s.terrainShape.variant) ||
+        !num(s.terrainShape.variant, 0, 0xffffffff)))
+        throw new Error('Contorno de terreno incompatible o inválido.');
+      return withTerrainShape({
         id: s.id,
         x: s.x,
         length: s.length,
@@ -143,7 +150,8 @@ export function validateMap(value: unknown): MapDesign {
         boost: s.boost,
         piece: s.piece,
         profile: s.profile.map((p) => [p[0], p[1]] as [number, number]),
-      };
+        ...(s.terrainShape ? { terrainShape: { ...s.terrainShape } } : {}),
+      });
     })
     .sort((a, b) => a.x - b.x || a.lanes - b.lanes);
   for (let lane = 0; lane < 4; lane++) {
@@ -215,7 +223,7 @@ export const BUILTINS: RaceCourse[] = Array.from({ length: 5 }, (_, i) => {
 });
 export function placedPiece(piece: string, x: number, lanes?: number): PlacedPiece {
   const p = PIECES.find((p) => p.id === piece)!;
-  return {
+  return withTerrainShape({
     id: crypto.randomUUID(),
     x,
     length: p.length,
@@ -224,36 +232,42 @@ export function placedPiece(piece: string, x: number, lanes?: number): PlacedPie
     surface: p.surface,
     boost: !!p.boost,
     piece: p.id,
-  };
+  });
 }
 export interface GeneratorOptions {
-  version: 2;
+  version: 3;
   seed: string;
   size: 'short' | 'medium' | 'long';
   difficulty: Difficulty;
   ramps: number;
   mud: number;
   cool: number;
+  grass: number;
+  sand: number;
+  gravel: number;
   loops: number;
 }
 export const generatorDefaults: GeneratorOptions = {
-  version: 2,
+  version: 3,
   seed: '1984',
   size: 'medium',
   difficulty: 'normal',
   ramps: 55,
   mud: 20,
   cool: 25,
+  grass: 10,
+  sand: 10,
+  gravel: 10,
   loops: 1,
 };
 export function generateMap(options: GeneratorOptions): MapDesign {
   if (
-    options.version !== 2 ||
+    options.version !== 3 ||
     !['short', 'medium', 'long'].includes(options.size) ||
     !['easy', 'normal', 'hard'].includes(options.difficulty) ||
     typeof options.seed !== 'string' ||
     options.seed.length > 80 ||
-    [options.ramps, options.mud, options.cool].some((v) => !Number.isFinite(v) || v < 0 || v > 100)
+    [options.ramps, options.mud, options.cool, options.grass, options.sand, options.gravel].some((v) => !Number.isFinite(v) || v < 0 || v > 100)
   )
     throw new Error('Parámetros del generador inválidos.');
   const mapLength={short:2048,medium:4096,long:6144}[options.size];
@@ -269,6 +283,9 @@ export function generateMap(options: GeneratorOptions): MapDesign {
       options.ramps,
       options.mud,
       options.cool,
+      options.grass,
+      options.sand,
+      options.gravel,
       options.loops,
     ]),
   );
@@ -300,24 +317,27 @@ export function generateMap(options: GeneratorOptions): MapDesign {
   while (x < d.length - 640) {
     const reserved=reservations.find(([start,end])=>x>=start && x<end);
     if(reserved) { x=reserved[1]; continue; }
-    const weight = options.ramps + options.mud + options.cool;
+    const terrainWeights = [['K', options.mud], ['M', options.cool], ['P', options.grass], ['U', options.sand], ['V', options.gravel]] as const;
+    const weight = options.ramps + terrainWeights.reduce((sum, [, w]) => sum + w, 0);
     if (!weight) break;
-    const pick = random() * Math.max(100, weight);
-    const code =
-      pick < options.ramps
-        ? ramps[Math.floor(random() * ramps.length)]
-        : pick < options.ramps + options.mud
-          ? 'K'
-          : pick < weight
-            ? 'M'
-            : null;
+    let pick = random() * Math.max(100, weight);
+    let code: string | null = null;
+    if (pick < options.ramps) code = ramps[Math.floor(random() * ramps.length)];
+    else {
+      pick -= options.ramps;
+      for (const [id, w] of terrainWeights) {
+        if (pick < w) { code = id; break; }
+        pick -= w;
+      }
+    }
     if (code) {
       const s = placedPiece(
         code,
         x,
-        code === 'K' || code === 'M' ? 1 << Math.floor(random() * 4) : 15,
+        terrainWeights.some(([id]) => id === code) ? 1 << Math.floor(random() * 4) : 15,
       );
       s.id = `generated-piece-${index++}`;
+      if (isFlatTerrain(s)) s.terrainShape = { ...terrainShape(s), variant: parseInt(hash(fingerprint + ':' + s.id), 16) };
       if(!reservations.some(([start,end])=>s.x<end && s.x+s.length>start)) d.items.push(s);
       x += s.length;
     }

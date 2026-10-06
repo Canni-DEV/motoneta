@@ -1,0 +1,38 @@
+[
+  {
+    "id": "roll-sand",
+    "file": "roll-sand.wav",
+    "provenance": "Original procedural synthesis",
+    "sampleRate": 44100,
+    "channels": 1,
+    "loop": true,
+    "sha256": "60c3d233a4e45d91a37dac3736527b760becb2b4fed10664c61a66751d8c74b6"
+  },
+  {
+    "id": "touch-sand",
+    "file": "touch-sand.wav",
+    "provenance": "Original procedural synthesis",
+    "sampleRate": 44100,
+    "channels": 1,
+    "loop": false,
+    "sha256": "e24e86b7210abb09c1f7955c526fbc277fd496e8280b8f3cde75801fa956d36f"
+  },
+  {
+    "id": "roll-gravel",
+    "file": "roll-gravel.wav",
+    "provenance": "Original procedural synthesis",
+    "sampleRate": 44100,
+    "channels": 1,
+    "loop": true,
+    "sha256": "d14a5ccbce42e9fad6bc4ab1f96ee0df824e730c0f90bce39138a083a7bc3352"
+  },
+  {
+    "id": "touch-gravel",
+    "file": "touch-gravel.wav",
+    "provenance": "Original procedural synthesis",
+    "sampleRate": 44100,
+    "channels": 1,
+    "loop": false,
+    "sha256": "ad4e74ecc18c4533fe6a92e1b908bad43fc057d46889ff9bb6eb55845c94a9de"
+  }
+]

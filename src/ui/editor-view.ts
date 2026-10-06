@@ -1,9 +1,12 @@
 import type { Editor } from './editor';
+import { isFlatTerrain, isTerrainSurface, TERRAIN_INFO } from '../core/terrain';
+
 import { PIECES } from '../core/tracks';
 import { placedPiece, validateMap } from '../core/maps';
 import { isLoop, LOOP_SAMPLES, LOOP_LENGTH, LOOP_HEIGHT, LOOP_WIDTH, sampleLane, loopWarnings } from '../core/loop-geometry';
 import { button as b, esc, select, environmentFields, icon } from './widgets';
 import { sceneHost } from './screens';
+import { contourSvg } from './terrain-preview';
 
 export function editorView(e: Editor) {
   const d = e.design,
@@ -26,7 +29,7 @@ export function editorView(e: Editor) {
   }
   const insertion =
     e.armed || e.tab === 'pieces'
-      ? `<div class="insertion-preview ${placementError ? 'invalid' : ''}" style="left:${(e.cursor / d.length) * 100}%;width:max(5px,${(proposed.length / d.length) * 100}%)" aria-label="${esc(placementError || 'Posición válida')}" >${[0, 1, 2, 3].map((lane) => `<i class="${proposed.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</div>`
+      ? `<div class="insertion-preview ${placementError ? 'invalid' : ''}" style="left:${(e.cursor / d.length) * 100}%;width:max(5px,${(proposed.length / d.length) * 100}%)" aria-label="${esc(placementError || 'Posición válida')}" >${isFlatTerrain(proposed) ? contourSvg(proposed) : [0, 1, 2, 3].map((lane) => `<i class="${proposed.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</div>`
       : '';
 
   const palette = ['dirt', 'terrain']
@@ -38,7 +41,7 @@ export function editorView(e: Editor) {
           .map((piece) =>
             b(
               'piece',
-              `<strong>${piece.id}</strong><span>${esc(piece.name)}</span><svg viewBox="0 0 100 36" aria-hidden="true"><polyline points="${(piece.id==='T' ? LOOP_SAMPLES.filter((_,i)=>i%8===0).map(s=>`${s.position[0]/LOOP_LENGTH*96+2},${32-s.position[1]/LOOP_HEIGHT*30}`) : piece.profile.map(([x, y]) => `${x * 96 + 2},${32 - (y / 128) * 30}`)).join(' ')}"/></svg><small>${[0, 1, 2, 3].map((lane) => `<i class="lane-dot ${piece.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</small>`,
+              `<strong>${piece.id}</strong><span>${esc(piece.name)}</span>${isTerrainSurface(piece.surface) ? `<small class="terrain-effect">${esc(TERRAIN_INFO[piece.surface].effect)}</small>` : ''}${isFlatTerrain(piece) ? contourSvg(placedPiece(piece.id, 0)) : `<svg viewBox="0 0 100 36" aria-hidden="true"><polyline points="${(piece.id==='T' ? LOOP_SAMPLES.filter((_,i)=>i%8===0).map(s=>`${s.position[0]/LOOP_LENGTH*96+2},${32-s.position[1]/LOOP_HEIGHT*30}`) : piece.profile.map(([x, y]) => `${x * 96 + 2},${32 - (y / 128) * 30}`)).join(' ')}"/></svg>`}<small>${[0, 1, 2, 3].map((lane) => `<i class="lane-dot ${piece.lanes & (1 << lane) ? 'on' : ''}"></i>`).join('')}</small>`,
               piece.id,
               `class="piece ${piece.surface}" aria-label="${piece.id}: ${esc(piece.name)}" aria-pressed="${piece.id === e.chosenPiece}"`,
             ),
@@ -47,7 +50,7 @@ export function editorView(e: Editor) {
     )
     .join('');
   const properties = p
-    ? `<span class="eyebrow">PIEZA ${esc(p.piece)}</span><h2>${isLoop(p)?'Loop · entrada 4 → salida 1 y 2':'Detalle del salto'}</h2>${isLoop(p)?'<p class="muted">Dimensiones fijas · ↑ hacia el carril 1 · Reducí antes si llegás con impulso.</p>':''}<div class="piece-inspector form-grid"><label>Posición<input id="piece-x" data-piece-field="x" type="number" min="0" max="${d.length - p.length}" step="8" value="${p.x}"></label><label>Largo<input id="piece-length" data-piece-field="length" type="number" min="8" max="640" step="8" value="${p.length}" ${isLoop(p)?'disabled':''}></label><label>${isLoop(p)?'Altura total':'Altura'}<input id="piece-height" data-piece-field="height" type="number" min="0" max="128" step="1" value="${isLoop(p)?Math.round(LOOP_HEIGHT):Math.max(...p.profile.map((v) => v[1]))}" ${p.profile.every((v) => v[1] === 0) ? 'disabled' : ''}></label><fieldset><legend>Carriles</legend><div class="lane-options">${[0, 1, 2, 3].map((lane) => `<label class="check"><input type="checkbox" data-piece-lane="${lane}" ${isLoop(p)?'disabled':''} ${p.lanes & (1 << lane) ? 'checked' : ''}>${lane + 1}</label>`).join('')}</div></fieldset></div><div class="actions">${b('move-left', '← 8')}${b('move-right', '8 →')}${b('duplicate-piece', 'Duplicar')}${b('replace-piece', 'Reemplazar por ' + e.chosenPiece)}${b('remove-piece', 'Quitar pieza', '', 'class="danger"')}</div>`
+    ? `<span class="eyebrow">PIEZA ${esc(p.piece)}</span><h2>${isLoop(p)?'Loop · entrada 4 → salida 1 y 2':isTerrainSurface(p.surface) ? TERRAIN_INFO[p.surface].name : 'Detalle del salto'}</h2>${isLoop(p)?'<p class="muted">Dimensiones fijas · ↑ hacia el carril 1 · Reducí antes si llegás con impulso.</p>':''}${isTerrainSurface(p.surface) ? `<p class="muted">${esc(TERRAIN_INFO[p.surface].effect)}</p>${contourSvg(p)}${isFlatTerrain(p) ? b('terrain-variant','Cambiar variante') : ''}` : ''}<div class="piece-inspector form-grid"><label>Posición<input id="piece-x" data-piece-field="x" type="number" min="0" max="${d.length - p.length}" step="8" value="${p.x}"></label><label>Largo<input id="piece-length" data-piece-field="length" type="number" min="8" max="640" step="8" value="${p.length}" ${isLoop(p)?'disabled':''}></label><label>${isLoop(p)?'Altura total':'Altura'}<input id="piece-height" data-piece-field="height" type="number" min="0" max="128" step="1" value="${isLoop(p)?Math.round(LOOP_HEIGHT):Math.max(...p.profile.map((v) => v[1]))}" ${p.profile.every((v) => v[1] === 0) ? 'disabled' : ''}></label><fieldset><legend>Carriles</legend><div class="lane-options">${[0, 1, 2, 3].map((lane) => `<label class="check"><input type="checkbox" data-piece-lane="${lane}" ${isLoop(p)?'disabled':''} ${p.lanes & (1 << lane) ? 'checked' : ''}>${lane + 1}</label>`).join('')}</div></fieldset></div><div class="actions">${b('move-left', '← 8')}${b('move-right', '8 →')}${b('duplicate-piece', 'Duplicar')}${b('replace-piece', 'Reemplazar por ' + e.chosenPiece)}${b('remove-piece', 'Quitar pieza', '', 'class="danger"')}</div>`
     : `<div class="empty-state">${icon('editor')}<h2>Elegí una pieza</h2><p>Seleccioná una pieza en los carriles para ajustar sus propiedades.</p>${b('editor-tab', 'Ver piezas', 'pieces')}</div>`;
   const track = `<h2>Tu circuito</h2><div class="form-grid"><label class="wide-field">Nombre<input id="design-name" aria-label="Nombre del circuito" maxlength="40" value="${esc(d.name)}" data-editor="name"></label><label>Longitud<input id="design-length" type="number" min="640" max="30000" step="8" value="${d.length}" data-editor="length"></label>${select(
     'design-laps',
@@ -64,9 +67,9 @@ export function editorView(e: Editor) {
         .map((p) =>
           b(
             'select-item',
-            isLoop(p) ? (lane===3?'T →':lane<=1?'T ↗':'T') : esc(p.piece),
+            isLoop(p) ? (lane===3?'T →':lane<=1?'T ↗':'T') : isFlatTerrain(p) ? `${contourSvg(p, lane)}<span>${esc(p.piece)}</span>` : esc(p.piece),
             p.id,
-            `data-key="${esc(p.id)}-${lane}" data-drag="${esc(p.id)}" class="placed ${e.chosenItem === p.id ? 'selected' : ''} surface-${p.surface} ${isLoop(p)?'placed-loop':''}" style="left:${(p.x / d.length) * 100}%;width:max(5px,${(p.length / d.length) * 100}%)" title="${isLoop(p)?(lane===3?'Entrada por el carril 4':lane<=1?'Salida elevada sobre los carriles 1 y 2 · paso libre por debajo':'Paso libre por debajo'):esc(p.piece)}" aria-label="${esc(p.piece)}, carril ${lane + 1}, posición ${p.x}"`,
+            `data-key="${esc(p.id)}-${lane}" data-drag="${esc(p.id)}" class="placed ${e.chosenItem === p.id ? 'selected' : ''} surface-${p.surface} ${isFlatTerrain(p)?'terrain-placement':''} ${isLoop(p)?'placed-loop':''}" style="left:${(p.x / d.length) * 100}%;width:max(5px,${(p.length / d.length) * 100}%)" title="${isLoop(p)?(lane===3?'Entrada por el carril 4':lane<=1?'Salida elevada sobre los carriles 1 y 2 · paso libre por debajo':'Paso libre por debajo'):esc((isTerrainSurface(p.surface) ? TERRAIN_INFO[p.surface].name + ': ' + TERRAIN_INFO[p.surface].effect : p.piece))}" aria-label="${esc(p.piece)}, carril ${lane + 1}, posición ${p.x}"`,
           ),
         )
         .join('')}</div>`,

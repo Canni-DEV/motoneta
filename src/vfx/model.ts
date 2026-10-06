@@ -1,6 +1,6 @@
 import { HZ, type Settings, type Track, type Weather } from '../core/types';
 import { DRIVE } from '../core/handling';
-import { heightAt, segmentAt } from '../core/tracks';
+import { heightAt, surfaceAt } from '../core/tracks';
 import { hash } from '../stadium-layout';
 import { landingLevel, materialFor, type Material } from '../presentation-material';
 import { LANE, SCALE, TRACK_LIFE, VFX_INTENSITY, VFX_LIMITS, vfxSettings, windAt } from './config';
@@ -30,6 +30,8 @@ const colors: Record<Material, number[]> = {
   grass: rgb(0x839063),
   wet: rgb(0xb2ccd0),
   snow: rgb(0xe4edf1),
+  sand: rgb(0xd2b579),
+  gravel: rgb(0x97978e),
 };
 const neutral = { smoke: rgb(0xa1a8ae), steam: rgb(0xe3e7e5), air: rgb(0xe3eef2) };
 
@@ -237,7 +239,7 @@ export class VfxModel {
     priority = 1,
   ) {
     const kind: Kind =
-      material === 'wet'
+      material === 'sand' ? 'dust' : material === 'wet'
         ? 'water'
         : material === 'snow'
           ? 'snow'
@@ -269,7 +271,7 @@ export class VfxModel {
         priority,
         p.speed,
       );
-    if (material === 'dirt' || material === 'mud' || material === 'snow')
+    if (material === 'dirt' || material === 'mud' || material === 'snow' || material === 'gravel')
       this.emit(
         point,
         material,
@@ -313,7 +315,7 @@ export class VfxModel {
     for (let j = 0; j < 6; j++) {
       const [x, z] = corners[order[j]],
         lane = z / LANE + 1.5;
-      const segment = segmentAt(this.track, x / SCALE, lane);
+      const segment = surfaceAt(this.track, x / SCALE, lane);
       const y =
         heightAt(this.track, x / SCALE, lane) * SCALE +
         (segment && segment.surface !== 'dirt' && !segment.profile.some((v) => v[1] > 0)

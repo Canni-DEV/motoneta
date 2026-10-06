@@ -23,7 +23,7 @@ it('accepts only the current MotoNeta map and recording contracts', () => {
     appendInput(recording, 1);
     stepRace(race, 1);
   }
-  expect(validateRecording(recording)).toMatchObject({ ...FILE_HEADER, ruleset: 'motoneta-3' });
+  expect(validateRecording(recording)).toMatchObject({ ...FILE_HEADER, ruleset: 'motoneta-4' });
   for (const change of [{ game: undefined }, { game: 'other' }, { version: 1 }, { version: 0 }]) {
     expect(() => validateMap({ ...design, ...change })).toThrow();
     expect(() => validateRecording({ ...recording, ...change })).toThrow();

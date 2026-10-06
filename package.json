@@ -8,6 +8,7 @@
   },
   "scripts": {
     "audio:engines": "node scripts/build-audio.mjs --engines-only",
+    "audio:terrain": "node scripts/build-terrain-audio.mjs",
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tests.json",

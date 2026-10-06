@@ -1,5 +1,5 @@
 import { updateWheelie, DRIVE } from './handling';
-import { heightAt, segmentAt } from './tracks';
+import { heightAt, surfaceAt } from './tracks';
 import { clamp, HZ, Input, q, type Race, type Rider } from './types';
 import { add, dot, loopInstances, loopPosition, loopSupportMargin, mul, norm, sampleLoop, sub, wrapAngle, LOOP_DISTANCE, LOOP_EDGE, LOOP_ENTRY_X, LOOP_EXIT_X, LOOP_LENGTH, LOOP_MANIFEST, LOOP_OFFSET, LOOP_SAMPLES, LOOP_WIDTH, riderBasis, riderLocalTilt, unit, type Vec3 } from './loop-geometry';
 import { WORLD_SCALE } from '../world-space';
@@ -15,7 +15,7 @@ const STUCK_FRAMES = Math.ceil(HZ);
 const STUCK_DISTANCE = 12;
 export const jumpVelocity = (speed: number, tilt: number) => tilt > 0.1 ? 1.2 + speed * 0.28 + Math.max(0, tilt) * 1.5 : 0;
 type Crash = (r: Race, p: Rider, kind?: Rider['crashKind'], speed?: number) => void;
-const emit = (r: Race, p: Rider, type: 'jump' | 'land', speed?: number) => r.events.push({ type, rider: p.id, frame: r.frame, impactSpeed: speed, surface: segmentAt(r.track, p.x, p.lane)?.surface ?? 'dirt' });
+const emit = (r: Race, p: Rider, type: 'jump' | 'land', speed?: number) => r.events.push({ type, rider: p.id, frame: r.frame, impactSpeed: speed, surface: surfaceAt(r.track, p.x, p.lane)?.surface ?? 'dirt' });
 export function enterLoop(r: Race, p: Rider, oldX: number) {
   if (!p.grounded || p.recovery || p.motion.kind !== 'track' || Math.abs(p.lane - 3) > LOOP_EDGE)
     return false;

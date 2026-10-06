@@ -2,6 +2,8 @@ import type { Editor } from './editor';
 import { placedPiece, validateMap } from '../core/maps';
 import type { PieceId } from '../core/types';
 import { loopWarnings } from '../core/loop-geometry';
+import { isFlatTerrain, terrainSeed } from '../core/terrain';
+import { contourSvg } from './terrain-preview';
 
 /** Delegated Pointer Events support mouse and touch; listeners live exactly as long as the view. */
 export function bindEditor(root: HTMLElement, editor: Editor, signal: AbortSignal) {
@@ -82,6 +84,7 @@ export function bindEditor(root: HTMLElement, editor: Editor, signal: AbortSigna
           candidate.lanes =
             1 <<
             Math.max(0, Math.min(3, firstLane + Math.round((e.clientY - startY) / laneHeight)));
+        if (palette && isFlatTerrain(candidate)) candidate.terrainShape = {version:1,variant:terrainSeed(candidate)};
         try {
           if (palette && (e.clientY < current.top || e.clientY > current.bottom))
             throw new Error('Soltá sobre los carriles.');
@@ -102,7 +105,10 @@ export function bindEditor(root: HTMLElement, editor: Editor, signal: AbortSigna
         ghost.classList.toggle('invalid', !valid);
         ghost.style.left = `${(candidate.x / editor.design.length) * 100}%`;
         ghost.style.width = `${Math.max(8, (candidate.length / editor.design.length) * current.width)}px`;
-        ghost.style.backgroundImage = `linear-gradient(to bottom, ${[0, 1, 2, 3].map((lane) => `${candidate.lanes & (1 << lane) ? 'currentColor' : 'transparent'} ${lane * 25}% ${(lane + 1) * 25}%`).join(',')})`;
+        const terrain = isFlatTerrain(candidate);
+        ghost.classList.toggle('terrain-ghost',terrain);
+        ghost.innerHTML = terrain ? contourSvg(candidate) : '';
+        ghost.style.backgroundImage = terrain ? 'none' : `linear-gradient(to bottom, ${[0, 1, 2, 3].map((lane) => `${candidate.lanes & (1 << lane) ? 'currentColor' : 'transparent'} ${lane * 25}% ${(lane + 1) * 25}%`).join(',')})`;
         hint.textContent = message;
       };
       const cleanup = () => {

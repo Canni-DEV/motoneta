@@ -1,4 +1,5 @@
 import raw from './track-layouts.json';
+import { withTerrainShape, isFlatTerrain, terrainContains, terrainPolygons, terrainIntervals } from './terrain';
 import type { PieceId, Segment, Surface, Track } from './types';
 import { isLoop, LOOP_LENGTH, LOOP_SAMPLES, LOOP_HEIGHT } from './loop-geometry';
 
@@ -17,6 +18,8 @@ const tri = (h: number): [number, number][] => [
   [1, 0],
 ];
 export const PIECES: Piece[] = [
+  { id: 'U', name: 'Arena', length: 64, profile: [[0,0],[1,0]], lanes: 15, surface: 'sand' },
+  { id: 'V', name: 'Grava', length: 48, profile: [[0,0],[1,0]], lanes: 15, surface: 'gravel' },
   { id: 'T', name: 'Loop · 4 → 1 y 2', length: LOOP_LENGTH, profile: [[0,0],[1,0]], lanes: 15, surface: 'dirt', boost: true },
   { id: 'A', name: 'Salto corto', length: 24, profile: tri(8), lanes: 15, surface: 'dirt' },
   { id: 'B', name: 'Salto medio', length: 40, profile: tri(16), lanes: 15, surface: 'dirt' },
@@ -97,7 +100,7 @@ export const PIECES: Piece[] = [
   },
   {
     id: 'M',
-    name: 'Enfriamiento · arriba',
+    name: 'Aspersores · arriba',
     length: 16,
     profile: [
       [0, 0],
@@ -108,7 +111,7 @@ export const PIECES: Piece[] = [
   },
   {
     id: 'N',
-    name: 'Enfriamiento · abajo',
+    name: 'Aspersores · abajo',
     length: 16,
     profile: [
       [0, 0],
@@ -119,7 +122,7 @@ export const PIECES: Piece[] = [
   },
   {
     id: 'O',
-    name: 'Corte inferior',
+    name: 'Césped · inferior',
     length: 152,
     profile: [
       [0, 0],
@@ -130,7 +133,7 @@ export const PIECES: Piece[] = [
   },
   {
     id: 'P',
-    name: 'Corte superior',
+    name: 'Césped · superior',
     length: 152,
     profile: [
       [0, 0],
@@ -141,7 +144,7 @@ export const PIECES: Piece[] = [
   },
   {
     id: 'Q',
-    name: 'Corte completo',
+    name: 'Césped · completo',
     length: 96,
     profile: [
       [0, 0],
@@ -200,7 +203,7 @@ const codeLetters: Record<number, PieceId> = {
 };
 export function makeSegment(id: PieceId, x: number): Segment {
   const p = pieceById(id);
-  return {
+  return withTerrainShape({
     x,
     length: p.length,
     profile: p.profile.map((v) => [...v]),
@@ -208,7 +211,7 @@ export function makeSegment(id: PieceId, x: number): Segment {
     surface: p.surface,
     boost: !!p.boost,
     piece: id,
-  };
+  });
 }
 function fromCode(code: number, x: number, length: number): Segment {
   if (codeLetters[code]) return { ...makeSegment(codeLetters[code], x), length };
@@ -315,7 +318,7 @@ export function getTrack(n: number): Track {
   let x = 0;
   const segments: Segment[] = [];
   for (const s of source.segments) {
-    segments.push(fromCode(s.code, x, s.length));
+    segments.push(withTerrainShape(fromCode(s.code, x, s.length)));
     x += s.length;
   }
   return {
@@ -349,6 +352,42 @@ export function segmentAt(track: Track, x: number, lane: number): Segment | unde
     else if (lx >= s.x + s.length) lo = m + 1;
     else return s.lanes & (1 << Math.round(lane)) ? s : undefined;
   }
+}
+/** Surface lookup uses the actual polygon; height lookup retains obstacle profiles. */
+export function surfaceAt(track: Track, x: number, lane: number): Segment | undefined {
+  const s = segmentAt(track, x, lane);
+  if (!s || !isFlatTerrain(s)) return s;
+  const localX = ((x % track.length) + track.length) % track.length;
+  return terrainContains(s, localX - s.x, lane) ? s : undefined;
+}
+const terrainIndices = new WeakMap<Track, { items: Segment[]; longest: number }>();
+export function surfacePath(track: Track, x0: number, lane0: number, x1: number, lane1: number) {
+  let index = terrainIndices.get(track);
+  if (!index) {
+    const items = track.segments.filter(isFlatTerrain).sort((a, b) => a.x - b.x);
+    index = { items, longest: items.reduce((n, s) => Math.max(n, s.length), 0) };
+    terrainIndices.set(track, index);
+  }
+  const contacts: { segment: Segment; enter: number; exit: number }[] = [];
+  const min = Math.min(x0, x1), max = Math.max(x0, x1);
+  for (let lap = Math.floor(min / track.length); lap <= Math.floor(max / track.length); lap++) {
+    const offset = lap * track.length;
+    let lo = 0, hi = index.items.length;
+    while (lo < hi) {
+      const m = (lo + hi) >>> 1;
+      if (index.items[m].x < min - offset - index.longest) lo = m + 1;
+      else hi = m;
+    }
+    for (let i = lo; i < index.items.length; i++) {
+      const s = index.items[i], origin = offset + s.x;
+      if (origin > max) break;
+      if (origin + s.length < min) continue;
+      for (const polygon of terrainPolygons(s))
+        for (const [enter, exit] of terrainIntervals(polygon, x0 - origin, lane0, x1 - origin, lane1))
+          contacts.push({ segment: s, enter, exit });
+    }
+  }
+  return contacts.sort((a, b) => a.enter - b.enter);
 }
 export function profileHeight(s: Segment, t: number): number {
   const p = s.profile;

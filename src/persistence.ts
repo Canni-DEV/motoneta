@@ -8,14 +8,14 @@ import {
   type LocalProfile,
   type Recording,
 } from './core/game';
-import { emptyDesign, type MapDesign } from './core/maps';
+import { emptyDesign, validateMap, type MapDesign } from './core/maps';
 import { DATABASE_NAME, FILE_HEADER } from './identity';
 import { defaultAppearance } from './appearance';
 import { compatibleLoopGeometry } from './core/loop-geometry';
 
 export interface SaveState {
   game: string;
-  version: 3;
+  version: 4;
   profiles: LocalProfile[];
   activeProfile: string;
   maps: MapDesign[];
@@ -24,6 +24,7 @@ export interface SaveState {
   motonetaSessions: Record<string, CompetitionSession>;
   tanqueSessions: Record<string, CompetitionSession>;
   draft: MapDesign;
+  terrainNoticePending?: boolean;
 }
 const initial = (): SaveState => ({
   ...FILE_HEADER,
@@ -43,21 +44,51 @@ export class GameStore {
   async open() {
     this.db?.close();
     this.db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, 4);
+      const request = indexedDB.open(DATABASE_NAME, 5);
+      let upgrading: IDBDatabase | null = null, blockedTimer: ReturnType<typeof setTimeout> | undefined, failed = false;
+      const fail = (error: Error | DOMException | null) => {
+        failed = true;
+        clearTimeout(blockedTimer);
+        upgrading?.close();
+        reject(error);
+      };
       request.onupgradeneeded = (event) => {
-        const db = request.result;
+        const db = upgrading = request.result;
         if (!db.objectStoreNames.contains('data')) db.createObjectStore('data');
         if (!db.objectStoreNames.contains('replays')) db.createObjectStore('replays');
         if (event.oldVersion > 0 && event.oldVersion < 4) {
           request.transaction!.objectStore('data').clear();
           request.transaction!.objectStore('replays').clear();
         }
+        if (event.oldVersion === 4) {
+          const tx = request.transaction!, data = tx.objectStore('data'), read = data.get('state');
+          // One upgrade transaction commits maps, progression and replay removal together.
+          read.onsuccess = () => {
+            try {
+              const stored = read.result as SaveState | undefined;
+              if (stored) {
+                data.put({ ...stored, ...FILE_HEADER,
+                  maps: stored.maps.map(validateMap), draft: validateMap(stored.draft),
+                  records: [], sessions: {}, motonetaSessions: {}, tanqueSessions: {},
+                  terrainNoticePending: true }, 'state');
+              }
+              tx.objectStore('replays').clear();
+            } catch { tx.abort(); }
+          };
+        }
       };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-      request.onblocked = () =>
-        reject(new Error('Cerrá otras pestañas del juego para actualizar el guardado.'));
+      request.onsuccess = () => {
+        clearTimeout(blockedTimer);
+        if (failed) request.result.close();
+        else resolve(request.result);
+      };
+      request.onerror = () => fail(request.error);
+      // A closing connection can briefly block an upgrade until its transaction finishes.
+      request.onblocked = () => {
+        blockedTimer ??= setTimeout(() => fail(new Error('Cerrá otras pestañas del juego para actualizar el guardado.')), 1000);
+      };
     });
+    this.db.onversionchange = () => this.db?.close();
     const stored = await this.get<SaveState>('data', 'state');
     if (stored) {
       this.state = structuredClone(stored);
@@ -70,6 +101,11 @@ export class GameStore {
       this.state = initial();
       await this.update(() => {});
     }
+  }
+  async consumeTerrainNotice() {
+    if (!this.state.terrainNoticePending) return false;
+    await this.update((state) => { state.terrainNoticePending = false; });
+    return true;
   }
   private async invalidateObsoleteLoops(stored: SaveState) {
     const next = structuredClone(this.state);

@@ -1,8 +1,12 @@
 import { DRIVE, updateWheelie } from './handling';
-import { heightAt, segmentAt } from './tracks';
+import { heightAt, segmentAt, surfaceAt, surfacePath } from './tracks';
+import { terrainFactors } from './terrain';
 import { clamp, Input, q, type Race, type Rider } from './types';
 import { enterLoop, stepLoop, stepLoopAir, pendingAirCrash, roadImpact, jumpVelocity } from './loop-physics';
 import { LOOP_WIDTH } from './loop-geometry';
+
+// Retain fractional terrain penalties while keeping the normal lane step unchanged.
+const terrainQ = (value: number) => Math.round(value * 65536) / 65536;
 
 export const START_X = 80;
 function event(
@@ -45,7 +49,7 @@ export function crash(
   p.height = heightAt(r.track, p.x, p.lane);
   event(r, 'crash', p, {
     impactSpeed,
-    surface: segmentAt(r.track, p.x, p.lane)?.surface ?? 'dirt',
+    surface: surfaceAt(r.track, p.x, p.lane)?.surface ?? 'dirt',
     cause: kind,
   });
 }
@@ -55,6 +59,8 @@ function moveInternal(r: Race, p: Rider, input: number) {
     b = !!(input & Input.B),
     edgeA = a && !p.previousA;
   p.previousA = a;
+  const factors = terrainFactors(p.grounded && p.motion.kind === 'track' ? surfaceAt(r.track, p.x, p.lane)?.surface : 'dirt', p.wheelie > 0.2);
+  const normalSpeed = DRIVE.normalSpeed * factors.speed, turboSpeed = DRIVE.turboSpeed * factors.speed;
   p.turbo = b && !p.overheated && !p.recovery;
   if (p.invincible) p.invincible--;
   if (p.recovery) {
@@ -111,13 +117,13 @@ function moveInternal(r: Race, p: Rider, input: number) {
     }
   } else {
     if (r.frame % 4 === 0) {
-      if (b && p.speed < DRIVE.turboSpeed)
-        p.speed = Math.min(DRIVE.turboSpeed, p.speed + DRIVE.turboAcceleration);
+      if (b && p.speed < turboSpeed)
+        p.speed = Math.min(turboSpeed, p.speed + DRIVE.turboAcceleration * factors.acceleration);
       else if (a && !b)
         p.speed =
-          p.speed < DRIVE.normalSpeed
-            ? Math.min(DRIVE.normalSpeed, p.speed + DRIVE.normalAcceleration)
-            : Math.max(DRIVE.normalSpeed, p.speed - DRIVE.normalDrag);
+          p.speed < normalSpeed
+            ? Math.min(normalSpeed, p.speed + DRIVE.normalAcceleration * factors.acceleration)
+            : factors.speed < 1 ? p.speed : Math.max(normalSpeed, p.speed - DRIVE.normalDrag);
       else if (!b) p.speed = Math.max(0, p.speed - 0.055);
     }
     p.heat = clamp(p.heat + (b ? 0.14 : a ? -0.105 : -0.25), 0, 100);
@@ -132,8 +138,8 @@ function moveInternal(r: Race, p: Rider, input: number) {
   const oldX = p.x,
     oldY = p.height,
     oldGround = heightAt(r.track, p.x, p.lane);
-  if (input & Input.UP) p.lane = clamp(p.lane - 0.034, 0, 3);
-  if (input & Input.DOWN) p.lane = clamp(p.lane + 0.034, 0, 3);
+  if (input & Input.UP) p.lane = clamp(p.lane - q(0.034) * factors.lateral, 0, 3);
+  if (input & Input.DOWN) p.lane = clamp(p.lane + q(0.034) * factors.lateral, 0, 3);
   p.x = q(p.x + p.speed);
   if (enterLoop(r,p,oldX)) return;
   const ground = heightAt(r.track, p.x, p.lane),
@@ -170,13 +176,6 @@ function moveInternal(r: Race, p: Rider, input: number) {
       }
       event(r, 'jump', p);
     }
-    if (s?.surface === 'cool' && s !== oldS) {
-      p.heat = 0;
-      p.overheated = false;
-      event(r, 'cool', p, { cause: 'surface', surface: 'cool' });
-    }
-    if (s?.surface === 'mud' || s?.surface === 'grass')
-      p.speed = Math.max(0.5, p.speed * (wheelie ? 0.996 : 0.94));
     if (s?.surface === 'bump' && s !== oldS && !wheelie) p.speed *= 0.75;
   } else {
     p.vy -= 0.105;
@@ -204,17 +203,54 @@ function moveInternal(r: Race, p: Rider, input: number) {
       if (Math.abs(p.tilt - slope) > 0.95 && p.speed > 1.5) crash(r, p, 'impact', impactSpeed);
       else {
         p.tilt = slope;
-        event(r, 'land', p, { impactSpeed, surface: s?.surface ?? 'dirt' });
+        event(r, 'land', p, { impactSpeed, surface: surfaceAt(r.track, p.x, p.lane)?.surface ?? 'dirt' });
       }
     }
   }
-  p.lane = q(p.lane);
-  p.speed = q(p.speed);
+  p.lane = terrainQ(p.lane);
+  p.speed = factors.speed < 1 ? terrainQ(p.speed) : q(p.speed);
   p.heat = q(p.heat);
   p.tilt = q(p.tilt);
 }
 export function move(r: Race, p: Rider, input: number) {
+  const oldX = p.x, oldLane = p.lane, wasGrounded = p.grounded && p.motion.kind === 'track';
+  const oldSpeed = p.speed, wasOverheated = p.overheated, wasWheelie = p.wheelie > 0.2;
+  const previousSurface = wasGrounded ? surfaceAt(r.track, oldX, oldLane) : undefined;
+  const initialFactors = terrainFactors(previousSurface?.surface, wasWheelie);
   moveInternal(r,p,input);
+  if (p.grounded && p.motion.kind === 'track' && !p.recovery) {
+    const surface = surfaceAt(r.track, p.x, p.lane);
+    let contacts = wasGrounded ? surfacePath(r.track, oldX, oldLane, p.x, p.lane) :
+      surface ? [{ segment: surface, enter: 0, exit: 1 }] : [];
+    if (wasGrounded) {
+      // Integrate resistance across the swept interval, including an entire short sector.
+      let lateral = 1;
+      for (const c of contacts) lateral -= (1 - terrainFactors(c.segment.surface).lateral) * (c.exit-c.enter);
+      if (Math.abs(lateral-initialFactors.lateral) > 1e-9 && p.lane !== oldLane) {
+        p.lane = terrainQ(clamp(oldLane + (p.lane-oldLane) * lateral / initialFactors.lateral,0,3));
+        contacts = surfacePath(r.track,oldX,oldLane,p.x,p.lane);
+      }
+      if (!wasOverheated && r.frame % 4 === 0 && input & (Input.A | Input.B) && p.speed > oldSpeed) {
+        let acceleration = 1;
+        for (const c of contacts) acceleration -= (1 - terrainFactors(c.segment.surface,wasWheelie).acceleration) * (c.exit-c.enter);
+        p.speed = terrainQ(oldSpeed + (p.speed-oldSpeed) * acceleration / initialFactors.acceleration);
+      }
+    }
+    for (const contact of contacts) {
+      const s = contact.segment, factors = terrainFactors(s.surface, p.wheelie > 0.2);
+      if (s.surface === 'cool' && (previousSurface !== s || contact.enter > 1e-9 || !wasGrounded)) {
+        p.heat = 0;
+        p.overheated = false;
+        event(r, 'cool', p, { cause: 'surface', surface: 'cool' });
+      }
+      if (factors.speed < 1) {
+        const limit = (input & Input.B ? DRIVE.turboSpeed : DRIVE.normalSpeed) * factors.speed;
+        if (p.speed > limit) p.speed = Math.ceil(Math.max(limit, p.speed - 0.08 * (contact.exit - contact.enter)) * 65536) / 65536;
+      }
+    }
+    p.speed = terrainQ(p.speed);
+    p.heat = q(p.heat);
+  }
   if(p.motion.kind !== 'loop') p.progress=p.x;
 }
 export function formatTime(seconds: number) {

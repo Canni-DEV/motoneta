@@ -1,11 +1,11 @@
 import type { Surface, Weather } from './core/types';
 
-export type Material = 'dirt' | 'mud' | 'grass' | 'wet' | 'snow';
+export type Material = 'dirt' | 'mud' | 'grass' | 'wet' | 'snow' | 'sand' | 'gravel';
 /** Shared by audio and VFX; never participates in handling. */
 export const materialFor = (surface: Surface = 'dirt', weather: Weather = 'clear'): Material =>
-  weather === 'snow'
+  surface === 'cool' ? 'wet' : weather === 'snow'
     ? 'snow'
-    : surface === 'mud' || surface === 'grass'
+    : surface === 'mud' || surface === 'grass' || surface === 'sand' || surface === 'gravel'
       ? surface
       : weather === 'rain'
         ? 'wet'

@@ -38,7 +38,7 @@ describe('Torneo Tanque diario', () => {
     expect(() => tanqueTournament(p)).toThrow('Desbloqueá la Motoneta');
     p.unlockedMotoneta = true;
     const s = tanqueTournament(p, new Date('2026-10-04T12:00:00Z'));
-    expect(s).toMatchObject({ presetId: 'tanque', calendarDate: '2026-10-04', calendarVersion: 1, difficulty: 'hard' });
+    expect(s).toMatchObject({ presetId: 'tanque', calendarDate: '2026-10-04', calendarVersion: 2, difficulty: 'hard' });
     expect(s.bots.map((b) => b.appearance.vehicle)).toEqual(['motocross', 'motocross', 'motocross']);
     expect(Object.keys(s.players[0]).sort()).toEqual(['appearance', 'color', 'id', 'name']);
     const other = owner(); other.id = 'other';

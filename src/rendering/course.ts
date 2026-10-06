@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import type { Track } from '../core/types';
+import type { Track, Settings } from '../core/types';
+import { isFlatTerrain } from '../core/terrain';
+import { terrainMaterials, buildTerrain } from './terrain';
 import type { WeatherSurfaces } from '../weather-surfaces';
 import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from '../world-space';
 import { box, mat, black, white } from './scene-geometry';
@@ -19,13 +21,12 @@ export function buildCourse(
   dirt: THREE.MeshStandardMaterial,
   surfaces: WeatherSurfaces,
   disposables: (THREE.BufferGeometry | THREE.Material)[],
+  quality: Settings['quality'] = 'high',
 ): CoursePiece[] {
   const pieces: CoursePiece[] = [];
-  const mud = surfaces.register(mat('#473e2a'), { profile: 'mud', temporary: true }),
-    grass = surfaces.register(mat('#76805a'), { profile: 'grass', temporary: true }),
-    cool = surfaces.register(mat('#8fc3ba', 0.45), { profile: 'cool', temporary: true }),
-    bump = surfaces.register(mat('#cda574'), { profile: 'bump', temporary: true });
-  disposables.push(mud, grass, cool, bump);
+  const terrain = terrainMaterials(surfaces, disposables);
+  const bump = surfaces.register(mat('#cda574'), { profile: 'bump', temporary: true });
+  disposables.push(bump);
   for (const s of track.segments) {
     if (s.piece === 'flat') continue;
     if(isLoop(s)) {
@@ -35,6 +36,7 @@ export function buildCourse(
     const group = new THREE.Group(),
       length = s.length * SCALE,
       hasHeight = s.profile.some((p) => p[1] > 0);
+    if (isFlatTerrain(s)) buildTerrain(s, group, terrain, disposables, quality);
     for (let lane = 0; lane < 4; lane++) {
       if (!(s.lanes & (1 << lane))) continue;
       const z = (lane - 1.5) * LANE;
@@ -68,23 +70,6 @@ export function buildCourse(
         });
         disposables.push(lm);
         group.add(new THREE.Line(lg, lm));
-      } else if (s.surface !== 'dirt') {
-        box(
-          group,
-          length / 2,
-          0.012,
-          z,
-          length,
-          0.028,
-          LANE - 0.04,
-          s.surface === 'mud' ? mud : s.surface === 'cool' ? cool : grass,
-        );
-        if (s.surface === 'cool')
-          for (let j = 0; j < 3; j++)
-            box(group, length * (0.25 + j * 0.22), 0.035, z, 0.05, 0.01, 0.64, white, 0.2);
-        if (s.surface === 'grass')
-          for (let j = 0; j < Math.min(10, Math.floor(length * 2)); j++)
-            box(group, j * 0.45 + 0.1, 0.07, z + Math.sin(j) * 0.35, 0.035, 0.13, 0.04, grass);
       }
     }
     const bounds = new THREE.Box3().setFromObject(group);

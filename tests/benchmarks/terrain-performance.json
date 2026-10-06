@@ -1,0 +1,4476 @@
+{
+  "date": "2026-10-04",
+  "ruleset": "motoneta-4",
+  "baselineCommit": "9ae671e470ec0b879792df2cdc10a1b73d018cce",
+  "methodology": {
+    "runtime": "Production bundles on the same PC and hardware GPU; six riders on official track 1, held normal throttle. Three 30-second samples per configuration, 5-second warmup, 1920x1080, Chromium. Baseline group followed by candidate group; no profiling during these samples.",
+    "frameMetric": "requestAnimationFrame interval, limited by the 60 Hz refresh rate; not a direct measurement of GPU execution time.",
+    "cpuMetric": "Wall time spent in requestAnimationFrame callbacks, including command submission. Medians of the three sample p95 values; no gl.finish().",
+    "resources": "Same staged scene; candidate adds sand/gravel. Attribute and uploaded texture byte estimates exclude unchanged composer targets and driver overhead.",
+    "baseline": "Original source/public/dist snapshot made before terrain changes. sourceVersion reads the shared Git directory and therefore says dirty on the final baseline run; buildFingerprint identifies the preserved production bundle.",
+    "caveats": [
+      "A 60 Hz frame interval can hide CPU/GPU headroom differences.",
+      "Terrain physics changes rider speed/positions in the full race; a separate fixed-position diagnostic isolates presentation cost.",
+      "CPU p95 varied substantially across runs in both versions. Initial results remain included.",
+      "No physical phone or lower-powered notebook measured. Landscape mobile QA uses browser viewports.",
+      "Resource bytes estimate scene buffers and uploaded texture sizes, not total VRAM."
+    ]
+  },
+  "comparisons": [
+    {
+      "quality": "low",
+      "timeOfDay": "morning",
+      "weather": "clear",
+      "baseline": {
+        "medianSampleP95FrameMs": 16.799999999999272,
+        "medianSampleP95CpuMs": 4.9000000059604645,
+        "medianSampleMedianCpuMs": 2.2999999970197678,
+        "medianSampleFps": 60.00240009600383,
+        "framesOver33Ms": 0,
+        "framesOver50Ms": 0
+      },
+      "candidate": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 4.100000008940697,
+        "medianSampleMedianCpuMs": 2.2999999970197678,
+        "medianSampleFps": 60.00240009600383,
+        "framesOver33Ms": 0,
+        "framesOver50Ms": 0
+      },
+      "p95FrameChangePercent": -0.5952380952078062,
+      "p95CpuChangePercent": -16.326530531563886
+    },
+    {
+      "quality": "low",
+      "timeOfDay": "night",
+      "weather": "rain",
+      "baseline": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 4.4000000059604645,
+        "medianSampleMedianCpuMs": 2.5,
+        "medianSampleFps": 60.00240009600383,
+        "framesOver33Ms": 0,
+        "framesOver50Ms": 0
+      },
+      "candidate": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 4.5,
+        "medianSampleMedianCpuMs": 2.5,
+        "medianSampleFps": 60.00220008066962,
+        "framesOver33Ms": 1,
+        "framesOver50Ms": 1
+      },
+      "p95FrameChangePercent": 0,
+      "p95CpuChangePercent": 2.2727271341834276
+    },
+    {
+      "quality": "high",
+      "timeOfDay": "morning",
+      "weather": "clear",
+      "baseline": {
+        "medianSampleP95FrameMs": 16.799999999999272,
+        "medianSampleP95CpuMs": 5,
+        "medianSampleMedianCpuMs": 2.9000000059604645,
+        "medianSampleFps": 60.002268012354,
+        "framesOver33Ms": 0,
+        "framesOver50Ms": 0
+      },
+      "candidate": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 7.9000000059604645,
+        "medianSampleMedianCpuMs": 3,
+        "medianSampleFps": 60.002268012353994,
+        "framesOver33Ms": 1,
+        "framesOver50Ms": 0
+      },
+      "p95FrameChangePercent": -0.5952380952078062,
+      "p95CpuChangePercent": 58.0000001192093
+    },
+    {
+      "quality": "high",
+      "timeOfDay": "night",
+      "weather": "rain",
+      "baseline": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 8.300000011920929,
+        "medianSampleMedianCpuMs": 3,
+        "medianSampleFps": 60.00240009600383,
+        "framesOver33Ms": 0,
+        "framesOver50Ms": 0
+      },
+      "candidate": {
+        "medianSampleP95FrameMs": 16.700000000004366,
+        "medianSampleP95CpuMs": 5.5,
+        "medianSampleMedianCpuMs": 3,
+        "medianSampleFps": 60.00220008066963,
+        "framesOver33Ms": 1,
+        "framesOver50Ms": 1
+      },
+      "p95FrameChangePercent": 0,
+      "p95CpuChangePercent": -33.73493985420977
+    }
+  ],
+  "acceptance": {
+    "targetMaxRegressionPercent": 10,
+    "p95FrameWithinTarget": true,
+    "estimatedResourceBytesWithinTarget": true,
+    "cpuP95WithinTarget": false,
+    "resourceRebuildsStable": true,
+    "newLights": 0,
+    "newPostprocessingPasses": 0
+  },
+  "resources": {
+    "method": "Same staged scene; candidate adds sand/gravel. Attribute and uploaded texture byte estimates exclude unchanged composer targets and driver overhead.",
+    "errors": [],
+    "comparisons": [
+      {
+        "quality": "high",
+        "weather": "clear",
+        "baselineBytes": 39898964,
+        "candidateBytes": 41727695,
+        "changePercent": 4.583404721987261,
+        "baselineMemory": {
+          "geometries": 126,
+          "textures": 58
+        },
+        "candidateMemory": {
+          "geometries": 138,
+          "textures": 68
+        },
+        "baselineDraw": {
+          "frame": 1280,
+          "calls": 596,
+          "triangles": 588823,
+          "points": 0,
+          "lines": 0
+        },
+        "candidateDraw": {
+          "frame": 1280,
+          "calls": 557,
+          "triangles": 596077,
+          "points": 0,
+          "lines": 45
+        },
+        "stable": true
+      },
+      {
+        "quality": "high",
+        "weather": "rain",
+        "baselineBytes": 39898964,
+        "candidateBytes": 41727695,
+        "changePercent": 4.583404721987261,
+        "baselineMemory": {
+          "geometries": 127,
+          "textures": 58
+        },
+        "candidateMemory": {
+          "geometries": 139,
+          "textures": 68
+        },
+        "baselineDraw": {
+          "frame": 5120,
+          "calls": 597,
+          "triangles": 588817,
+          "points": 0,
+          "lines": 512
+        },
+        "candidateDraw": {
+          "frame": 5120,
+          "calls": 558,
+          "triangles": 596051,
+          "points": 0,
+          "lines": 557
+        },
+        "stable": true
+      },
+      {
+        "quality": "high",
+        "weather": "snow",
+        "baselineBytes": 39898964,
+        "candidateBytes": 41727695,
+        "changePercent": 4.583404721987261,
+        "baselineMemory": {
+          "geometries": 128,
+          "textures": 58
+        },
+        "candidateMemory": {
+          "geometries": 140,
+          "textures": 68
+        },
+        "baselineDraw": {
+          "frame": 8960,
+          "calls": 597,
+          "triangles": 588925,
+          "points": 512,
+          "lines": 0
+        },
+        "candidateDraw": {
+          "frame": 8960,
+          "calls": 558,
+          "triangles": 596209,
+          "points": 512,
+          "lines": 45
+        },
+        "stable": true
+      },
+      {
+        "quality": "low",
+        "weather": "clear",
+        "baselineBytes": 39801860,
+        "candidateBytes": 41630591,
+        "changePercent": 4.594586785642685,
+        "baselineMemory": {
+          "geometries": 236,
+          "textures": 94
+        },
+        "candidateMemory": {
+          "geometries": 248,
+          "textures": 104
+        },
+        "baselineDraw": {
+          "frame": 11680,
+          "calls": 263,
+          "triangles": 222375,
+          "points": 0,
+          "lines": 0
+        },
+        "candidateDraw": {
+          "frame": 11680,
+          "calls": 248,
+          "triangles": 224991,
+          "points": 0,
+          "lines": 45
+        },
+        "stable": true
+      },
+      {
+        "quality": "low",
+        "weather": "rain",
+        "baselineBytes": 39801860,
+        "candidateBytes": 41630591,
+        "changePercent": 4.594586785642685,
+        "baselineMemory": {
+          "geometries": 236,
+          "textures": 94
+        },
+        "candidateMemory": {
+          "geometries": 248,
+          "textures": 104
+        },
+        "baselineDraw": {
+          "frame": 12160,
+          "calls": 264,
+          "triangles": 222351,
+          "points": 0,
+          "lines": 192
+        },
+        "candidateDraw": {
+          "frame": 12160,
+          "calls": 249,
+          "triangles": 224973,
+          "points": 0,
+          "lines": 237
+        },
+        "stable": true
+      },
+      {
+        "quality": "low",
+        "weather": "snow",
+        "baselineBytes": 39801860,
+        "candidateBytes": 41630591,
+        "changePercent": 4.594586785642685,
+        "baselineMemory": {
+          "geometries": 236,
+          "textures": 94
+        },
+        "candidateMemory": {
+          "geometries": 248,
+          "textures": 104
+        },
+        "baselineDraw": {
+          "frame": 12640,
+          "calls": 264,
+          "triangles": 222443,
+          "points": 192,
+          "lines": 0
+        },
+        "candidateDraw": {
+          "frame": 12640,
+          "calls": 249,
+          "triangles": 225059,
+          "points": 192,
+          "lines": 45
+        },
+        "stable": true
+      }
+    ],
+    "rows": [
+      {
+        "label": "baseline",
+        "quality": "high",
+        "weather": "clear",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 126,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 1280,
+              "calls": 596,
+              "triangles": 588823,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 329,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 121,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "9b9f2259",
+              "velocities": "2b5380f9",
+              "styles": "a54fdc6",
+              "forces": "b7662b67",
+              "colors": "59b6de99",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 126,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 2560,
+              "calls": 596,
+              "triangles": 588823,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 329,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 121,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "9b9f2259",
+              "velocities": "2b5380f9",
+              "styles": "a54fdc6",
+              "forces": "b7662b67",
+              "colors": "59b6de99",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 126,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 3840,
+              "calls": 596,
+              "triangles": 588823,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 329,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 121,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "9b9f2259",
+              "velocities": "2b5380f9",
+              "styles": "a54fdc6",
+              "forces": "b7662b67",
+              "colors": "59b6de99",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "baseline",
+        "quality": "high",
+        "weather": "rain",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 127,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 5120,
+              "calls": 597,
+              "triangles": 588817,
+              "points": 0,
+              "lines": 512
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 326,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 79,
+                "water": 374,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "450b3acf",
+              "velocities": "aa4493e",
+              "styles": "31fcbc07",
+              "forces": "b7581569",
+              "colors": "b2fb2e63",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 127,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 6400,
+              "calls": 597,
+              "triangles": 588817,
+              "points": 0,
+              "lines": 512
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 326,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 79,
+                "water": 374,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "450b3acf",
+              "velocities": "aa4493e",
+              "styles": "31fcbc07",
+              "forces": "b7581569",
+              "colors": "b2fb2e63",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 127,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 7680,
+              "calls": 597,
+              "triangles": 588817,
+              "points": 0,
+              "lines": 512
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 326,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 79,
+                "water": 374,
+                "snow": 0,
+                "grass": 253,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "450b3acf",
+              "velocities": "aa4493e",
+              "styles": "31fcbc07",
+              "forces": "b7581569",
+              "colors": "b2fb2e63",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "baseline",
+        "quality": "high",
+        "weather": "snow",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 128,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 8960,
+              "calls": 597,
+              "triangles": 588925,
+              "points": 512,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 380,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 191,
+                "clod": 0,
+                "water": 0,
+                "snow": 557,
+                "grass": 0,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "550a4664",
+              "velocities": "79f92934",
+              "styles": "3db0b9ea",
+              "forces": "dfcb10c0",
+              "colors": "6c4056e6",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 128,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 10240,
+              "calls": 597,
+              "triangles": 588925,
+              "points": 512,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 380,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 191,
+                "clod": 0,
+                "water": 0,
+                "snow": 557,
+                "grass": 0,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "550a4664",
+              "velocities": "79f92934",
+              "styles": "3db0b9ea",
+              "forces": "dfcb10c0",
+              "colors": "6c4056e6",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 128,
+              "textures": 58
+            },
+            "draw": {
+              "frame": 11520,
+              "calls": 597,
+              "triangles": 588925,
+              "points": 512,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 380,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 191,
+                "clod": 0,
+                "water": 0,
+                "snow": 557,
+                "grass": 0,
+                "smoke": 64,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "550a4664",
+              "velocities": "79f92934",
+              "styles": "3db0b9ea",
+              "forces": "dfcb10c0",
+              "colors": "6c4056e6",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19255124,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39898964,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "baseline",
+        "quality": "low",
+        "weather": "clear",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 11680,
+              "calls": 263,
+              "triangles": 222375,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 190,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 73,
+                "clod": 156,
+                "water": 0,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "f7ad9544",
+              "velocities": "f3dfb661",
+              "styles": "8dac45ce",
+              "forces": "cbf6fdc4",
+              "colors": "e5ca565a",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 11840,
+              "calls": 263,
+              "triangles": 222375,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 190,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 73,
+                "clod": 156,
+                "water": 0,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "f7ad9544",
+              "velocities": "f3dfb661",
+              "styles": "8dac45ce",
+              "forces": "cbf6fdc4",
+              "colors": "e5ca565a",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12000,
+              "calls": 263,
+              "triangles": 222375,
+              "points": 0,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 190,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 73,
+                "clod": 156,
+                "water": 0,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "f7ad9544",
+              "velocities": "f3dfb661",
+              "styles": "8dac45ce",
+              "forces": "cbf6fdc4",
+              "colors": "e5ca565a",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "baseline",
+        "quality": "low",
+        "weather": "rain",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12160,
+              "calls": 264,
+              "triangles": 222351,
+              "points": 0,
+              "lines": 192
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 178,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 43,
+                "water": 202,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 34
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "482dcbf",
+              "velocities": "a2e9a741",
+              "styles": "4373aec8",
+              "forces": "263bc8a1",
+              "colors": "c53ad8d4",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12320,
+              "calls": 264,
+              "triangles": 222351,
+              "points": 0,
+              "lines": 192
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 178,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 43,
+                "water": 202,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 34
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "482dcbf",
+              "velocities": "a2e9a741",
+              "styles": "4373aec8",
+              "forces": "263bc8a1",
+              "colors": "c53ad8d4",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12480,
+              "calls": 264,
+              "triangles": 222351,
+              "points": 0,
+              "lines": 192
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 178,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 43,
+                "water": 202,
+                "snow": 0,
+                "grass": 142,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 34
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "482dcbf",
+              "velocities": "a2e9a741",
+              "styles": "4373aec8",
+              "forces": "263bc8a1",
+              "colors": "c53ad8d4",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "baseline",
+        "quality": "low",
+        "weather": "snow",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12640,
+              "calls": 264,
+              "triangles": 222443,
+              "points": 192,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 224,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 0,
+                "water": 0,
+                "snow": 310,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "805edef3",
+              "velocities": "ecd530a1",
+              "styles": "d8fcd89b",
+              "forces": "a69cf220",
+              "colors": "cb9ccbaa",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12800,
+              "calls": 264,
+              "triangles": 222443,
+              "points": 192,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 224,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 0,
+                "water": 0,
+                "snow": 310,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "805edef3",
+              "velocities": "ecd530a1",
+              "styles": "d8fcd89b",
+              "forces": "a69cf220",
+              "colors": "cb9ccbaa",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 236,
+              "textures": 94
+            },
+            "draw": {
+              "frame": 12960,
+              "calls": 264,
+              "triangles": 222443,
+              "points": 192,
+              "lines": 0
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1738598648,
+              "active": 224,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 0,
+                "water": 0,
+                "snow": 310,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "805edef3",
+              "velocities": "ecd530a1",
+              "styles": "d8fcd89b",
+              "forces": "a69cf220",
+              "colors": "cb9ccbaa",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19158020,
+              "textureBytes": 20643840,
+              "estimatedSceneBytes": 39801860,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "high",
+        "weather": "clear",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 138,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 1280,
+              "calls": 557,
+              "triangles": 596077,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 330,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f561bf1",
+              "velocities": "565cbcad",
+              "styles": "f8e47869",
+              "forces": "b16dcb65",
+              "colors": "9409d030",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 138,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 2560,
+              "calls": 557,
+              "triangles": 596077,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 330,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f561bf1",
+              "velocities": "565cbcad",
+              "styles": "f8e47869",
+              "forces": "b16dcb65",
+              "colors": "9409d030",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 138,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 3840,
+              "calls": 557,
+              "triangles": 596077,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 330,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 116,
+                "clod": 290,
+                "water": 0,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f561bf1",
+              "velocities": "565cbcad",
+              "styles": "f8e47869",
+              "forces": "b16dcb65",
+              "colors": "9409d030",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 512,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 0,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "high",
+        "weather": "rain",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 139,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 5120,
+              "calls": 558,
+              "triangles": 596051,
+              "points": 0,
+              "lines": 557
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 317,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 77,
+                "water": 375,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f673c1a",
+              "velocities": "84692d5f",
+              "styles": "6d15b057",
+              "forces": "f615ef29",
+              "colors": "9abd07f1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 139,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 6400,
+              "calls": 558,
+              "triangles": 596051,
+              "points": 0,
+              "lines": 557
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 317,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 77,
+                "water": 375,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f673c1a",
+              "velocities": "84692d5f",
+              "styles": "6d15b057",
+              "forces": "f615ef29",
+              "colors": "9abd07f1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 139,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 7680,
+              "calls": 558,
+              "triangles": 596051,
+              "points": 0,
+              "lines": 557
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 317,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 77,
+                "water": 375,
+                "snow": 0,
+                "grass": 247,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 60
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "4f673c1a",
+              "velocities": "84692d5f",
+              "styles": "6d15b057",
+              "forces": "f615ef29",
+              "colors": "9abd07f1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "high",
+        "weather": "snow",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 140,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 8960,
+              "calls": 558,
+              "triangles": 596209,
+              "points": 512,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 396,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 203,
+                "clod": 0,
+                "water": 0,
+                "snow": 547,
+                "grass": 0,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "7a9673a0",
+              "velocities": "33be1d29",
+              "styles": "230574df",
+              "forces": "610df154",
+              "colors": "18e28e1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 140,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 10240,
+              "calls": 558,
+              "triangles": 596209,
+              "points": 512,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 396,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 203,
+                "clod": 0,
+                "water": 0,
+                "snow": 547,
+                "grass": 0,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "7a9673a0",
+              "velocities": "33be1d29",
+              "styles": "230574df",
+              "forces": "610df154",
+              "colors": "18e28e1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 140,
+              "textures": 68
+            },
+            "draw": {
+              "frame": 11520,
+              "calls": 558,
+              "triangles": 596209,
+              "points": 512,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 396,
+              "marks": 12,
+              "limits": {
+                "particles": 1536,
+                "tracks": 512
+              },
+              "counts": {
+                "dust": 203,
+                "clod": 0,
+                "water": 0,
+                "snow": 547,
+                "grass": 0,
+                "smoke": 53,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "7a9673a0",
+              "velocities": "33be1d29",
+              "styles": "230574df",
+              "forces": "610df154",
+              "colors": "18e28e1",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 512,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19336228,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41727695,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "low",
+        "weather": "clear",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 11680,
+              "calls": 248,
+              "triangles": 224991,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 179,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 60,
+                "clod": 155,
+                "water": 0,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "c6257373",
+              "velocities": "962289c7",
+              "styles": "7f9c0cbb",
+              "forces": "3974d2d",
+              "colors": "6cd853eb",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 11840,
+              "calls": 248,
+              "triangles": 224991,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 179,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 60,
+                "clod": 155,
+                "water": 0,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "c6257373",
+              "velocities": "962289c7",
+              "styles": "7f9c0cbb",
+              "forces": "3974d2d",
+              "colors": "6cd853eb",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12000,
+              "calls": 248,
+              "triangles": 224991,
+              "points": 0,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 179,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 60,
+                "clod": 155,
+                "water": 0,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "c6257373",
+              "velocities": "962289c7",
+              "styles": "7f9c0cbb",
+              "forces": "3974d2d",
+              "colors": "6cd853eb",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "23d54951",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 0,
+              "count": 192,
+              "rain": false,
+              "snow": false,
+              "draws": 0,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "low",
+        "weather": "rain",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12160,
+              "calls": 249,
+              "triangles": 224973,
+              "points": 0,
+              "lines": 237
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 170,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 42,
+                "water": 199,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 30
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "ff9f6ab6",
+              "velocities": "ce142cc4",
+              "styles": "4d2af19c",
+              "forces": "84b96634",
+              "colors": "a98eac2",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12320,
+              "calls": 249,
+              "triangles": 224973,
+              "points": 0,
+              "lines": 237
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 170,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 42,
+                "water": 199,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 30
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "ff9f6ab6",
+              "velocities": "ce142cc4",
+              "styles": "4d2af19c",
+              "forces": "84b96634",
+              "colors": "a98eac2",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12480,
+              "calls": 249,
+              "triangles": 224973,
+              "points": 0,
+              "lines": 237
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 170,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 0,
+                "clod": 42,
+                "water": 199,
+                "snow": 0,
+                "grass": 134,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 30
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "ff9f6ab6",
+              "velocities": "ce142cc4",
+              "styles": "4d2af19c",
+              "forces": "84b96634",
+              "colors": "a98eac2",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "c68d8801",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": true,
+              "snow": false,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      },
+      {
+        "label": "candidate",
+        "quality": "low",
+        "weather": "snow",
+        "snapshots": [
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12640,
+              "calls": 249,
+              "triangles": 225059,
+              "points": 192,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 213,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 98,
+                "clod": 0,
+                "water": 0,
+                "snow": 294,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "2a18ea2",
+              "velocities": "cf16ee5c",
+              "styles": "bd5f7a22",
+              "forces": "5f7c532d",
+              "colors": "f5efe669",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12800,
+              "calls": 249,
+              "triangles": 225059,
+              "points": 192,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 213,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 98,
+                "clod": 0,
+                "water": 0,
+                "snow": 294,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "2a18ea2",
+              "velocities": "cf16ee5c",
+              "styles": "bd5f7a22",
+              "forces": "5f7c532d",
+              "colors": "f5efe669",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          },
+          {
+            "memory": {
+              "geometries": 248,
+              "textures": 104
+            },
+            "draw": {
+              "frame": 12960,
+              "calls": 249,
+              "triangles": 225059,
+              "points": 192,
+              "lines": 45
+            },
+            "vfx": {
+              "frame": 80,
+              "time": 1.3311410793650797,
+              "seed": 1246402592,
+              "active": 213,
+              "marks": 12,
+              "limits": {
+                "particles": 512,
+                "tracks": 192
+              },
+              "counts": {
+                "dust": 98,
+                "clod": 0,
+                "water": 0,
+                "snow": 294,
+                "grass": 0,
+                "smoke": 31,
+                "steam": 0,
+                "air": 0,
+                "splash": 0
+              },
+              "eventsConsumed": 0,
+              "discarded": 0,
+              "finished": false,
+              "tail": 0
+            },
+            "buffers": {
+              "origins": "2a18ea2",
+              "velocities": "cf16ee5c",
+              "styles": "bd5f7a22",
+              "forces": "5f7c532d",
+              "colors": "f5efe669",
+              "trackPositions": "6c75e8ce",
+              "trackBirth": "8386aa3d",
+              "trackColors": "5adb10cd",
+              "trackGroups": "ad4c702f"
+            },
+            "precipitation": {
+              "time": 1.3311410793650797,
+              "count": 192,
+              "rain": false,
+              "snow": true,
+              "draws": 1,
+              "recycleCenter": 21.187215083404016,
+              "bounds": [
+                96,
+                22,
+                36
+              ]
+            },
+            "timerResolution": "isolated",
+            "device": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "resources": {
+              "bufferBytes": 19239124,
+              "textureBytes": 22391467,
+              "estimatedSceneBytes": 41630591,
+              "note": "Unique scene attribute buffers and uploaded RGBA textures, including mipmaps; excludes composer targets and driver overhead."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "finalRuns": {
+    "baseline": {
+      "label": "terrain-baseline-final",
+      "sourceCommit": "9ae671e470ec0b879792df2cdc10a1b73d018cce",
+      "sourceVersion": "9ae671e-dirty",
+      "buildDirectory": "C:\\Code\\ExciteBike\\tmp\\terrain\\baseline\\dist",
+      "buildFingerprint": "099fbded5fddb2545292a73b2a2eee8bd421dec98c9939079933df5ad88d38f1",
+      "platform": "win32 10.0.26200",
+      "cpu": "Intel(R) Core(TM) Ultra 7 265",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "deviceScaleFactor": 1,
+      "seconds": 30,
+      "samples": 3,
+      "warmup": 5,
+      "configuration": {
+        "track": 1,
+        "laps": 9,
+        "bots": 5,
+        "difficulty": "normal",
+        "seed": 1984,
+        "input": "KeyZ",
+        "volume": 0,
+        "effects": "defaults"
+      },
+      "measurements": [
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.199999988079071,
+            "p95Ms": 4.700000002980232,
+            "p99Ms": 7.100000008940697
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.2999999970197678,
+            "p95Ms": 6.700000002980232,
+            "p99Ms": 7.4000000059604645
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.2999999970197678,
+            "p95Ms": 4.9000000059604645,
+            "p99Ms": 7.299999997019768
+          },
+          "averageFps": 60.002268012353994,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.5,
+            "p95Ms": 5.4000000059604645,
+            "p99Ms": 7.799999997019768
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.3999999910593033,
+            "p95Ms": 4.200000002980232,
+            "p99Ms": 5.4000000059604645
+          },
+          "averageFps": 60.002200080669624,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.5,
+            "p95Ms": 4.4000000059604645,
+            "p99Ms": 5.399999991059303
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 3,
+            "p95Ms": 5.299999997019768,
+            "p99Ms": 7
+          },
+          "averageFps": 60.00246813932313,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.800000011920929,
+            "p95Ms": 4.799999997019768,
+            "p99Ms": 8.699999988079071
+          },
+          "averageFps": 60.002268012354,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.9000000059604645,
+            "p95Ms": 5,
+            "p99Ms": 8.5
+          },
+          "averageFps": 60.002268012353994,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3.0999999940395355,
+            "p95Ms": 8.300000011920929,
+            "p99Ms": 9.399999991059303
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3,
+            "p95Ms": 8.399999991059303,
+            "p99Ms": 9.400000005960464
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 3,
+            "p95Ms": 5.799999997019768,
+            "p99Ms": 9.399999991059303
+          },
+          "averageFps": 60.002268012354,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        }
+      ],
+      "browser": "153.0.8010.12",
+      "graphics": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (NVIDIA)",
+        "hardwareConfirmed": true
+      }
+    },
+    "candidate": {
+      "label": "terrain-candidate-final",
+      "sourceCommit": "9ae671e470ec0b879792df2cdc10a1b73d018cce",
+      "sourceVersion": "9ae671e-dirty",
+      "buildDirectory": "C:\\Code\\ExciteBike\\dist",
+      "buildFingerprint": "72b2acd723e58a027d6bb4fca8004deff13ecd8ae13471ab982feeb3a3fda20b",
+      "platform": "win32 10.0.26200",
+      "cpu": "Intel(R) Core(TM) Ultra 7 265",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "deviceScaleFactor": 1,
+      "seconds": 30,
+      "samples": 3,
+      "warmup": 5,
+      "configuration": {
+        "track": 1,
+        "laps": 9,
+        "bots": 5,
+        "difficulty": "normal",
+        "seed": 1984,
+        "input": "KeyZ",
+        "volume": 0,
+        "effects": "defaults"
+      },
+      "measurements": [
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.3999999910593033,
+            "p95Ms": 5.399999991059303,
+            "p99Ms": 7.4000000059604645
+          },
+          "averageFps": 59.96906542928383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.2999999970197678,
+            "p95Ms": 4.100000008940697,
+            "p99Ms": 6.9000000059604645
+          },
+          "averageFps": 60.00246813932313,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.2000000029802322,
+            "p95Ms": 4,
+            "p99Ms": 5.299999997019768
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1792,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1793,
+            "medianMs": 2.5,
+            "p95Ms": 4.199999988079071,
+            "p99Ms": 5.5
+          },
+          "averageFps": 59.76919485024348,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.800000000000182
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.3999999910593033,
+            "p95Ms": 4.5,
+            "p99Ms": 6.399999991059303
+          },
+          "averageFps": 60.00220008066962,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.699999988079071,
+            "p95Ms": 7.299999997019768,
+            "p99Ms": 8
+          },
+          "averageFps": 60.002200080669624,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1798,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1799,
+            "medianMs": 3,
+            "p95Ms": 7.9000000059604645,
+            "p99Ms": 9.099999994039536
+          },
+          "averageFps": 59.935730762563836,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3,
+            "p95Ms": 8.5,
+            "p99Ms": 9.300000011920929
+          },
+          "averageFps": 60.00260011267156,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.800000000000182
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 3.0999999940395355,
+            "p95Ms": 5,
+            "p99Ms": 8.600000008940697
+          },
+          "averageFps": 60.002268012353994,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1790,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1791,
+            "medianMs": 3,
+            "p95Ms": 6,
+            "p99Ms": 8.799999997019768
+          },
+          "averageFps": 59.66905342880382,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3,
+            "p95Ms": 5.299999997019768,
+            "p99Ms": 8.899999991059303
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3,
+            "p95Ms": 5.5,
+            "p99Ms": 7.800000011920929
+          },
+          "averageFps": 60.00220008066963,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        }
+      ],
+      "browser": "153.0.8010.12",
+      "graphics": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (NVIDIA)",
+        "hardwareConfirmed": true
+      }
+    }
+  },
+  "initialRuns": {
+    "note": "Collected before final hot-path allocation optimizations. Preserved as evidence of CPU variability and the initial regression.",
+    "comparisons": [
+      {
+        "quality": "low",
+        "timeOfDay": "morning",
+        "weather": "clear",
+        "baseline": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 3.1000000089406967,
+          "medianSampleMedianCpuMs": 2.4000000059604645,
+          "medianSampleFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        "candidate": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 4.299999997019768,
+          "medianSampleMedianCpuMs": 2.2000000029802322,
+          "medianSampleFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        "p95FrameChangePercent": 0,
+        "p95CpuChangePercent": 38.709676923166334
+      },
+      {
+        "quality": "low",
+        "timeOfDay": "night",
+        "weather": "rain",
+        "baseline": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 3.0999999940395355,
+          "medianSampleMedianCpuMs": 1.4000000059604645,
+          "medianSampleFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        "candidate": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 4.100000008940697,
+          "medianSampleMedianCpuMs": 2.1000000089406967,
+          "medianSampleFps": 60.00240009600383,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        "p95FrameChangePercent": 0,
+        "p95CpuChangePercent": 32.258065058835214
+      },
+      {
+        "quality": "high",
+        "timeOfDay": "morning",
+        "weather": "clear",
+        "baseline": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 3.7999999970197678,
+          "medianSampleMedianCpuMs": 3.0999999940395355,
+          "medianSampleFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        "candidate": {
+          "medianSampleP95FrameMs": 16.700000000004366,
+          "medianSampleP95CpuMs": 7.5,
+          "medianSampleMedianCpuMs": 2.7000000029802322,
+          "medianSampleFps": 60.002332128400326,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        "p95FrameChangePercent": 0,
+        "p95CpuChangePercent": 97.36842120742205
+      },
+      {
+        "quality": "high",
+        "timeOfDay": "night",
+        "weather": "rain",
+        "baseline": {
+          "medianSampleP95FrameMs": 16.799999999995634,
+          "medianSampleP95CpuMs": 3.7000000029802322,
+          "medianSampleMedianCpuMs": 2,
+          "medianSampleFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        "candidate": {
+          "medianSampleP95FrameMs": 16.799999999995634,
+          "medianSampleP95CpuMs": 5.700000002980232,
+          "medianSampleMedianCpuMs": 3.199999988079071,
+          "medianSampleFps": 60.00246813932313,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        "p95FrameChangePercent": 0,
+        "p95CpuChangePercent": 54.05405401051524
+      }
+    ],
+    "baseline": {
+      "label": "terrain-baseline",
+      "sourceCommit": "9ae671e470ec0b879792df2cdc10a1b73d018cce",
+      "sourceVersion": "9ae671e-dirty",
+      "buildDirectory": "C:\\Code\\ExciteBike\\tmp\\terrain\\baseline\\dist",
+      "buildFingerprint": "099fbded5fddb2545292a73b2a2eee8bd421dec98c9939079933df5ad88d38f1",
+      "platform": "win32 10.0.26200",
+      "cpu": "Intel(R) Core(TM) Ultra 7 265",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "deviceScaleFactor": 1,
+      "seconds": 30,
+      "samples": 3,
+      "warmup": 5,
+      "configuration": {
+        "track": 1,
+        "laps": 9,
+        "bots": 5,
+        "difficulty": "normal",
+        "seed": 1984,
+        "input": "KeyZ",
+        "volume": 0,
+        "effects": "defaults"
+      },
+      "measurements": [
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.5999999940395355,
+            "p95Ms": 3,
+            "p99Ms": 4.5
+          },
+          "averageFps": 60.00220008066963,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.800000000000182
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.4000000059604645,
+            "p95Ms": 3.1000000089406967,
+            "p99Ms": 4.600000008940697
+          },
+          "averageFps": 60.002468139323135,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.800000000000182
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 1.4000000059604645,
+            "p95Ms": 3.2000000029802322,
+            "p99Ms": 4.799999997019768
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 1.4000000059604645,
+            "p95Ms": 3.0999999940395355,
+            "p99Ms": 4.600000008940697
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 1.4000000059604645,
+            "p95Ms": 3.0999999940395355,
+            "p99Ms": 4.5999999940395355
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 1.5,
+            "p95Ms": 3.1000000089406967,
+            "p99Ms": 4.700000002980232
+          },
+          "averageFps": 60.00260011267154,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 1.800000011920929,
+            "p95Ms": 3.4000000059604645,
+            "p99Ms": 5
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 3.0999999940395355,
+            "p95Ms": 3.8999999910593033,
+            "p99Ms": 5.300000011920929
+          },
+          "averageFps": 60.00226801235399,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3.0999999940395355,
+            "p95Ms": 3.7999999970197678,
+            "p99Ms": 5.0999999940395355
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2,
+            "p95Ms": 3.7000000029802322,
+            "p99Ms": 5.200000002980232
+          },
+          "averageFps": 60.00246813932312,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.1000000089406967,
+            "p95Ms": 3.7000000029802322,
+            "p99Ms": 5.5
+          },
+          "averageFps": 60.002200080669624,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2,
+            "p95Ms": 3.7000000029802322,
+            "p99Ms": 5.200000002980232
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        }
+      ],
+      "browser": "153.0.8010.12",
+      "graphics": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (NVIDIA)",
+        "hardwareConfirmed": true
+      }
+    },
+    "candidate": {
+      "label": "terrain-candidate",
+      "sourceCommit": "9ae671e470ec0b879792df2cdc10a1b73d018cce",
+      "sourceVersion": "9ae671e-dirty",
+      "buildDirectory": "C:\\Code\\ExciteBike\\dist",
+      "buildFingerprint": "88fa039a07b483693189e0cf3205a5d334ff81b6761eb85d886092dc7f81c724",
+      "platform": "win32 10.0.26200",
+      "cpu": "Intel(R) Core(TM) Ultra 7 265",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "deviceScaleFactor": 1,
+      "seconds": 30,
+      "samples": 3,
+      "warmup": 5,
+      "configuration": {
+        "track": 1,
+        "laps": 9,
+        "bots": 5,
+        "difficulty": "normal",
+        "seed": 1984,
+        "input": "KeyZ",
+        "volume": 0,
+        "effects": "defaults"
+      },
+      "measurements": [
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 2.2000000029802322,
+            "p95Ms": 6,
+            "p99Ms": 7.9000000059604645
+          },
+          "averageFps": 59.96906542928383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.2000000029802322,
+            "p95Ms": 4.299999997019768,
+            "p99Ms": 6.199999988079071
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.1000000089406967,
+            "p95Ms": 3.800000011920929,
+            "p99Ms": 5
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1792,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1793,
+            "medianMs": 2.2999999970197678,
+            "p95Ms": 4.200000002980232,
+            "p99Ms": 5.799999997019768
+          },
+          "averageFps": 59.73592188994857,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.1000000089406967,
+            "p95Ms": 4,
+            "p99Ms": 7.899999991059303
+          },
+          "averageFps": 60.00240009600383,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "low",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 1.9000000059604645,
+            "p95Ms": 4.100000008940697,
+            "p99Ms": 7.700000002980232
+          },
+          "averageFps": 60.002468139323135,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 0,
+          "frames": {
+            "count": 1798,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1799,
+            "medianMs": 3,
+            "p95Ms": 6.700000002980232,
+            "p99Ms": 9.799999997019768
+          },
+          "averageFps": 59.935730762563836,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 1,
+          "frames": {
+            "count": 1801,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1802,
+            "medianMs": 2.5,
+            "p95Ms": 7.5,
+            "p99Ms": 9.700000002980232
+          },
+          "averageFps": 60.002332128400326,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "morning",
+          "weather": "clear",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 2.7000000029802322,
+            "p95Ms": 7.700000002980232,
+            "p99Ms": 10
+          },
+          "averageFps": 60.00240009600384,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 0,
+          "frames": {
+            "count": 1789,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000291
+          },
+          "cpuSubmission": {
+            "count": 1790,
+            "medianMs": 3.199999988079071,
+            "p95Ms": 5.700000002980232,
+            "p99Ms": 9.700000002980232
+          },
+          "averageFps": 59.63571876208382,
+          "framesOver33Ms": 1,
+          "framesOver50Ms": 1
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 1,
+          "frames": {
+            "count": 1799,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.700000000004366,
+            "p99Ms": 16.800000000000182
+          },
+          "cpuSubmission": {
+            "count": 1800,
+            "medianMs": 3.2000000029802322,
+            "p95Ms": 5.899999991059303,
+            "p99Ms": 9.199999988079071
+          },
+          "averageFps": 60.00246813932313,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        },
+        {
+          "quality": "high",
+          "timeOfDay": "night",
+          "weather": "rain",
+          "sample": 2,
+          "frames": {
+            "count": 1800,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999995634,
+            "p99Ms": 16.80000000000109
+          },
+          "cpuSubmission": {
+            "count": 1801,
+            "medianMs": 3.199999988079071,
+            "p95Ms": 5.5,
+            "p99Ms": 6.5
+          },
+          "averageFps": 60.002600112671544,
+          "framesOver33Ms": 0,
+          "framesOver50Ms": 0
+        }
+      ],
+      "browser": "153.0.8010.12",
+      "graphics": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "vendor": "Google Inc. (NVIDIA)",
+        "hardwareConfirmed": true
+      }
+    }
+  },
+  "diagnostics": {
+    "fixedPosition": {
+      "method": "300 RAF frames after 90 warmup frames, same six staged rider positions, development modules, V8 sampling profiler active. Not the production acceptance benchmark.",
+      "measurements": [
+        {
+          "label": "baseline",
+          "quality": "low",
+          "physics": {
+            "median": 0.025000005960464478,
+            "p95": 0.10000000894069672
+          },
+          "presentation": {
+            "median": 1.7850000113248825,
+            "p95": 3.1599999964237213
+          }
+        },
+        {
+          "label": "baseline",
+          "quality": "high",
+          "physics": {
+            "median": 0.030000001192092896,
+            "p95": 0.07500000298023224
+          },
+          "presentation": {
+            "median": 2.5699999928474426,
+            "p95": 4.115000009536743
+          }
+        },
+        {
+          "label": "candidate",
+          "quality": "low",
+          "physics": {
+            "median": 0.06000000238418579,
+            "p95": 0.14000000059604645
+          },
+          "presentation": {
+            "median": 1.6599999964237213,
+            "p95": 3.0249999910593033
+          }
+        },
+        {
+          "label": "candidate",
+          "quality": "high",
+          "physics": {
+            "median": 0.06999999284744263,
+            "p95": 0.23000000417232513
+          },
+          "presentation": {
+            "median": 2.770000010728836,
+            "p95": 4.290000006556511
+          }
+        }
+      ]
+    },
+    "productionProfile": {
+      "method": "20-second high/morning/clear production race with V8 sampling profiler active. Diagnostic only; totals include idle time.",
+      "measurements": [
+        {
+          "label": "baseline",
+          "sampledMs": 19530.649999999998,
+          "idleMs": 16341.476,
+          "topFunctions": [
+            {
+              "fn": "(idle)",
+              "url": "",
+              "line": -1,
+              "ms": 16341.476
+            },
+            {
+              "fn": "(program)",
+              "url": "",
+              "line": -1,
+              "ms": 341.662
+            },
+            {
+              "fn": "updateMatrixWorld",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 4,
+              "ms": 323.0210000000001
+            },
+            {
+              "fn": "Dm.renderBufferDirect",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3839,
+              "ms": 235.841
+            },
+            {
+              "fn": "multiplyMatrices",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 4,
+              "ms": 175.77499999999998
+            },
+            {
+              "fn": "br",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3839,
+              "ms": 137.532
+            },
+            {
+              "fn": "M",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3815,
+              "ms": 135.26599999999996
+            },
+            {
+              "fn": "update",
+              "url": "http://127.0.0.1:4182/assets/index-BEA-2LG3.js",
+              "line": 0,
+              "ms": 132.60099999999997
+            },
+            {
+              "fn": "me",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3736,
+              "ms": 100.17900000000002
+            },
+            {
+              "fn": "bindVertexArray",
+              "url": "",
+              "line": -1,
+              "ms": 97.661
+            },
+            {
+              "fn": "m",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3787,
+              "ms": 89.713
+            },
+            {
+              "fn": "Lo",
+              "url": "http://127.0.0.1:4182/assets/three-core-gwXrWTFJ.js",
+              "line": 3839,
+              "ms": 84.063
+            }
+          ]
+        },
+        {
+          "label": "candidate",
+          "sampledMs": 19458.32700000001,
+          "idleMs": 16137.069,
+          "topFunctions": [
+            {
+              "fn": "(idle)",
+              "url": "",
+              "line": -1,
+              "ms": 16137.069
+            },
+            {
+              "fn": "updateMatrixWorld",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 4,
+              "ms": 419.96799999999996
+            },
+            {
+              "fn": "(program)",
+              "url": "",
+              "line": -1,
+              "ms": 349.489
+            },
+            {
+              "fn": "Fm.renderBufferDirect",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3839,
+              "ms": 290.602
+            },
+            {
+              "fn": "multiplyMatrices",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 4,
+              "ms": 158.17000000000002
+            },
+            {
+              "fn": "x",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3815,
+              "ms": 142.317
+            },
+            {
+              "fn": "update",
+              "url": "http://127.0.0.1:4182/assets/index-BhUsmKMa.js",
+              "line": 0,
+              "ms": 124.003
+            },
+            {
+              "fn": "br",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3839,
+              "ms": 121.09800000000001
+            },
+            {
+              "fn": "bindVertexArray",
+              "url": "",
+              "line": -1,
+              "ms": 98.144
+            },
+            {
+              "fn": "Bo",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3839,
+              "ms": 95.88300000000001
+            },
+            {
+              "fn": "ge",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3736,
+              "ms": 86.418
+            },
+            {
+              "fn": "m",
+              "url": "http://127.0.0.1:4182/assets/three-core-BywRmuqh.js",
+              "line": 3787,
+              "ms": 86.022
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "validation": {
+    "unitTests": 329,
+    "unitFiles": 26,
+    "typecheck": "passed",
+    "build": "passed",
+    "browsers": [
+      "Chromium",
+      "Firefox",
+      "WebKit"
+    ],
+    "visualMatrixScreenshots": 36,
+    "additionalEffectsOffScreenshots": 4,
+    "driveScreenshots": 5,
+    "visualErrors": [],
+    "contoursStableAcrossSurfaceDetail": true,
+    "drive": [
+      {
+        "surface": "grass",
+        "x": 279.25,
+        "lane": 0,
+        "speed": 3.2311553955078125,
+        "heat": 96.265625,
+        "crashes": 0
+      },
+      {
+        "surface": "mud",
+        "x": 453.984375,
+        "lane": 2.00390625,
+        "speed": 2.8126068115234375,
+        "heat": 26.34375,
+        "crashes": 0
+      },
+      {
+        "surface": "cool",
+        "x": 523.26171875,
+        "lane": 2.00390625,
+        "speed": 2.60546875,
+        "heat": 0,
+        "crashes": 0
+      },
+      {
+        "surface": "sand",
+        "x": 595.1640625,
+        "lane": 2.00390625,
+        "speed": 3.1988983154296875,
+        "heat": 3.234375,
+        "crashes": 0
+      },
+      {
+        "surface": "gravel",
+        "x": 689.109375,
+        "lane": 2.00390625,
+        "speed": 3.09375,
+        "heat": 8.015625,
+        "crashes": 0
+      }
+    ],
+    "historicalLayoutAndPhysicsFixtures": "unchanged",
+    "newPhysicsReferences": 10,
+    "migrations": "IndexedDB 4 to 5 rollback on injected failure, retry, profile/vehicle/settings preservation, obsolete result removal, idempotent reopen and one-time menu notice verified in all three browsers."
+  }
+}

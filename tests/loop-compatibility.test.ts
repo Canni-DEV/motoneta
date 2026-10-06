@@ -46,10 +46,10 @@ describe('loop geometry compatibility without a global save reset', () => {
     expect(() => validateRecording(replay)).toThrow(/geometría actual del loop/);
     expect(() => new Playback(replay)).toThrow(/geometría actual del loop/);
   });
-  it('keeps previous format-3 loop maps and their exact saved positions', () => {
+  it('keeps current loop maps and their exact saved positions', () => {
     const saved = design(true), imported = validateMap(JSON.parse(JSON.stringify(saved)));
     expect(imported).toEqual(saved);
-    expect(imported.version).toBe(3);
+    expect(imported.version).toBe(4);
     expect(imported.items[0].length).toBe(128);
     expect(mapCourse(imported).loopGeometryVersion).toBe(2);
   });

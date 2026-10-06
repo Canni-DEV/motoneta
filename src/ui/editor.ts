@@ -1,5 +1,6 @@
 import { emptyDesign, placedPiece, validateMap, type MapDesign } from '../core/maps';
 import type { PieceId } from '../core/types';
+import { isFlatTerrain, terrainShape } from '../core/terrain';
 import { isLoop } from '../core/loop-geometry';
 import { editorView } from './editor-view';
 import { bindEditor } from './editor-input';
@@ -120,6 +121,12 @@ export class Editor {
   action(action: string, value: string): boolean {
     const selected = this.design.items.find((p) => p.id === this.chosenItem);
     switch (action) {
+      case 'terrain-variant':
+        if (selected && isFlatTerrain(selected)) this.edit((d) => {
+          const item = d.items.find((p) => p.id === selected.id)!;
+          item.terrainShape = { version: 1, variant: (terrainShape(item).variant + 0x9e3779b9) >>> 0 };
+        }, 'move');
+        return true;
       case 'editor-tab':
         this.tab = value as typeof this.tab;
         this.collapsed = false;

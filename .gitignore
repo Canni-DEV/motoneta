@@ -40,6 +40,12 @@
 !/scripts/compare-model-performance.mjs
 !/scripts/check-rider-clearance.py
 !/scripts/benchmark-runtime.mjs
+!/scripts/build-terrain-audio.mjs
+!/scripts/capture-terrain-physics.mjs
+!/scripts/terrain-fixture.mjs
+!/scripts/weather-surface-fixture.mjs
+!/scripts/review-terrain.mjs
+!/scripts/compare-terrain-resources.mjs
 # Large runtime snapshots are reproducible from the review script; retain the diagnostic report.
 /assets/motocross/review/**/posed-geometry.json
 /assets/motocross/review/**/posed-geometry.json.gz

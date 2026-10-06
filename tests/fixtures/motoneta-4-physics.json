@@ -1,0 +1,397 @@
+[
+  {
+    "track": 0,
+    "bots": 0,
+    "hash": "bf8877452088b47ea1c7ff0664d0c569e97af04eb390ece84d1e2730c4b3dfb2",
+    "frames": 4030,
+    "finishes": [
+      {
+        "id": "player",
+        "ticks": 3850,
+        "laps": [
+          1942,
+          3850
+        ],
+        "crashes": 0
+      }
+    ]
+  },
+  {
+    "track": 0,
+    "bots": 5,
+    "hash": "ea045f5963d0574d565d8e471e30432f0003b5f52781a444e9278955f659878d",
+    "frames": 4065,
+    "finishes": [
+      {
+        "id": "bot-3",
+        "ticks": 3528,
+        "laps": [
+          1928,
+          3528
+        ],
+        "crashes": 4
+      },
+      {
+        "id": "bot-5",
+        "ticks": 3604,
+        "laps": [
+          2066,
+          3604
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "player",
+        "ticks": 3850,
+        "laps": [
+          1942,
+          3850
+        ],
+        "crashes": 0
+      },
+      {
+        "id": "bot-1",
+        "ticks": 3855,
+        "laps": [
+          1850,
+          3855
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-2",
+        "ticks": 3869,
+        "laps": [
+          1942,
+          3869
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-4",
+        "ticks": 3885,
+        "laps": [
+          1928,
+          3885
+        ],
+        "crashes": 5
+      }
+    ]
+  },
+  {
+    "track": 1,
+    "bots": 0,
+    "hash": "f20cb423e7ee855e7d4708eaa205e3180a52f4becaea433149e30d404db5074f",
+    "frames": 3714,
+    "finishes": [
+      {
+        "id": "player",
+        "ticks": 3534,
+        "laps": [
+          1796,
+          3534
+        ],
+        "crashes": 2
+      }
+    ]
+  },
+  {
+    "track": 1,
+    "bots": 5,
+    "hash": "ad4caa38bfc53ca3cf5e5dacbfe013eab4628b73a14cbe69ad93e2d3a0888060",
+    "frames": 3714,
+    "finishes": [
+      {
+        "id": "bot-1",
+        "ticks": 3250,
+        "laps": [
+          1636,
+          3250
+        ],
+        "crashes": 0
+      },
+      {
+        "id": "bot-4",
+        "ticks": 3279,
+        "laps": [
+          1663,
+          3279
+        ],
+        "crashes": 0
+      },
+      {
+        "id": "bot-3",
+        "ticks": 3321,
+        "laps": [
+          1718,
+          3321
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "bot-2",
+        "ticks": 3342,
+        "laps": [
+          1743,
+          3342
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "bot-5",
+        "ticks": 3371,
+        "laps": [
+          1785,
+          3371
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "player",
+        "ticks": 3534,
+        "laps": [
+          1796,
+          3534
+        ],
+        "crashes": 2
+      }
+    ]
+  },
+  {
+    "track": 2,
+    "bots": 0,
+    "hash": "36c74a83250fd80ed672c33bdc2038a3b1fd503c4393dc0dbb9e2226b1f3b3a1",
+    "frames": 4561,
+    "finishes": [
+      {
+        "id": "player",
+        "ticks": 4381,
+        "laps": [
+          2060,
+          4381
+        ],
+        "crashes": 2
+      }
+    ]
+  },
+  {
+    "track": 2,
+    "bots": 5,
+    "hash": "da14b383c8bcfae3127d2a58d03388ef918deb99ab9aab068ffb783d26859f09",
+    "frames": 4561,
+    "finishes": [
+      {
+        "id": "bot-1",
+        "ticks": 4012,
+        "laps": [
+          1982,
+          4012
+        ],
+        "crashes": 2
+      },
+      {
+        "id": "bot-2",
+        "ticks": 4051,
+        "laps": [
+          2056,
+          4051
+        ],
+        "crashes": 2
+      },
+      {
+        "id": "bot-5",
+        "ticks": 4146,
+        "laps": [
+          2228,
+          4146
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-4",
+        "ticks": 4201,
+        "laps": [
+          2188,
+          4201
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-3",
+        "ticks": 4355,
+        "laps": [
+          2244,
+          4355
+        ],
+        "crashes": 5
+      },
+      {
+        "id": "player",
+        "ticks": 4381,
+        "laps": [
+          2060,
+          4381
+        ],
+        "crashes": 2
+      }
+    ]
+  },
+  {
+    "track": 3,
+    "bots": 0,
+    "hash": "735542da1e60c9939879b69fad9559e8de079ea29d55d266b1c4693ac4db63e1",
+    "frames": 4378,
+    "finishes": [
+      {
+        "id": "player",
+        "ticks": 4198,
+        "laps": [
+          2190,
+          4198
+        ],
+        "crashes": 1
+      }
+    ]
+  },
+  {
+    "track": 3,
+    "bots": 5,
+    "hash": "c555b458f8ff2880ca41321858b7d8f48d2cc6426ca0d953b6300b39993053d6",
+    "frames": 4803,
+    "finishes": [
+      {
+        "id": "bot-1",
+        "ticks": 4178,
+        "laps": [
+          2156,
+          4178
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "player",
+        "ticks": 4198,
+        "laps": [
+          2190,
+          4198
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "bot-3",
+        "ticks": 4330,
+        "laps": [
+          2236,
+          4330
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-5",
+        "ticks": 4404,
+        "laps": [
+          2303,
+          4404
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-2",
+        "ticks": 4550,
+        "laps": [
+          2278,
+          4550
+        ],
+        "crashes": 4
+      },
+      {
+        "id": "bot-4",
+        "ticks": 4623,
+        "laps": [
+          2346,
+          4623
+        ],
+        "crashes": 6
+      }
+    ]
+  },
+  {
+    "track": 4,
+    "bots": 0,
+    "hash": "54fd6f0de16f42b38afe6699efa8126d0c132823f09d8440a561706f282aea3e",
+    "frames": 3744,
+    "finishes": [
+      {
+        "id": "player",
+        "ticks": 3564,
+        "laps": [
+          1725,
+          3564
+        ],
+        "crashes": 0
+      }
+    ]
+  },
+  {
+    "track": 4,
+    "bots": 5,
+    "hash": "37c0d3db4e97653cfe0a30b510ebc7d2ac83aa1ed59457d3a981ae9aae35503b",
+    "frames": 4015,
+    "finishes": [
+      {
+        "id": "bot-3",
+        "ticks": 3465,
+        "laps": [
+          1823,
+          3465
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "player",
+        "ticks": 3564,
+        "laps": [
+          1725,
+          3564
+        ],
+        "crashes": 0
+      },
+      {
+        "id": "bot-4",
+        "ticks": 3602,
+        "laps": [
+          1883,
+          3602
+        ],
+        "crashes": 1
+      },
+      {
+        "id": "bot-1",
+        "ticks": 3673,
+        "laps": [
+          1806,
+          3673
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-2",
+        "ticks": 3737,
+        "laps": [
+          1941,
+          3737
+        ],
+        "crashes": 3
+      },
+      {
+        "id": "bot-5",
+        "ticks": 3835,
+        "laps": [
+          2074,
+          3835
+        ],
+        "crashes": 4
+      }
+    ]
+  }
+]

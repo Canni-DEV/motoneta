@@ -19,7 +19,7 @@ Funciona como sitio estático: no necesita backend, cuentas ni servicios externo
 | C               | Cambiar entre cámara normal y cinematográfica durante una repetición                 |
 | Rueda del mouse | Zoom de cámara                                                                       |
 
-También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y las zonas claras enfrían el motor.
+También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y los sectores mojados con aspersores enfrían el motor.
 
 Carrera rápida muestra tu récord para la pista, vueltas, cantidad de rivales y dificultad elegidas. Activá “Correr contra mi fantasma” para competir contra tu mejor carrera: al completar cada vuelta verás la diferencia de esa vuelta y la acumulada, con el detalle final en resultados. La elección se conserva mientras el juego está abierto y cada nuevo intento usa la mejor marca disponible.
 
@@ -41,7 +41,21 @@ El loop tiene dimensiones fijas y solo permite cambiar su posición longitudinal
 
 La geometría del loop usa versión 2, registrada en los cursos y repeticiones que incluyen la pieza. Al cargar el guardado se retiran solo los récords, repeticiones y competencias con una geometría de loop incompatible. Se conservan perfiles, desbloqueos, mapas, borrador y datos de circuitos sin loops. Los mapas existentes usan la salida nueva; las repeticiones anteriores con loops se rechazan al importar.
 
-Esta versión usa archivos de formato **3**, reglas **`motoneta-3`**, generador **2** y almacenamiento **4**. Reinicia completamente el guardado de desarrollo anterior (perfiles, desbloqueos, mapas, borrador, récords, repeticiones y competencias) y rechaza archivos anteriores. Las preferencias de interfaz se conservan y las cinco pistas oficiales mantienen su diseño.
+Esta versión usa archivos de formato **4**, reglas **`motoneta-4`**, generador **3** y almacenamiento **5**. Migra mapas y borradores de formato 3 conservando perfiles, vehículos, personalización y preferencias. Una transacción atómica retira marcas, fantasmas, repeticiones y competencias anteriores; el menú anuncia una sola vez la nueva etapa de marcas. Las repeticiones antiguas se rechazan al importar. Los guardados de desarrollo anteriores al formato 3 mantienen su política de reinicio.
+
+Los cinco modificadores planos tienen contornos irregulares deterministas, compartidos entre imagen y física. Carriles contiguos forman una mancha; los separados forman islas. Las cinco pistas oficiales conservan sus posiciones, longitudes, carriles y obstáculos.
+
+| Terreno | Velocidad respecto de tierra | Aceleración | Particularidad |
+| --- | --- | --- | --- |
+| Barro | 65 % | 70 % | Surcos húmedos, terrones y pequeñas acumulaciones de agua |
+| Césped | 90 % | 90 % | Matas agrupadas y rodadas aplastadas |
+| Aspersores | 100 % | 100 % | Temperatura cero y recuperación del motor una vez por entrada |
+| U · Arena | 80 % | 50 % | Huellas hundidas, dunas bajas y polvo fino |
+| V · Grava | 100 % | 100 % | Cambio de carril al 60 %, piedras y sonido granular |
+
+Los factores se aplican a aceleración normal y turbo únicamente en contacto con el suelo. La reducción hasta el límite de velocidad es gradual, con un máximo de 0,08 unidades por cuadro. El caballito elimina el 40 % de la penalización de velocidad y aceleración; conserva la resistencia lateral de la grava. El clima cambia la apariencia y cobertura, con la misma física. No hay caídas aleatorias ni avisos nuevos durante la carrera.
+
+El editor muestra efectos y contornos, incorpora arena y grava sobre cuatro carriles, y permite **Cambiar variante** con deshacer/rehacer. Mover, duplicar y redimensionar conservan la variante. El generador incorpora pesos de césped, arena y grava de 5, 10 y 15 para Fácil, Normal y Difícil; conserva los demás pesos y las reservas de loops. Torneo Tanque usa el generador nuevo, con calendario versión 2.
 
 ## Ejecutar localmente
 
@@ -72,6 +86,14 @@ npm run build
 ```
 
 `typecheck` comprueba también las pruebas y sus configuraciones. TypeScript detecta símbolos sin uso; se mantienen las dependencias y el workflow de publicación actuales.
+
+`tests/terrain.test.ts` comprueba contornos, triangulación, cruces entre cuadros y vueltas, balance, caballitos, aterrizajes, enfriamiento, generación y repeticiones. `tests/e2e/terrain.spec.ts` verifica migración atómica con fallos inyectados, conservación de perfiles, aviso único, variantes y exportación. Las referencias físicas de reglas anteriores se conservan en `tests/fixtures/motoneta-physics.json`; las referencias nuevas están en `tests/fixtures/motoneta-4-physics.json`. `node scripts/capture-terrain-physics.mjs` regenera solamente las nuevas, después de validar las reglas.
+
+Con Vite en el puerto 5173 y Chromium instalado, `node scripts/review-terrain.mjs` guarda en `tmp/terrain/review/` una galería de escritorio y móvil horizontal, High/Low, tres horarios y tres climas, y verifica estabilidad de contornos. Los materiales son procedurales y los detalles se agrupan por instancias o geometría combinada, sin luces ni pases nuevos. `npm run audio:terrain` reproduce los cuatro sonidos originales de arena y grava; su manifiesto y hashes están en `src/audio/terrain-manifest.json`.
+
+`node scripts/compare-terrain-resources.mjs` compara una escena equivalente con seis motos entre Vite de referencia (puerto 5175) y la versión actual (5173), incluyendo reconstrucciones repetidas para detectar recursos que no se liberan. La referencia necesita el código, `public/` y el manifiesto original del loop; los dos materiales nuevos se añaden solamente al candidato. Estima bytes de atributos y texturas RGBA con mipmaps, excluyendo los destinos de postprocesado comunes y el consumo interno del controlador. El resultado queda en `tmp/terrain/resources/comparison.json`.
+
+La renovación de terrenos se comparó con `9ae671e` en el Core Ultra 7 265 y la RTX 5070 Ti, con tres muestras de 30 segundos por escenario y versión. La pasada final sostuvo aproximadamente 60 FPS, con p95 de cuadro de 16,7–16,8 ms; los bytes estimados de recursos aumentaron un 4,6 % y permanecieron estables al reconstruir el circuito. El objetivo del 10 % se cumple para esos dos indicadores. La CPU presenta una limitación: la mediana de sus tres p95 en High despejado pasó de 5,0 a 7,9 ms (+58 %), aunque su mediana habitual pasó de 2,9 a 3,0 ms. Low despejado pasó de 4,9 a 4,1 ms, Low lluvia de 4,4 a 4,5 ms y High lluvia de 8,3 a 5,5 ms. Se conservan las muestras iniciales y finales, los cuadros largos y los diagnósticos con posiciones equivalentes en [el informe de terrenos](tests/benchmarks/terrain-performance.json). La pantalla de 60 Hz puede ocultar diferencias de margen; no se afirma una regresión de CPU inferior al 10 % ni se midieron teléfonos físicos.
 
 Las pruebas de `tests/loop.test.ts` verifican el manejo manual, impulso, vuelo, estructura sólida, choques, progreso y repeticiones con las tres dificultades. `tests/e2e/loop.spec.ts` recorre editor, generador, reinicio del guardado anterior y limpieza selectiva de resultados con geometrías de loop incompatibles. `node scripts/review-loop-integration.mjs` captura poses de la simulación en el renderer del juego y valida el GLB; el modelo se regenera con Blender ejecutando `scripts/build-loop-prototype.py`. El manifiesto compartido define recorrido, marcos locales, límites y soportes tanto para física como para render.
 
