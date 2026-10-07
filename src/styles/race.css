@@ -7,11 +7,24 @@ body[data-cinematic='true'] .race-ui {
   visibility: hidden;
 }
 .cinematic-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: fixed;
   z-index: 5;
   right: max(12px, env(safe-area-inset-right));
   top: 50%;
   transform: translateY(-50%);
+}
+.cinematic-selector select {
+  max-width: min(210px, 65vw);
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #f5ead67d;
+  border-radius: 5px;
+  background: #202321f2;
+  color: var(--ivory);
+  font-size: 12px;
 }
 .cinematic-toggle {
   position: relative;
@@ -54,6 +67,12 @@ body[data-cinematic='true'] .race-ui {
 .cinematic-toggle.show-help::after {
   opacity: 1;
   visibility: visible;
+}
+.cinematic-selector:not([hidden]) + .cinematic-toggle::after {
+  right: 0;
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: none;
 }
 body[data-cinematic='true'] #app::before,
 body[data-cinematic='true'] #app::after {

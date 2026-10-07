@@ -34,7 +34,7 @@ test('steering and detached recovery render on desktop and mobile in both qualit
         if (kind === 'steer') {
           p.crashPhase = 'none'; p.recovery = 0; p.speed = 3;
           world.bikes[0].reset();
-          world.previous = [{ x: p.x, lane: p.lane - 0.034, height: p.height, tilt: p.tilt,
+          world.previous = [{ x: p.x, lane: p.lane - 0.034, height: p.height, tilt: p.tilt, quaternion: world.bikes[0].root.quaternion.clone().identity(),
             crashPhase: 'none', crashPhaseAge: 0 }];
         } else {
           p.crashPhase = kind === 'rolling' ? 'rolling' : kind === 'down' ? 'down' : 'mounting';
@@ -42,7 +42,7 @@ test('steering and detached recovery render on desktop and mobile in both qualit
           p.crashAge = 40 + p.crashPhaseAge;
           p.crashKind = 'impact'; p.crashRollDuration = 40; p.crashStartTilt = 0;
           p.recovery = 66; p.speed = kind === 'rolling' ? 2 : 0;
-          world.previous = [{ x: p.x, lane: p.lane, height: p.height, tilt: p.tilt,
+          world.previous = [{ x: p.x, lane: p.lane, height: p.height, tilt: p.tilt, quaternion: world.bikes[0].root.quaternion.clone().identity(),
             crashPhase: p.crashPhase, crashPhaseAge: p.crashPhaseAge }];
         }
         for (let i = 1; i <= (kind === 'steer' ? 22 : 2); i++)

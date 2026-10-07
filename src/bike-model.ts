@@ -28,6 +28,15 @@ export interface BikeVisualState {
   readonly crashStartTilt?: number;
 }
 
+export interface RiderViewPose {
+  position: THREE.Vector3;
+  quaternion: THREE.Quaternion;
+}
+// Antiparras in the authored helmet, relative to Head's rest position.
+const EYE_OFFSET = new THREE.Vector3(0.165, 0.095, 0);
+const VIEW_ROTATION = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0))
+  .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -6 * Math.PI / 180));
+
 const requiredNodes = [
   'Chassis',
   'HeadlightAnchor',
@@ -200,6 +209,12 @@ export class Bike {
   private readonly visualMeshes: Record<BikeQuality, { mesh: THREE.Mesh; bounds: THREE.Box3 }[]> = { high: [], low: [] };
   private readonly visualBox = new THREE.Box3();
   private readonly visualPoint = new THREE.Vector3();
+  private readonly viewRotation = new THREE.Quaternion();
+  private readonly viewScale = new THREE.Vector3();
+  private readonly viewPosition = new THREE.Vector3();
+  private readonly eyeLocal: Record<BikeQuality, THREE.Vector3> = { high: new THREE.Vector3(), low: new THREE.Vector3() };
+  private readonly headRestInverse: Record<BikeQuality, THREE.Quaternion> = { high: new THREE.Quaternion(), low: new THREE.Quaternion() };
+  private firstPerson = false;
   quality: BikeQuality;
   wheels: THREE.Object3D[] = [];
   rider!: THREE.Object3D;
@@ -266,7 +281,8 @@ export class Bike {
     for (const variant of [...Object.values(this.variants), ...Object.values(this.variantRiders)])
       variant.traverse((object) => {
         const match = /^Slot_([^_]+)_(core|sprint|trail)(?:_(?:Front|Rear|FrontWheel|RearWheel))?$/.exec(object.name);
-        if (match) object.visible = appearance.parts[match[1] as SlotId] === match[2];
+        if (match) object.visible = appearance.parts[match[1] as SlotId] === match[2] &&
+          !(this.firstPerson && (match[1] === 'helmet' || match[1] === 'visor'));
         if (!(object instanceof THREE.Mesh)) return;
         if (!this.originals.has(object)) this.originals.set(object, object.material);
         const original = this.originals.get(object)!;
@@ -288,6 +304,27 @@ export class Bike {
   }
 
   get ghostOpacity() { return this.opacity; }
+
+  /** Keep customization intact in both LODs while hiding only the eye-port pieces. */
+  setFirstPerson(active: boolean) {
+    if (active === this.firstPerson) return;
+    this.firstPerson = active;
+    for (const nodes of Object.values(this.variantNodes))
+      for (const slot of ['helmet', 'visor'] as const)
+        for (const variant of VARIANTS)
+          nodes[`Slot_${slot}_${variant}`].visible = !active && this.appearance?.parts[slot] === variant;
+  }
+
+  /** Read after update(): includes root interpolation, suspension and detached crash poses. */
+  getRiderViewPose(target: RiderViewPose) {
+    const head = this.nodes.Head;
+    head.updateWorldMatrix(true, false);
+    target.position.copy(this.eyeLocal[this.quality]).applyMatrix4(head.matrixWorld);
+    head.matrixWorld.decompose(this.viewPosition, this.viewRotation, this.viewScale);
+    target.quaternion.copy(this.viewRotation)
+      .multiply(this.headRestInverse[this.quality]).multiply(VIEW_ROTATION).normalize();
+    return target;
+  }
 
   /** Update cached clones only; real bikes and shared asset materials remain untouched. */
   setGhostOpacity(value: number) {
@@ -400,6 +437,9 @@ export class Bike {
           desired: new THREE.Matrix4(),
         };
       }
+      this.eyeLocal[q].copy(this.rest.Head.head).add(EYE_OFFSET)
+        .applyMatrix4(nodes.Head.matrixWorld.clone().invert());
+      this.headRestInverse[q].copy(bindings.Head.quaternion).invert();
       this.variants[q] = scene;
       this.variantBindings[q] = bindings;
       this.variantNodes[q] = nodes;
@@ -434,6 +474,7 @@ export class Bike {
   }
 
   reset() {
+    this.setFirstPerson(false);
     this.setGhostOpacity(GHOST_OPACITY);
     this.body.visible = true;
     this.riderLayer.visible = true;
