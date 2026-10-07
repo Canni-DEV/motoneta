@@ -2,11 +2,28 @@ import * as THREE from 'three';
 import { heightAt } from './core/tracks';
 import { HZ, type Race } from './core/types';
 import type { CinematicMoment, CinematicPose, CinematicTimeline } from './cinematic-timeline';
+import type { RiderViewPose } from './bike-model';
 
 import { WORLD_SCALE as SCALE, LANE_WIDTH as LANE } from './world-space';
 const clamp = THREE.MathUtils.clamp;
 const MIN_SHOT = 2.5;
-type Shot = 'opening' | 'chase' | 'front' | 'ground' | 'drone' | 'helmet' | 'mounted' | 'tripod' | 'crowd' | 'safe';
+export const CINEMATIC_MODES = [
+  { id: 'mix', label: 'Mezcla', key: '1' },
+  { id: 'firstPerson', label: 'Primera persona', key: '2' },
+  { id: 'chase', label: 'Seguimiento', key: '3' },
+  { id: 'front', label: 'Frontal', key: '4' },
+  { id: 'ground', label: 'Rasante', key: '5' },
+  { id: 'drone', label: 'Dron', key: '6' },
+  { id: 'mounted', label: 'Montada', key: '7' },
+  { id: 'tripod', label: 'Trípode', key: '8' },
+  { id: 'crowd', label: 'Tribuna', key: '9' },
+] as const;
+export type CinematicMode = typeof CINEMATIC_MODES[number]['id'];
+export type Shot = Exclude<CinematicMode, 'mix'> | 'opening' | 'safe';
+export function cinematicModeForKey(code: string): CinematicMode | undefined {
+  const match = /^(?:Digit|Numpad)([1-9])$/.exec(code);
+  return match ? CINEMATIC_MODES[Number(match[1]) - 1].id : undefined;
+}
 type Pose = Pick<CinematicPose, 'x' | 'y' | 'z'>;
 type Composition = { position: THREE.Vector3; target: THREE.Vector3; fov: number };
 type Choice = { shot: Shot; anchor?: THREE.Vector3; moment?: CinematicMoment };
@@ -18,9 +35,9 @@ export interface CinematicCut {
   lap: number;
 }
 
-const normalOrder: Shot[] = ['tripod', 'ground', 'mounted', 'chase', 'crowd', 'front', 'helmet', 'drone'];
+const normalOrder: Shot[] = ['tripod', 'ground', 'mounted', 'chase', 'crowd', 'front', 'firstPerson', 'drone'];
 const family = (shot: Shot) => shot === 'tripod' || shot === 'crowd' ? 'fixed'
-  : shot === 'helmet' || shot === 'mounted' ? 'mounted'
+  : shot === 'firstPerson' || shot === 'mounted' ? 'mounted'
     : shot === 'drone' ? 'aerial'
       : shot === 'ground' || shot === 'front' ? 'trackside' : 'follow';
 
@@ -28,12 +45,15 @@ export class CinematicCamera {
   readonly camera = new THREE.PerspectiveCamera(58, 16 / 9, 0.055, 180);
   readonly cuts: CinematicCut[] = [];
   private shot: Shot = 'opening';
+  private mode: CinematicMode = 'mix';
+  private modePending = false;
   private elapsed = 0;
   private cutAt = 0;
   private holdUntilFrame = -1;
   private droneSeconds = 0;
   private lap = -1;
   private familySeconds = new Map<string, number>();
+  private shotSeconds = new Map<Shot, number>();
   private fixedLaps = new Set<number>();
   private recent: Shot[] = [];
   private position = new THREE.Vector3();
@@ -46,12 +66,27 @@ export class CinematicCamera {
   private obstructedFor = 0;
   private protectedUntil = 0;
   private testCamera = new THREE.PerspectiveCamera(58, 16 / 9, 0.055, 180);
+  private readonly composition: Composition = { position: new THREE.Vector3(), target: new THREE.Vector3(), fov: 58 };
+  private readonly viewQuaternion = new THREE.Quaternion();
+  private readonly subjectTarget = new THREE.Vector3();
+  private readonly stableView = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2, 0))
+    .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -6 * Math.PI / 180));
   constructor(public timeline: CinematicTimeline) {}
 
   get currentShot() { return this.shot; }
+  get selectedMode() { return this.mode; }
+  setMode(mode: CinematicMode) {
+    if (mode === this.mode) return;
+    this.mode = mode;
+    this.modePending = true;
+  }
   diagnostics() {
     return {
+      mode: this.mode,
       shot: this.shot,
+      position: this.camera.position.toArray(),
+      quaternion: this.camera.quaternion.toArray(),
+      fov: this.camera.fov,
       cuts: this.cuts.map((cut, index) => ({
         ...cut,
         duration: Math.max(0, (this.cuts[index + 1]?.at ?? this.elapsed) - cut.at),
@@ -99,8 +134,7 @@ export class CinematicCamera {
     const lane = clamp(Math.round(z / LANE + 1.5), 0, 3);
     const groundY = this.trackHeight(race, x, lane);
     const airborne = Math.max(0, y - groundY);
-    const position = new THREE.Vector3();
-    const target = new THREE.Vector3();
+    const { position, target } = this.composition;
     let fov = 58;
     switch (shot) {
       case 'opening': {
@@ -130,7 +164,7 @@ export class CinematicCamera {
         target.set(x + 2.5, y + 0.8, z);
         fov = 51;
         break;
-      case 'helmet':
+      case 'firstPerson':
         position.set(x + 0.25, y + 1.55, z);
         target.set(x + 8, y + 1.05, z - 1.2);
         fov = 68;
@@ -154,7 +188,8 @@ export class CinematicCamera {
         fov = 55;
         break;
     }
-    return { position, target, fov };
+    this.composition.fov = fov;
+    return this.composition;
   }
   private validate(shot: Shot, race: Race, pose: Pose, aspect: number, moment?: CinematicMoment, anchor?: THREE.Vector3) {
     const start = race.frame;
@@ -175,7 +210,7 @@ export class CinematicCamera {
     for (const frame of samples) {
       const subject = frame === start ? pose : this.poseAt(frame, pose);
       const { position, target, fov } = this.compose(shot, race, subject, anchor);
-      if (shot !== 'helmet' && shot !== 'mounted') {
+      if (shot !== 'firstPerson' && shot !== 'mounted') {
         if (frame === start) {
           predictedPosition.copy(position);
           predictedLook.copy(target);
@@ -263,7 +298,7 @@ export class CinematicCamera {
           (fixedDue && family(shot) === 'fixed' ? -100 : 0) +
           (this.recent.includes(shot) ? 100 : 0) +
           (this.recent.length && family(this.recent[0]) === family(shot) ? 20 : 0) +
-          (this.familySeconds.get(family(shot)) ?? 0) + normalOrder.indexOf(shot) * 0.01;
+          (this.familySeconds.get(family(shot)) ?? 0) + (this.shotSeconds.get(shot) ?? 0) * 0.25 + normalOrder.indexOf(shot) * 0.01;
         return priority(a) - priority(b);
       });
     }
@@ -273,8 +308,8 @@ export class CinematicCamera {
     }
     return { shot: 'safe', moment };
   }
-  private cut(choice: Choice, race: Race, reason: string) {
-    if (choice.shot === this.shot) return;
+  private cut(choice: Choice, race: Race, reason: string, force = false) {
+    if (choice.shot === this.shot && !force) return;
     this.shot = choice.shot;
     this.anchor.copy(choice.anchor ?? new THREE.Vector3());
     this.cutAt = this.elapsed;
@@ -291,24 +326,44 @@ export class CinematicCamera {
     this.recent.length = Math.min(this.recent.length, 2);
     this.cuts.push({ frame: race.frame, at: this.elapsed, shot: choice.shot, reason, lap: race.laps.length });
   }
-  update(race: Race, player: Pose, dt: number, aspect: number, paused: boolean, beatDelay: number | null) {
+  private manualAnchor(shot: 'tripod' | 'crowd', race: Race, player: Pose) {
+    const lead = clamp(race.riders[0].speed * SCALE * HZ * 1.8, 8, 24);
+    return new THREE.Vector3(player.x + lead, this.trackHeight(race, player.x + lead, 3) +
+      (shot === 'tripod' ? 2.3 : 4.4), shot === 'tripod' ? 4.9 : 8.5);
+  }
+  update(race: Race, player: Pose, dt: number, aspect: number, paused: boolean, beatDelay: number | null,
+    riderView?: RiderViewPose, reducedMotion = false) {
     const frameDt = clamp(dt, 0, 0.1);
+    const loopView = riderView && race.riders[0].motion.kind !== 'track';
+    if (loopView) this.subjectTarget.set(0, -0.55, 0).applyQuaternion(riderView.quaternion).add(riderView.position);
+    else this.subjectTarget.set(player.x, player.y + 0.85, player.z);
     if (!paused) {
       this.elapsed += frameDt;
-      if (race.phase !== 'countdown') {
+      if (this.mode === 'mix' && race.phase !== 'countdown') {
         if (this.lap !== race.laps.length) {
           this.lap = race.laps.length;
           this.familySeconds.clear();
+          this.shotSeconds.clear();
         }
         this.familySeconds.set(family(this.shot), (this.familySeconds.get(family(this.shot)) ?? 0) + frameDt);
+        this.shotSeconds.set(this.shot, (this.shotSeconds.get(this.shot) ?? 0) + frameDt);
         if (this.shot === 'drone') this.droneSeconds += frameDt;
       }
     }
-    if (race.phase !== 'countdown' && this.shot === 'opening')
+    if (this.modePending || (!this.ready && this.mode !== 'mix')) {
+      const choice: Choice = this.mode === 'mix'
+        ? race.phase === 'countdown' ? { shot: 'opening' } : this.choose(race, player, aspect, this.nextMoment(race.frame))
+        : { shot: this.mode };
+      if (choice.shot === 'tripod' || choice.shot === 'crowd')
+        choice.anchor ??= this.manualAnchor(choice.shot, race, player);
+      this.cut(choice, race, this.mode === 'mix' ? 'mezcla' : 'manual', true);
+      this.modePending = false;
+    }
+    if (this.mode === 'mix' && race.phase !== 'countdown' && this.shot === 'opening')
       this.cut(this.choose(race, player, aspect, this.nextMoment(race.frame)), race, 'salida');
     const age = this.elapsed - this.cutAt;
     const beatReady = beatDelay === null ? this.elapsed % 0.5 < 0.05 : beatDelay < 0.07;
-    if (!paused && race.phase !== 'countdown' && age >= MIN_SHOT && this.elapsed >= this.protectedUntil) {
+    if (this.mode === 'mix' && !paused && race.phase !== 'countdown' && age >= MIN_SHOT && this.elapsed >= this.protectedUntil) {
       const ongoing = this.timeline.moments.some((moment) => moment.start < race.frame && race.frame <= moment.end);
       if (race.frame > this.holdUntilFrame && !ongoing) {
         const moment = this.nextMoment(race.frame);
@@ -319,10 +374,27 @@ export class CinematicCamera {
           this.cut(this.choose(race, player, aspect), race, 'ritmo');
       }
     }
+    if (this.mode !== 'mix' && !paused && (this.shot === 'tripod' || this.shot === 'crowd') &&
+      (player.x > this.anchor.x + 1 || Math.abs(player.x - this.anchor.x) > 30))
+      this.cut({ shot: this.shot, anchor: this.manualAnchor(this.shot, race, player) }, race, 'reencuadre', true);
+    if (this.shot === 'firstPerson' && riderView) {
+      this.camera.position.copy(riderView.position);
+      this.viewQuaternion.copy(reducedMotion ? this.stableView : riderView.quaternion);
+      if (!this.ready || this.cutPending || reducedMotion) this.camera.quaternion.copy(this.viewQuaternion);
+      else if (!paused) this.camera.quaternion.slerp(this.viewQuaternion, 1 - Math.exp(-12 * Math.min(frameDt, 0.05)));
+      this.camera.fov = 68;
+      this.camera.near = 0.02;
+      this.camera.aspect = aspect;
+      this.camera.updateProjectionMatrix();
+      this.ready = true;
+      this.cutPending = false;
+      return;
+    }
+    this.camera.near = 0.055;
     const { position, target, fov } = this.compose(this.shot, race, player, this.anchor);
     this.position.copy(position);
-    this.target.copy(target);
-    const attached = this.shot === 'helmet' || this.shot === 'mounted';
+    this.target.copy(loopView ? this.subjectTarget : target);
+    const attached = this.shot === 'firstPerson' || this.shot === 'mounted';
     const fixed = this.shot === 'tripod' || this.shot === 'crowd';
     if (!this.ready || this.cutPending) {
       this.camera.position.copy(this.position);
@@ -347,7 +419,7 @@ export class CinematicCamera {
       }
       this.camera.fov += (fov - this.camera.fov) * follow;
     }
-    if (!paused && this.shot !== 'opening' && this.shot !== 'safe' && !attached) {
+    if (this.mode === 'mix' && !paused && this.shot !== 'opening' && this.shot !== 'safe' && !attached) {
       const lane = clamp(Math.round(this.camera.position.z / LANE + 1.5), 0, 3);
       const floor = this.trackHeight(race, this.camera.position.x, lane);
       const hidden = this.camera.position.y < floor + (this.shot === 'ground' ? 0.35 : 0.45) ||

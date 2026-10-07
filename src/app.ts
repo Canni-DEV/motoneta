@@ -1,6 +1,6 @@
 import { GameAudio } from './audio';
 import { BIKE_SLOTS, defaultAppearance, defaultVehicleAppearance, editGarage, garageAppearance, initialGarage, normalizeAppearance, slotVariants, vehicleUnlocked, type GarageState, type VehicleId, type Appearance, type SlotId, type VariantId } from './appearance';
-import { CinematicCamera } from './cinematic-camera';
+import { CinematicCamera, CINEMATIC_MODES, cinematicModeForKey, type CinematicMode } from './cinematic-camera';
 import { analyzeRecording, type CinematicTimeline } from './cinematic-timeline';
 import { audioCreditsView } from './audio/credits';
 import { loadVehicleAssets } from './bike-model';
@@ -109,6 +109,7 @@ export async function startApp() {
     playback: Playback | null = null,
     lastRecording: Recording | null = null;
   let replayPresentation: 'none' | 'manual' | 'attract' = 'none';
+  let cinematicMode: CinematicMode = 'mix';
   let timeline: CinematicTimeline | null = null;
   let timelinePending: Promise<CinematicTimeline> | null = null;
   let replayGeneration = 0;
@@ -487,6 +488,7 @@ export async function startApp() {
     playback = watch ? new Playback(watch) : null;
     replayGeneration++;
     replayPresentation = watch ? presentation : 'none';
+    cinematicMode = 'mix';
     timeline = preparedTimeline;
     timelinePending = watch && !preparedTimeline ? analyzeRecording(watch) : null;
     void timelinePending?.catch(() => {});
@@ -517,7 +519,7 @@ export async function startApp() {
     document.body.dataset.screen = 'race';
     patch(ui, presentation === 'attract' && watch
       ? '<div class="attract-hint">Escape para volver al menú</div>'
-      : raceView(race, ghostNames, !!watch, quickAttempt?.reference) + (watch ? `<div class="cinematic-controls">${b('toggle-cinematic', icon('camera'), '', 'class="cinematic-toggle" aria-label="Activar cámara cinematográfica" aria-pressed="false" data-tooltip="Activar cámara cinematográfica · C"')}</div>` : ''));
+      : raceView(race, ghostNames, !!watch, quickAttempt?.reference) + (watch ? `<div class="cinematic-controls"><label class="cinematic-selector" hidden><span class="sr-only">Tipo de cámara cinematográfica</span><select id="cinematic-view" aria-label="Tipo de cámara cinematográfica">${CINEMATIC_MODES.map(mode => `<option value="${mode.id}">${mode.key} · ${mode.label}</option>`).join('')}</select></label>${b('toggle-cinematic', icon('camera'), '', 'class="cinematic-toggle" aria-label="Activar cámara cinematográfica" aria-pressed="false" data-tooltip="Activar cámara cinematográfica · C"')}</div>` : ''));
     viewport.attach($('#backdrop-host'), 'race');
     document.querySelector('.race-identity>div')?.insertAdjacentHTML(
       'beforeend',
@@ -542,6 +544,11 @@ export async function startApp() {
     button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', String(active));
     button.dataset.tooltip = `${label} · C`;
+    const selector = ui.querySelector<HTMLSelectElement>('#cinematic-view');
+    if (selector) {
+      selector.closest<HTMLElement>('label')!.hidden = !active;
+      selector.value = cinematicMode;
+    }
     if (showHelp && matchMedia('(pointer: coarse)').matches) {
       button.classList.add('show-help');
       if (cinematicHelpTimer) clearTimeout(cinematicHelpTimer);
@@ -558,6 +565,7 @@ export async function startApp() {
     } else {
       const generation = replayGeneration;
       const director = new CinematicCamera(timeline ?? { events: [], moments: [], poses: [], lapEnds: [], slowMotion: [], lastFrame: 0 });
+      director.setMode(cinematicMode);
       world.cinematic = director;
       document.body.dataset.cinematic = 'true';
       audio.setScene(paused ? 'pause' : 'cinematic', activeWeather);
@@ -579,6 +587,13 @@ export async function startApp() {
       }
     }
     updateCinematicButton(showHelp);
+  }
+  function selectCinematicMode(mode: CinematicMode) {
+    if (screen !== 'race' || activity !== 'running' || !playback || replayPresentation !== 'manual' ||
+      paused || modal.open || !world?.cinematic) return;
+    cinematicMode = mode;
+    world.cinematic.setMode(mode);
+    updateCinematicButton();
   }
   function exitAttract() {
     if (replayPresentation !== 'attract' && !attractStarting) return;
@@ -1483,7 +1498,7 @@ export async function startApp() {
           case 'help':
             if (screen === 'race' && activity === 'running') paused = true;
             showModal(
-              `<h2>Controles</h2><p>Acelerá con ${esc(settings.bindings.A.replace('Key', ''))} y usá ${esc(settings.bindings.B.replace('Key', ''))} para el turbo. El turbo calienta el motor; los sectores de aspersores llevan su temperatura a cero al tocarlos en el suelo.</p><p>Arriba y abajo cambian de carril. Izquierda levanta la rueda y derecha baja el morro. Los saltos se producen al pasar por las rampas. Aterrizá alineado con el terreno.</p><p>El barro frena más que el césped. La arena dificulta acelerar; la grava hace más lentos los cambios de carril. El caballito reduce parte de la resistencia de barro, césped y arena. Saltar permite evitar los efectos del suelo.</p><p>Después de una caída, pulsá acelerar repetidamente. La rueda del mouse ajusta el zoom. Escape pausa la carrera.</p><p>En Torneo y Versus hay un intento por carrera. Los fantasmas no producen colisiones.</p>${b('close-modal', 'Cerrar')}`,
+              `<h2>Controles</h2><p>Acelerá con ${esc(settings.bindings.A.replace('Key', ''))} y usá ${esc(settings.bindings.B.replace('Key', ''))} para el turbo. El turbo calienta el motor; los sectores de aspersores llevan su temperatura a cero al tocarlos en el suelo.</p><p>Arriba y abajo cambian de carril. Izquierda levanta la rueda y derecha baja el morro. Los saltos se producen al pasar por las rampas. Aterrizá alineado con el terreno.</p><p>El barro frena más que el césped. La arena dificulta acelerar; la grava hace más lentos los cambios de carril. El caballito reduce parte de la resistencia de barro, césped y arena. Saltar permite evitar los efectos del suelo.</p><p>Después de una caída, pulsá acelerar repetidamente. La rueda del mouse ajusta el zoom. Escape pausa la carrera.</p><p>En repeticiones, C activa la cámara cinematográfica. Con 1–9 o su selector elegís Mezcla, Primera persona, Seguimiento, Frontal, Rasante, Dron, Montada, Trípode y Tribuna. 1 vuelve a la mezcla automática. Estos encuadres tienen zoom predefinido.</p><p>En Torneo y Versus hay un intento por carrera. Los fantasmas no producen colisiones.</p>${b('close-modal', 'Cerrar')}`,
             );
             break;
           case 'close-modal':
@@ -1518,7 +1533,8 @@ export async function startApp() {
               await retryQuickRace();
             } else if (playback) {
               const r = playback.recording;
-              run({ ...structuredClone(r.config), player: profile(), mode: 'quick' });
+              if (activity === 'running') run(null, r);
+              else run({ ...structuredClone(r.config), player: profile(), mode: 'quick' });
             } else if (recording)
               run(
                 recording.config,
@@ -1611,6 +1627,12 @@ export async function startApp() {
       editor.setCursor((Number(el.value) / 100) * editor.design.length);
   });
   document.addEventListener('change', (event) => {
+    if ((event.target as HTMLElement).id === 'cinematic-view') {
+      const value = (event.target as HTMLSelectElement).value;
+      const mode = CINEMATIC_MODES.find(mode => mode.id === value);
+      if (mode) selectCinematicMode(mode.id);
+      return;
+    }
     const el = event.target as HTMLInputElement;
     safely(
       (async () => {
@@ -1824,12 +1846,23 @@ export async function startApp() {
     { passive: false },
   );
   document.addEventListener('keydown', (event) => {
-    if (event.code === 'KeyC' && !event.repeat && replayPresentation === 'manual' && screen === 'race' && activity === 'running' && !modal.open && !(event.target as Element)?.closest('input,textarea,select,[contenteditable="true"]')) {
+    const target = event.target instanceof Element ? event.target : null;
+    const cameraKey = cinematicModeForKey(event.code);
+    const cameraShortcut = !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+      replayPresentation === 'manual' && screen === 'race' && activity === 'running' && !modal.open &&
+      !paused && !controls.onKey && !target?.closest('input,textarea,select') &&
+      !(event.target instanceof HTMLElement && event.target.isContentEditable);
+    if (cameraShortcut && cameraKey && world?.cinematic) {
+      event.preventDefault();
+      selectCinematicMode(cameraKey);
+      return;
+    }
+    if (event.code === 'KeyC' && cameraShortcut) {
       event.preventDefault();
       toggleCinematic();
       return;
     }
-    const tab = (event.target as Element)?.closest<HTMLElement>('[role="tab"]');
+    const tab = target?.closest<HTMLElement>('[role="tab"]');
     if (tab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
       const tabs = Array.from(
         tab.parentElement!.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
@@ -1851,7 +1884,7 @@ export async function startApp() {
       screen !== 'editor' ||
       modal.open ||
       focusedField.active ||
-      (event.target as Element)?.closest('input,textarea,select,[contenteditable="true"]')
+      target?.closest('input,textarea,select,[contenteditable="true"]')
     )
       return;
     const modifier = event.ctrlKey || event.metaKey;

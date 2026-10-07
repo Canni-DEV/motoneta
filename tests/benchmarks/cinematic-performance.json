@@ -1,0 +1,6880 @@
+{
+  "baselineRef": "cdc2cfed2ab65a5f59d18eaf5bcab8fbcc6a8143",
+  "measuredAt": "2026-10-06T03:24:21.799Z",
+  "method": "Same cross-origin-isolated Playwright Chromium pages (approximately 5 microsecond timer resolution), RTX 5070 Ti with ANGLE/D3D11, 1440x900, six riders, same frozen simulation state and assets; three runs alternating baseline/candidate order, 100 warm frames and 240 samples per view and quality/weather. Fixed anchors, camera poses and FOVs are aligned for existing views. CPU render submission and render+gl.finish are recorded separately. Comparisons use the median p95 of three runs. Baseline existing shots are held for comparable sampling; helmet is only the reference for the new first-person view, whose eye transform, body visibility and framing differ.",
+  "samples": [
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7549999989569187,
+      "medianCpuMs": 0.6000000014901161,
+      "p95RenderMs": 0.7650000005960464,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 161,
+        "textures": 48
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7450000010430813,
+      "medianCpuMs": 0.6050000004470348,
+      "p95RenderMs": 0.7549999989569187,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 161,
+        "textures": 48
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 1,
+      "medianCpuMs": 0.8200000002980232,
+      "p95RenderMs": 1.005000002682209,
+      "calls": 425,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 227,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8950000032782555,
+      "medianCpuMs": 0.7600000016391277,
+      "p95RenderMs": 0.9000000022351742,
+      "calls": 380,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 210,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6849999986588955,
+      "medianCpuMs": 0.6449999995529652,
+      "p95RenderMs": 0.6900000013411045,
+      "calls": 299,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 233,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7399999983608723,
+      "medianCpuMs": 0.6550000011920929,
+      "p95RenderMs": 0.7399999983608723,
+      "calls": 282,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 216,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6999999992549419,
+      "medianCpuMs": 0.6349999979138374,
+      "p95RenderMs": 0.7049999982118607,
+      "calls": 293,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 233,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6649999991059303,
+      "medianCpuMs": 0.630000002682209,
+      "p95RenderMs": 0.6700000017881393,
+      "calls": 275,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 216,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6950000002980232,
+      "medianCpuMs": 0.625,
+      "p95RenderMs": 0.6999999992549419,
+      "calls": 287,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 233,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.625,
+      "medianCpuMs": 0.5999999977648258,
+      "p95RenderMs": 0.6349999979138374,
+      "calls": 263,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 216,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6750000007450581,
+      "medianCpuMs": 0.6350000016391277,
+      "p95RenderMs": 0.6799999997019768,
+      "calls": 301,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 233,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6900000013411045,
+      "medianCpuMs": 0.6349999979138374,
+      "p95RenderMs": 0.6900000013411045,
+      "calls": 295,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 216,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8100000023841858,
+      "medianCpuMs": 0.7899999991059303,
+      "p95RenderMs": 0.8150000013411045,
+      "calls": 464,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 255,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.9200000017881393,
+      "medianCpuMs": 0.8200000002980232,
+      "p95RenderMs": 0.9200000017881393,
+      "calls": 428,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 274,
+        "textures": 52
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8399999998509884,
+      "medianCpuMs": 0.794999998062849,
+      "p95RenderMs": 0.8449999988079071,
+      "calls": 476,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 255,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8649999983608723,
+      "medianCpuMs": 0.8249999992549419,
+      "p95RenderMs": 0.8700000010430813,
+      "calls": 440,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 274,
+        "textures": 52
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6900000013411045,
+      "medianCpuMs": 0.6400000005960464,
+      "p95RenderMs": 0.6950000002980232,
+      "calls": 312,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 264,
+        "textures": 50
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8500000014901161,
+      "medianCpuMs": 0.7400000020861626,
+      "p95RenderMs": 0.8550000004470348,
+      "calls": 361,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5657061020274996,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.037007109537153214,
+        -0.7061377159034347,
+        -0.03700710954652585,
+        0.7061377159346447
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 287,
+        "textures": 52
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7199999988079071,
+      "medianCpuMs": 0.6550000011920929,
+      "p95RenderMs": 0.7200000025331974,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.6849999986588955,
+      "medianCpuMs": 0.6499999985098839,
+      "p95RenderMs": 0.6950000002980232,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8850000016391277,
+      "medianCpuMs": 0.8399999998509884,
+      "p95RenderMs": 0.8949999995529652,
+      "calls": 433,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9600000008940697,
+      "medianCpuMs": 0.8249999992549419,
+      "p95RenderMs": 0.9649999998509884,
+      "calls": 388,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0049999989569187,
+      "medianCpuMs": 0.7349999994039536,
+      "p95RenderMs": 1.0100000016391277,
+      "calls": 303,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0049999989569187,
+      "medianCpuMs": 0.7250000014901161,
+      "p95RenderMs": 1.0099999979138374,
+      "calls": 286,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7850000001490116,
+      "medianCpuMs": 0.7100000008940697,
+      "p95RenderMs": 0.7899999991059303,
+      "calls": 297,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7899999991059303,
+      "medianCpuMs": 0.6950000002980232,
+      "p95RenderMs": 0.794999998062849,
+      "calls": 279,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.2850000001490116,
+      "medianCpuMs": 0.7600000016391277,
+      "p95RenderMs": 1.2899999991059303,
+      "calls": 289,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.705000001937151,
+      "medianCpuMs": 0.75,
+      "p95RenderMs": 1.705000001937151,
+      "calls": 265,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9149999991059303,
+      "medianCpuMs": 0.7149999998509884,
+      "p95RenderMs": 0.9250000007450581,
+      "calls": 306,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8049999997019768,
+      "medianCpuMs": 0.6950000002980232,
+      "p95RenderMs": 0.8150000013411045,
+      "calls": 300,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9049999974668026,
+      "medianCpuMs": 0.8649999983608723,
+      "p95RenderMs": 0.9100000001490116,
+      "calls": 476,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.080000001937151,
+      "medianCpuMs": 0.919999998062849,
+      "p95RenderMs": 1.0899999998509884,
+      "calls": 440,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9950000010430813,
+      "medianCpuMs": 0.8850000016391277,
+      "p95RenderMs": 1.005000002682209,
+      "calls": 489,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.199999999254942,
+      "medianCpuMs": 0.9499999992549419,
+      "p95RenderMs": 1.2100000008940697,
+      "calls": 453,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8200000002980232,
+      "medianCpuMs": 0.7349999994039536,
+      "p95RenderMs": 0.830000001937151,
+      "calls": 323,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 266,
+        "textures": 51
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8849999979138374,
+      "medianCpuMs": 0.8399999998509884,
+      "p95RenderMs": 0.8900000005960464,
+      "calls": 372,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.565150047020262,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.03700710953715323,
+        -0.7061377159034347,
+        -0.037007109546525856,
+        0.7061377159346447
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 289,
+        "textures": 53
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1449999995529652,
+      "medianCpuMs": 0.9649999998509884,
+      "p95RenderMs": 1.1500000022351742,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 374,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0850000008940697,
+      "medianCpuMs": 0.9450000002980232,
+      "p95RenderMs": 1.0850000008940697,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 397,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3500000014901161,
+      "medianCpuMs": 1.25,
+      "p95RenderMs": 1.3599999994039536,
+      "calls": 825,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 416,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.300000000745058,
+      "medianCpuMs": 1.169999998062849,
+      "p95RenderMs": 1.3049999997019768,
+      "calls": 684,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 419,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1500000022351742,
+      "medianCpuMs": 1.1000000014901161,
+      "p95RenderMs": 1.155000001192093,
+      "calls": 687,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 422,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.169999998062849,
+      "medianCpuMs": 1.0350000001490116,
+      "p95RenderMs": 1.169999998062849,
+      "calls": 580,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 425,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1799999997019768,
+      "medianCpuMs": 1.0899999998509884,
+      "p95RenderMs": 1.1849999986588955,
+      "calls": 682,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 422,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0700000002980232,
+      "medianCpuMs": 1.0150000005960464,
+      "p95RenderMs": 1.074999999254942,
+      "calls": 574,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 425,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.125,
+      "medianCpuMs": 1.069999996572733,
+      "p95RenderMs": 1.1299999989569187,
+      "calls": 681,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 422,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0250000022351742,
+      "medianCpuMs": 0.9800000004470348,
+      "p95RenderMs": 1.0350000001490116,
+      "calls": 561,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 425,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1850000023841858,
+      "medianCpuMs": 1.094999998807907,
+      "p95RenderMs": 1.1900000013411045,
+      "calls": 696,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 422,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.125,
+      "medianCpuMs": 1.0450000017881393,
+      "p95RenderMs": 1.125,
+      "calls": 597,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 425,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3700000010430813,
+      "medianCpuMs": 1.2700000032782555,
+      "p95RenderMs": 1.375,
+      "calls": 854,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 438,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3850000016391277,
+      "medianCpuMs": 1.25,
+      "p95RenderMs": 1.3949999995529652,
+      "calls": 730,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 431,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.4200000017881393,
+      "medianCpuMs": 1.2899999991059303,
+      "p95RenderMs": 1.4299999997019768,
+      "calls": 866,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 438,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3399999998509884,
+      "medianCpuMs": 1.2599999979138374,
+      "p95RenderMs": 1.344999998807907,
+      "calls": 742,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 431,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1149999983608723,
+      "medianCpuMs": 1.0799999982118607,
+      "p95RenderMs": 1.1200000010430813,
+      "calls": 702,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 438,
+        "textures": 88
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2549999989569187,
+      "medianCpuMs": 1.1700000017881393,
+      "p95RenderMs": 1.2600000016391277,
+      "calls": 664,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5642378544897075,
+        -1.8299999830033893
+      ],
+      "quaternion": [
+        -0.037007109537153256,
+        -0.7061377159034347,
+        -0.03700710954652587,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 431,
+        "textures": 90
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2450000010430813,
+      "medianCpuMs": 1.0199999995529652,
+      "p95RenderMs": 1.2450000010430813,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.1350000016391277,
+      "medianCpuMs": 1.0099999979138374,
+      "p95RenderMs": 1.1400000005960464,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.469999998807907,
+      "medianCpuMs": 1.3250000029802322,
+      "p95RenderMs": 1.4749999977648258,
+      "calls": 809,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.375,
+      "medianCpuMs": 1.2349999994039536,
+      "p95RenderMs": 1.3799999989569187,
+      "calls": 674,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4450000002980232,
+      "medianCpuMs": 1.175000000745058,
+      "p95RenderMs": 1.455000001937151,
+      "calls": 666,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.175000000745058,
+      "medianCpuMs": 1.1000000014901161,
+      "p95RenderMs": 1.1799999997019768,
+      "calls": 568,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.405000001192093,
+      "medianCpuMs": 1.175000000745058,
+      "p95RenderMs": 1.4100000001490116,
+      "calls": 659,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.419999998062849,
+      "medianCpuMs": 1.1299999989569187,
+      "p95RenderMs": 1.425000000745058,
+      "calls": 560,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2650000005960464,
+      "medianCpuMs": 1.1349999979138374,
+      "p95RenderMs": 1.2700000032782555,
+      "calls": 661,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2950000017881393,
+      "medianCpuMs": 1.0850000008940697,
+      "p95RenderMs": 1.300000000745058,
+      "calls": 550,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3650000020861626,
+      "medianCpuMs": 1.1649999991059303,
+      "p95RenderMs": 1.375,
+      "calls": 672,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3200000002980232,
+      "medianCpuMs": 1.1200000010430813,
+      "p95RenderMs": 1.3299999982118607,
+      "calls": 582,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4749999977648258,
+      "medianCpuMs": 1.3500000014901161,
+      "p95RenderMs": 1.4799999967217445,
+      "calls": 846,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.5549999997019768,
+      "medianCpuMs": 1.3550000004470348,
+      "p95RenderMs": 1.5600000023841858,
+      "calls": 723,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4950000010430813,
+      "medianCpuMs": 1.3600000031292439,
+      "p95RenderMs": 1.5,
+      "calls": 859,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.625,
+      "medianCpuMs": 1.3799999989569187,
+      "p95RenderMs": 1.6299999989569187,
+      "calls": 736,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.199999999254942,
+      "medianCpuMs": 1.1500000022351742,
+      "p95RenderMs": 1.205000001937151,
+      "calls": 683,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 0,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.6149999983608723,
+      "medianCpuMs": 1.294999998062849,
+      "p95RenderMs": 1.625,
+      "calls": 652,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.563781352064117,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.03700710953715321,
+        -0.7061377159034347,
+        -0.03700710954652584,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6500000022351742,
+      "medianCpuMs": 0.5949999988079071,
+      "p95RenderMs": 0.6550000011920929,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 431,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6749999970197678,
+      "medianCpuMs": 0.6000000014901161,
+      "p95RenderMs": 0.6849999986588955,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 438,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8599999994039536,
+      "medianCpuMs": 0.7400000020861626,
+      "p95RenderMs": 0.8649999983608723,
+      "calls": 380,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8900000005960464,
+      "medianCpuMs": 0.7749999985098839,
+      "p95RenderMs": 0.8949999995529652,
+      "calls": 425,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7250000014901161,
+      "medianCpuMs": 0.6449999995529652,
+      "p95RenderMs": 0.7250000014901161,
+      "calls": 282,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6950000002980232,
+      "medianCpuMs": 0.6500000022351742,
+      "p95RenderMs": 0.6999999992549419,
+      "calls": 299,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7749999985098839,
+      "medianCpuMs": 0.6350000016391277,
+      "p95RenderMs": 0.7850000001490116,
+      "calls": 275,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7349999994039536,
+      "medianCpuMs": 0.6449999995529652,
+      "p95RenderMs": 0.7399999983608723,
+      "calls": 293,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6600000001490116,
+      "medianCpuMs": 0.5999999977648258,
+      "p95RenderMs": 0.669999998062849,
+      "calls": 263,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7200000025331974,
+      "medianCpuMs": 0.6350000016391277,
+      "p95RenderMs": 0.7300000004470348,
+      "calls": 287,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6600000001490116,
+      "medianCpuMs": 0.6399999968707561,
+      "p95RenderMs": 0.669999998062849,
+      "calls": 295,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8099999986588955,
+      "medianCpuMs": 0.6550000011920929,
+      "p95RenderMs": 0.8200000002980232,
+      "calls": 301,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8350000008940697,
+      "medianCpuMs": 0.8099999986588955,
+      "p95RenderMs": 0.8450000025331974,
+      "calls": 428,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 1.0099999979138374,
+      "medianCpuMs": 0.8199999965727329,
+      "p95RenderMs": 1.0149999968707561,
+      "calls": 464,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.9599999971687794,
+      "medianCpuMs": 0.8550000004470348,
+      "p95RenderMs": 0.9699999988079071,
+      "calls": 440,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8549999967217445,
+      "medianCpuMs": 0.8049999997019768,
+      "p95RenderMs": 0.8599999994039536,
+      "calls": 476,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8499999977648258,
+      "medianCpuMs": 0.7599999979138374,
+      "p95RenderMs": 0.8550000004470348,
+      "calls": 361,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5641868150306943,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.037007109537153256,
+        -0.7061377159034347,
+        -0.03700710954652586,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8049999997019768,
+      "medianCpuMs": 0.6449999995529652,
+      "p95RenderMs": 0.8099999986588955,
+      "calls": 312,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.6799999997019768,
+      "medianCpuMs": 0.6400000005960464,
+      "p95RenderMs": 0.6849999986588955,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.594999998807907,
+      "medianCpuMs": 0.6850000023841858,
+      "p95RenderMs": 1.6000000014901161,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0599999986588955,
+      "medianCpuMs": 0.8249999992549419,
+      "p95RenderMs": 1.0650000013411045,
+      "calls": 388,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8999999985098839,
+      "medianCpuMs": 0.8449999988079071,
+      "p95RenderMs": 0.9100000001490116,
+      "calls": 433,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.219999998807907,
+      "medianCpuMs": 0.7100000008940697,
+      "p95RenderMs": 1.2300000004470348,
+      "calls": 286,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.4899999983608723,
+      "medianCpuMs": 0.7600000016391277,
+      "p95RenderMs": 1.5,
+      "calls": 303,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9899999983608723,
+      "medianCpuMs": 0.705000001937151,
+      "p95RenderMs": 0.9950000010430813,
+      "calls": 279,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8249999992549419,
+      "medianCpuMs": 0.705000001937151,
+      "p95RenderMs": 0.8350000008940697,
+      "calls": 297,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.4299999997019768,
+      "medianCpuMs": 0.6950000002980232,
+      "p95RenderMs": 1.4349999986588955,
+      "calls": 265,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.4400000013411045,
+      "medianCpuMs": 0.7199999988079071,
+      "p95RenderMs": 1.4450000002980232,
+      "calls": 289,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.050000000745058,
+      "medianCpuMs": 0.7250000014901161,
+      "p95RenderMs": 1.0549999997019768,
+      "calls": 300,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7700000032782555,
+      "medianCpuMs": 0.7150000035762787,
+      "p95RenderMs": 0.7750000022351742,
+      "calls": 306,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9549999982118607,
+      "medianCpuMs": 0.9050000011920929,
+      "p95RenderMs": 0.9649999998509884,
+      "calls": 440,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9450000002980232,
+      "medianCpuMs": 0.875,
+      "p95RenderMs": 0.9500000029802322,
+      "calls": 476,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9899999983608723,
+      "medianCpuMs": 0.9250000007450581,
+      "p95RenderMs": 0.9950000010430813,
+      "calls": 453,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0600000023841858,
+      "medianCpuMs": 0.9100000001490116,
+      "p95RenderMs": 1.0650000013411045,
+      "calls": 489,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9950000010430813,
+      "medianCpuMs": 0.8649999983608723,
+      "p95RenderMs": 1,
+      "calls": 372,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5650933918918335,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.03700710953715323,
+        -0.7061377159034347,
+        -0.037007109546525856,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.75,
+      "medianCpuMs": 0.7249999977648258,
+      "p95RenderMs": 0.7599999979138374,
+      "calls": 323,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.030000001192093,
+      "medianCpuMs": 0.9250000007450581,
+      "p95RenderMs": 1.0350000001490116,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0700000002980232,
+      "medianCpuMs": 0.9450000002980232,
+      "p95RenderMs": 1.0799999982118607,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2650000005960464,
+      "medianCpuMs": 1.1499999985098839,
+      "p95RenderMs": 1.2699999995529652,
+      "calls": 684,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3399999998509884,
+      "medianCpuMs": 1.2450000010430813,
+      "p95RenderMs": 1.3450000025331974,
+      "calls": 825,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1349999979138374,
+      "medianCpuMs": 1.0250000022351742,
+      "p95RenderMs": 1.1399999968707561,
+      "calls": 580,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2950000017881393,
+      "medianCpuMs": 1.1150000020861626,
+      "p95RenderMs": 1.300000000745058,
+      "calls": 687,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.074999999254942,
+      "medianCpuMs": 1.0100000016391277,
+      "p95RenderMs": 1.074999999254942,
+      "calls": 574,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2600000016391277,
+      "medianCpuMs": 1.1050000004470348,
+      "p95RenderMs": 1.2650000005960464,
+      "calls": 682,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.050000000745058,
+      "medianCpuMs": 0.9649999998509884,
+      "p95RenderMs": 1.0549999997019768,
+      "calls": 561,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1200000010430813,
+      "medianCpuMs": 1.055000003427267,
+      "p95RenderMs": 1.125,
+      "calls": 681,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1000000014901161,
+      "medianCpuMs": 1.030000001192093,
+      "p95RenderMs": 1.1000000014901161,
+      "calls": 597,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.25,
+      "medianCpuMs": 1.1349999979138374,
+      "p95RenderMs": 1.2549999989569187,
+      "calls": 696,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2900000028312206,
+      "medianCpuMs": 1.2300000004470348,
+      "p95RenderMs": 1.2950000017881393,
+      "calls": 730,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3599999994039536,
+      "medianCpuMs": 1.2600000016391277,
+      "p95RenderMs": 1.3650000020861626,
+      "calls": 854,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.4549999982118607,
+      "medianCpuMs": 1.2649999968707561,
+      "p95RenderMs": 1.4599999971687794,
+      "calls": 742,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3500000014901161,
+      "medianCpuMs": 1.2750000022351742,
+      "p95RenderMs": 1.3599999994039536,
+      "calls": 866,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3500000014901161,
+      "medianCpuMs": 1.1799999997019768,
+      "p95RenderMs": 1.3599999994039536,
+      "calls": 664,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5656942528215443,
+        -1.8299999830033893
+      ],
+      "quaternion": [
+        -0.037007109537153256,
+        -0.7061377159034347,
+        -0.03700710954652587,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1850000023841858,
+      "medianCpuMs": 1.0850000008940697,
+      "p95RenderMs": 1.1900000013411045,
+      "calls": 702,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.219999998807907,
+      "medianCpuMs": 1,
+      "p95RenderMs": 1.2250000014901161,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2349999994039536,
+      "medianCpuMs": 1.0249999985098839,
+      "p95RenderMs": 1.2549999989569187,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.425000000745058,
+      "medianCpuMs": 1.2549999989569187,
+      "p95RenderMs": 1.4299999997019768,
+      "calls": 674,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4600000008940697,
+      "medianCpuMs": 1.3350000008940697,
+      "p95RenderMs": 1.469999998807907,
+      "calls": 809,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.155000001192093,
+      "medianCpuMs": 1.1000000014901161,
+      "p95RenderMs": 1.1600000001490116,
+      "calls": 568,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2450000010430813,
+      "medianCpuMs": 1.1599999964237213,
+      "p95RenderMs": 1.2549999989569187,
+      "calls": 666,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.324999999254942,
+      "medianCpuMs": 1.1150000020861626,
+      "p95RenderMs": 1.3299999982118607,
+      "calls": 560,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3200000002980232,
+      "medianCpuMs": 1.1700000017881393,
+      "p95RenderMs": 1.324999999254942,
+      "calls": 659,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.074999999254942,
+      "medianCpuMs": 1.030000001192093,
+      "p95RenderMs": 1.0799999982118607,
+      "calls": 550,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2749999985098839,
+      "medianCpuMs": 1.1449999995529652,
+      "p95RenderMs": 1.2749999985098839,
+      "calls": 661,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.280000001192093,
+      "medianCpuMs": 1.125,
+      "p95RenderMs": 1.2850000001490116,
+      "calls": 582,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3900000005960464,
+      "medianCpuMs": 1.175000000745058,
+      "p95RenderMs": 1.3900000005960464,
+      "calls": 672,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4950000010430813,
+      "medianCpuMs": 1.3550000004470348,
+      "p95RenderMs": 1.5049999989569187,
+      "calls": 723,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.5,
+      "medianCpuMs": 1.3599999994039536,
+      "p95RenderMs": 1.5049999989569187,
+      "calls": 846,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.5950000025331974,
+      "medianCpuMs": 1.380000002682209,
+      "p95RenderMs": 1.6000000014901161,
+      "calls": 736,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.5,
+      "medianCpuMs": 1.3799999989569187,
+      "p95RenderMs": 1.5049999989569187,
+      "calls": 859,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.430000003427267,
+      "medianCpuMs": 1.294999998062849,
+      "p95RenderMs": 1.4350000023841858,
+      "calls": 652,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.56545464722115,
+        -1.8299999830033893
+      ],
+      "quaternion": [
+        -0.03700710953715323,
+        -0.7061377159034347,
+        -0.03700710954652586,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 1,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.324999999254942,
+      "medianCpuMs": 1.1700000017881393,
+      "p95RenderMs": 1.330000001937151,
+      "calls": 683,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6599999964237213,
+      "medianCpuMs": 0.6050000004470348,
+      "p95RenderMs": 0.6649999991059303,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.5950000025331974,
+      "medianCpuMs": 0.5799999982118607,
+      "p95RenderMs": 0.6000000014901161,
+      "calls": 270,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7800000011920929,
+      "medianCpuMs": 0.7649999968707561,
+      "p95RenderMs": 0.7850000001490116,
+      "calls": 425,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7450000010430813,
+      "medianCpuMs": 0.7250000014901161,
+      "p95RenderMs": 0.7549999989569187,
+      "calls": 380,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.744999997317791,
+      "medianCpuMs": 0.6550000011920929,
+      "p95RenderMs": 0.75,
+      "calls": 299,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6550000011920929,
+      "medianCpuMs": 0.6299999989569187,
+      "p95RenderMs": 0.6600000001490116,
+      "calls": 282,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7300000004470348,
+      "medianCpuMs": 0.6499999985098839,
+      "p95RenderMs": 0.7300000004470348,
+      "calls": 293,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6449999995529652,
+      "medianCpuMs": 0.6299999989569187,
+      "p95RenderMs": 0.6500000022351742,
+      "calls": 275,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6899999976158142,
+      "medianCpuMs": 0.6349999979138374,
+      "p95RenderMs": 0.6950000002980232,
+      "calls": 287,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.625,
+      "medianCpuMs": 0.5950000025331974,
+      "p95RenderMs": 0.630000002682209,
+      "calls": 263,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.705000001937151,
+      "medianCpuMs": 0.6500000022351742,
+      "p95RenderMs": 0.7100000008940697,
+      "calls": 301,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6850000023841858,
+      "medianCpuMs": 0.6499999985098839,
+      "p95RenderMs": 0.6999999992549419,
+      "calls": 295,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8399999998509884,
+      "medianCpuMs": 0.8049999997019768,
+      "p95RenderMs": 0.8449999988079071,
+      "calls": 464,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8700000010430813,
+      "medianCpuMs": 0.8200000002980232,
+      "p95RenderMs": 0.875,
+      "calls": 428,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8700000010430813,
+      "medianCpuMs": 0.8200000002980232,
+      "p95RenderMs": 0.8799999989569187,
+      "calls": 476,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.8849999979138374,
+      "medianCpuMs": 0.8350000008940697,
+      "p95RenderMs": 0.8900000005960464,
+      "calls": 440,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.6899999976158142,
+      "medianCpuMs": 0.6500000022351742,
+      "p95RenderMs": 0.6900000013411045,
+      "calls": 312,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "p95CpuMs": 0.7850000001490116,
+      "medianCpuMs": 0.75,
+      "p95RenderMs": 0.7899999991059303,
+      "calls": 361,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.564587817842725,
+        -1.8299999830033893
+      ],
+      "quaternion": [
+        -0.037007109537153256,
+        -0.7061377159034347,
+        -0.03700710954652587,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.6950000002980232,
+      "medianCpuMs": 0.6650000028312206,
+      "p95RenderMs": 0.7049999982118607,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.4299999997019768,
+      "medianCpuMs": 0.6750000007450581,
+      "p95RenderMs": 1.4350000023841858,
+      "calls": 273,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0249999985098839,
+      "medianCpuMs": 0.8600000031292439,
+      "p95RenderMs": 1.030000001192093,
+      "calls": 433,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.8599999994039536,
+      "medianCpuMs": 0.8150000013411045,
+      "p95RenderMs": 0.8700000010430813,
+      "calls": 388,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9350000023841858,
+      "medianCpuMs": 0.7250000014901161,
+      "p95RenderMs": 0.9450000002980232,
+      "calls": 303,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.625,
+      "medianCpuMs": 0.7750000022351742,
+      "p95RenderMs": 1.630000002682209,
+      "calls": 286,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7549999989569187,
+      "medianCpuMs": 0.7149999998509884,
+      "p95RenderMs": 0.7650000005960464,
+      "calls": 297,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9299999997019768,
+      "medianCpuMs": 0.7000000029802322,
+      "p95RenderMs": 0.9400000013411045,
+      "calls": 279,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.3999999985098839,
+      "medianCpuMs": 0.7199999988079071,
+      "p95RenderMs": 1.405000001192093,
+      "calls": 289,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.3799999989569187,
+      "medianCpuMs": 0.7749999985098839,
+      "p95RenderMs": 1.3850000016391277,
+      "calls": 265,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.919999998062849,
+      "medianCpuMs": 0.7199999988079071,
+      "p95RenderMs": 0.9299999997019768,
+      "calls": 306,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.875,
+      "medianCpuMs": 0.7149999998509884,
+      "p95RenderMs": 0.8799999989569187,
+      "calls": 300,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9699999988079071,
+      "medianCpuMs": 0.8900000005960464,
+      "p95RenderMs": 0.9800000004470348,
+      "calls": 476,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9649999998509884,
+      "medianCpuMs": 0.919999998062849,
+      "p95RenderMs": 0.9699999988079071,
+      "calls": 440,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9699999988079071,
+      "medianCpuMs": 0.9050000011920929,
+      "p95RenderMs": 0.9800000004470348,
+      "calls": 489,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 1.0700000002980232,
+      "medianCpuMs": 0.9450000002980232,
+      "p95RenderMs": 1.0700000002980232,
+      "calls": 453,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.7549999989569187,
+      "medianCpuMs": 0.7349999994039536,
+      "p95RenderMs": 0.7599999979138374,
+      "calls": 323,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "p95CpuMs": 0.9100000001490116,
+      "medianCpuMs": 0.8550000004470348,
+      "p95RenderMs": 0.9150000028312206,
+      "calls": 372,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5638652202863497,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.03700710953715321,
+        -0.7061377159034347,
+        -0.03700710954652584,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 0.9649999998509884,
+      "medianCpuMs": 0.9350000023841858,
+      "p95RenderMs": 0.9699999988079071,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 0.9450000002980232,
+      "medianCpuMs": 0.919999998062849,
+      "p95RenderMs": 0.9499999992549419,
+      "calls": 527,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3200000002980232,
+      "medianCpuMs": 1.25,
+      "p95RenderMs": 1.3200000002980232,
+      "calls": 825,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2349999994039536,
+      "medianCpuMs": 1.1549999974668026,
+      "p95RenderMs": 1.2450000010430813,
+      "calls": 684,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1449999995529652,
+      "medianCpuMs": 1.094999998807907,
+      "p95RenderMs": 1.1499999985098839,
+      "calls": 687,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0799999982118607,
+      "medianCpuMs": 1.0249999985098839,
+      "p95RenderMs": 1.0850000008940697,
+      "calls": 580,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1400000005960464,
+      "medianCpuMs": 1.0899999998509884,
+      "p95RenderMs": 1.1449999995529652,
+      "calls": 682,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0600000023841858,
+      "medianCpuMs": 1.0100000016391277,
+      "p95RenderMs": 1.0650000013411045,
+      "calls": 574,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1299999989569187,
+      "medianCpuMs": 1.0700000002980232,
+      "p95RenderMs": 1.1349999979138374,
+      "calls": 681,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.0150000005960464,
+      "medianCpuMs": 0.9700000025331974,
+      "p95RenderMs": 1.0249999985098839,
+      "calls": 561,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.1600000001490116,
+      "medianCpuMs": 1.1049999967217445,
+      "p95RenderMs": 1.1649999991059303,
+      "calls": 696,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.080000001937151,
+      "medianCpuMs": 1.0350000001490116,
+      "p95RenderMs": 1.0849999971687794,
+      "calls": 597,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3299999982118607,
+      "medianCpuMs": 1.2749999985098839,
+      "p95RenderMs": 1.3349999971687794,
+      "calls": 854,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2699999995529652,
+      "medianCpuMs": 1.2250000014901161,
+      "p95RenderMs": 1.2700000032782555,
+      "calls": 730,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3550000004470348,
+      "medianCpuMs": 1.2950000017881393,
+      "p95RenderMs": 1.3599999994039536,
+      "calls": 866,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.3150000013411045,
+      "medianCpuMs": 1.255000002682209,
+      "p95RenderMs": 1.324999999254942,
+      "calls": 742,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.155000001192093,
+      "medianCpuMs": 1.0899999998509884,
+      "p95RenderMs": 1.1600000001490116,
+      "calls": 702,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "p95CpuMs": 1.2399999983608723,
+      "medianCpuMs": 1.1600000001490116,
+      "p95RenderMs": 1.2450000010430813,
+      "calls": 664,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5639299475820312,
+        -1.8299999830033895
+      ],
+      "quaternion": [
+        -0.037007109537153214,
+        -0.7061377159034347,
+        -0.03700710954652585,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.069999996572733,
+      "medianCpuMs": 1.0100000016391277,
+      "p95RenderMs": 1.0700000002980232,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.050000000745058,
+      "medianCpuMs": 0.9849999994039536,
+      "p95RenderMs": 1.0549999997019768,
+      "calls": 513,
+      "position": [
+        40.08,
+        11.5,
+        20
+      ],
+      "quaternion": [
+        -0.23480859682463234,
+        -0.14106448049851006,
+        -0.034462584510012925,
+        0.9611337396365934
+      ],
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3799999989569187,
+      "medianCpuMs": 1.3200000002980232,
+      "p95RenderMs": 1.3900000005960464,
+      "calls": 809,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3200000002980232,
+      "medianCpuMs": 1.2400000020861626,
+      "p95RenderMs": 1.324999999254942,
+      "calls": 674,
+      "shot": "chase",
+      "position": [
+        35.800000000000004,
+        4.6,
+        6.2
+      ],
+      "quaternion": [
+        -0.1415542276798043,
+        -0.3773139491478176,
+        -0.05847855612497852,
+        0.9133328215267368
+      ],
+      "fov": 56,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2100000008940697,
+      "medianCpuMs": 1.169999998062849,
+      "p95RenderMs": 1.219999998807907,
+      "calls": 666,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.1350000016391277,
+      "medianCpuMs": 1.094999998807907,
+      "p95RenderMs": 1.1400000005960464,
+      "calls": 568,
+      "shot": "front",
+      "position": [
+        47.800000000000004,
+        4.2,
+        6.2
+      ],
+      "quaternion": [
+        -0.14403103768986117,
+        0.31909911726421497,
+        0.04913302538484735,
+        0.935423304905171
+      ],
+      "fov": 52,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2300000004470348,
+      "medianCpuMs": 1.1650000028312206,
+      "p95RenderMs": 1.2349999994039536,
+      "calls": 659,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.1900000013411045,
+      "medianCpuMs": 1.0950000025331974,
+      "p95RenderMs": 1.1900000013411045,
+      "calls": 560,
+      "shot": "ground",
+      "position": [
+        46.1,
+        1.2,
+        4.7
+      ],
+      "quaternion": [
+        -0.01570462534559692,
+        0.27131917457304683,
+        0.004427662549613584,
+        0.9623511137085581
+      ],
+      "fov": 61,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.1849999986588955,
+      "medianCpuMs": 1.1349999979138374,
+      "p95RenderMs": 1.1900000013411045,
+      "calls": 661,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.119999997317791,
+      "medianCpuMs": 1.0450000017881393,
+      "p95RenderMs": 1.1200000010430813,
+      "calls": 550,
+      "shot": "drone",
+      "position": [
+        36.6,
+        14.5,
+        8
+      ],
+      "quaternion": [
+        -0.38482702995946866,
+        -0.2925364604619964,
+        -0.13004181364977196,
+        0.8656903043326863
+      ],
+      "fov": 51,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2250000014901161,
+      "medianCpuMs": 1.1600000001490116,
+      "p95RenderMs": 1.2300000004470348,
+      "calls": 672,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.1449999995529652,
+      "medianCpuMs": 1.1050000004470348,
+      "p95RenderMs": 1.1499999985098839,
+      "calls": 582,
+      "shot": "mounted",
+      "position": [
+        41.050000000000004,
+        1.05,
+        0.3700000000000001
+      ],
+      "quaternion": [
+        -0.02160452785056581,
+        -0.3320456168778721,
+        -0.007607424600419882,
+        0.9429851959492772
+      ],
+      "fov": 66,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4249999970197678,
+      "medianCpuMs": 1.3599999994039536,
+      "p95RenderMs": 1.425000000745058,
+      "calls": 846,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3900000005960464,
+      "medianCpuMs": 1.344999998807907,
+      "p95RenderMs": 1.4000000022351742,
+      "calls": 723,
+      "shot": "tripod",
+      "position": [
+        58.4757469424013,
+        2.3,
+        4.9
+      ],
+      "quaternion": [
+        -0.03295373237818988,
+        0.5606134673945081,
+        0.02233569891270222,
+        0.8271201292752671
+      ],
+      "fov": 57.28088015838824,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.449999999254942,
+      "medianCpuMs": 1.3799999989569187,
+      "p95RenderMs": 1.4549999982118607,
+      "calls": 859,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.4950000010430813,
+      "medianCpuMs": 1.369999997317791,
+      "p95RenderMs": 1.5,
+      "calls": 736,
+      "shot": "crowd",
+      "position": [
+        58.4757469424013,
+        4.4,
+        8.5
+      ],
+      "quaternion": [
+        -0.07733377493537968,
+        0.4869123540034761,
+        0.0433341065219626,
+        0.8689407355999491
+      ],
+      "fov": 59.69467882432627,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "baseline",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.2250000014901161,
+      "medianCpuMs": 1.175000000745058,
+      "p95RenderMs": 1.2300000004470348,
+      "calls": 683,
+      "shot": "helmet",
+      "position": [
+        41.85,
+        1.55,
+        -1.83
+      ],
+      "quaternion": [
+        -0.024167703498321955,
+        -0.6504331603897485,
+        -0.020713602186674077,
+        0.758896285837184
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 440,
+        "textures": 89
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    },
+    {
+      "run": 2,
+      "version": "candidate",
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "p95CpuMs": 1.3399999998509884,
+      "medianCpuMs": 1.2749999985098839,
+      "p95RenderMs": 1.344999998807907,
+      "calls": 652,
+      "shot": "firstPerson",
+      "position": [
+        41.84999996377573,
+        1.5647243941202056,
+        -1.8299999830033893
+      ],
+      "quaternion": [
+        -0.03700710953715323,
+        -0.7061377159034347,
+        -0.03700710954652586,
+        0.7061377159346446
+      ],
+      "fov": 68,
+      "memory": {
+        "geometries": 433,
+        "textures": 91
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "isolated": true
+    }
+  ],
+  "comparisons": [
+    {
+      "mode": "normal",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.6749999970197678,
+      "candidateP95CpuMs": 0.6500000022351742,
+      "changePercent": -3.7037029474033423,
+      "baselineMedianCpuMs": 0.6000000014901161,
+      "candidateMedianCpuMs": 0.5949999988079071,
+      "medianChangePercent": -0.8333337782985617
+    },
+    {
+      "mode": "chase",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.8900000005960464,
+      "candidateP95CpuMs": 0.8599999994039536,
+      "changePercent": -3.370786648539492,
+      "baselineMedianCpuMs": 0.7749999985098839,
+      "candidateMedianCpuMs": 0.7400000020861626,
+      "medianChangePercent": -4.516128579486045
+    },
+    {
+      "mode": "front",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.6950000002980232,
+      "candidateP95CpuMs": 0.7250000014901161,
+      "changePercent": 4.31654693226311,
+      "baselineMedianCpuMs": 0.6500000022351742,
+      "candidateMedianCpuMs": 0.6449999995529652,
+      "medianChangePercent": -0.7692311792331319
+    },
+    {
+      "mode": "ground",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.7300000004470348,
+      "candidateP95CpuMs": 0.6649999991059303,
+      "changePercent": -8.904109767301371,
+      "baselineMedianCpuMs": 0.6449999995529652,
+      "candidateMedianCpuMs": 0.630000002682209,
+      "medianChangePercent": -2.3255809118065573
+    },
+    {
+      "mode": "drone",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.6950000002980232,
+      "candidateP95CpuMs": 0.625,
+      "changePercent": -10.071942484605255,
+      "baselineMedianCpuMs": 0.6349999979138374,
+      "candidateMedianCpuMs": 0.5999999977648258,
+      "medianChangePercent": -5.511811065196371
+    },
+    {
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.705000001937151,
+      "candidateP95CpuMs": 0.6850000023841858,
+      "changePercent": -2.8368793614199306,
+      "baselineMedianCpuMs": 0.6500000022351742,
+      "candidateMedianCpuMs": 0.6399999968707561,
+      "medianChangePercent": -1.5384623584662638
+    },
+    {
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.8399999998509884,
+      "candidateP95CpuMs": 0.8700000010430813,
+      "changePercent": 3.5714287139779533,
+      "baselineMedianCpuMs": 0.8049999997019768,
+      "candidateMedianCpuMs": 0.8200000002980232,
+      "medianChangePercent": 1.8633541119999597
+    },
+    {
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.8549999967217445,
+      "candidateP95CpuMs": 0.8849999979138374,
+      "changePercent": 3.5087720827040147,
+      "baselineMedianCpuMs": 0.8049999997019768,
+      "candidateMedianCpuMs": 0.8350000008940697,
+      "medianChangePercent": 3.7267082239999194
+    },
+    {
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "clear",
+      "baselineP95CpuMs": 0.6900000013411045,
+      "candidateP95CpuMs": 0.8499999977648258,
+      "changePercent": 23.188405233730514,
+      "baselineMedianCpuMs": 0.6449999995529652,
+      "candidateMedianCpuMs": 0.75,
+      "medianChangePercent": 16.279069848032247
+    },
+    {
+      "mode": "normal",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.7199999988079071,
+      "candidateP95CpuMs": 0.6849999986588955,
+      "changePercent": -4.861111139855634,
+      "baselineMedianCpuMs": 0.6650000028312206,
+      "candidateMedianCpuMs": 0.6499999985098839,
+      "medianChangePercent": -2.2556397379661086
+    },
+    {
+      "mode": "chase",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.8999999985098839,
+      "candidateP95CpuMs": 0.9600000008940697,
+      "changePercent": 6.666666942614086,
+      "baselineMedianCpuMs": 0.8449999988079071,
+      "candidateMedianCpuMs": 0.8249999992549419,
+      "medianChangePercent": -2.3668638557609922
+    },
+    {
+      "mode": "front",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.0049999989569187,
+      "candidateP95CpuMs": 1.219999998807907,
+      "changePercent": 21.39303483324728,
+      "baselineMedianCpuMs": 0.7349999994039536,
+      "candidateMedianCpuMs": 0.7250000014901161,
+      "medianChangePercent": -1.3605439349587578
+    },
+    {
+      "mode": "ground",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.7850000001490116,
+      "candidateP95CpuMs": 0.9299999997019768,
+      "changePercent": 18.471337519164432,
+      "baselineMedianCpuMs": 0.7100000008940697,
+      "candidateMedianCpuMs": 0.7000000029802322,
+      "medianChangePercent": -1.4084504086260385
+    },
+    {
+      "mode": "drone",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.3999999985098839,
+      "candidateP95CpuMs": 1.4299999997019768,
+      "changePercent": 2.1428572302874205,
+      "baselineMedianCpuMs": 0.7199999988079071,
+      "candidateMedianCpuMs": 0.75,
+      "medianChangePercent": 4.1666668391338035
+    },
+    {
+      "mode": "mounted",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.9149999991059303,
+      "candidateP95CpuMs": 0.875,
+      "changePercent": -4.371584606012602,
+      "baselineMedianCpuMs": 0.7150000035762787,
+      "candidateMedianCpuMs": 0.7149999998509884,
+      "medianChangePercent": -5.210196163396574e-7
+    },
+    {
+      "mode": "tripod",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.9450000002980232,
+      "candidateP95CpuMs": 0.9649999998509884,
+      "changePercent": 2.1164020684294016,
+      "baselineMedianCpuMs": 0.875,
+      "candidateMedianCpuMs": 0.919999998062849,
+      "medianChangePercent": 5.142856921468453
+    },
+    {
+      "mode": "crowd",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.9950000010430813,
+      "candidateP95CpuMs": 1.0700000002980232,
+      "changePercent": 7.537688359428918,
+      "baselineMedianCpuMs": 0.9050000011920929,
+      "candidateMedianCpuMs": 0.9450000002980232,
+      "medianChangePercent": 4.419889398148191
+    },
+    {
+      "mode": "firstPerson",
+      "quality": "low",
+      "weather": "rain",
+      "baselineP95CpuMs": 0.7549999989569187,
+      "candidateP95CpuMs": 0.9100000001490116,
+      "changePercent": 20.529801510759647,
+      "baselineMedianCpuMs": 0.7349999994039536,
+      "candidateMedianCpuMs": 0.8550000004470348,
+      "medianChangePercent": 16.32653076740067
+    },
+    {
+      "mode": "normal",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.0700000002980232,
+      "candidateP95CpuMs": 1.030000001192093,
+      "changePercent": -3.7383176724102074,
+      "baselineMedianCpuMs": 0.9450000002980232,
+      "candidateMedianCpuMs": 0.9250000007450581,
+      "medianChangePercent": -2.1164020684294016
+    },
+    {
+      "mode": "chase",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.3399999998509884,
+      "candidateP95CpuMs": 1.2650000005960464,
+      "changePercent": -5.59701487039419,
+      "baselineMedianCpuMs": 1.25,
+      "candidateMedianCpuMs": 1.1549999974668026,
+      "medianChangePercent": -7.600000202655788
+    },
+    {
+      "mode": "front",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.1500000022351742,
+      "candidateP95CpuMs": 1.1349999979138374,
+      "changePercent": -1.3043481993202044,
+      "baselineMedianCpuMs": 1.1000000014901161,
+      "candidateMedianCpuMs": 1.0250000022351742,
+      "medianChangePercent": -6.818181741213014
+    },
+    {
+      "mode": "ground",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.1799999997019768,
+      "candidateP95CpuMs": 1.0700000002980232,
+      "changePercent": -9.322033850147072,
+      "baselineMedianCpuMs": 1.0899999998509884,
+      "candidateMedianCpuMs": 1.0100000016391277,
+      "medianChangePercent": -7.3394493782382835
+    },
+    {
+      "mode": "drone",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.125,
+      "candidateP95CpuMs": 1.0250000022351742,
+      "changePercent": -8.888888690206741,
+      "baselineMedianCpuMs": 1.069999996572733,
+      "candidateMedianCpuMs": 0.9700000025331974,
+      "medianChangePercent": -9.345793865405682
+    },
+    {
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.1850000023841858,
+      "candidateP95CpuMs": 1.1000000014901161,
+      "changePercent": -7.172995841607777,
+      "baselineMedianCpuMs": 1.1049999967217445,
+      "candidateMedianCpuMs": 1.0350000001490116,
+      "medianChangePercent": -6.334841337593233
+    },
+    {
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.3599999994039536,
+      "candidateP95CpuMs": 1.2900000028312206,
+      "changePercent": -5.147058573780283,
+      "baselineMedianCpuMs": 1.2700000032782555,
+      "candidateMedianCpuMs": 1.2300000004470348,
+      "medianChangePercent": -3.14960651401327
+    },
+    {
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.3550000004470348,
+      "candidateP95CpuMs": 1.3399999998509884,
+      "changePercent": -1.1070111137341465,
+      "baselineMedianCpuMs": 1.2899999991059303,
+      "candidateMedianCpuMs": 1.2599999979138374,
+      "medianChangePercent": -2.3255814893709426
+    },
+    {
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "clear",
+      "baselineP95CpuMs": 1.155000001192093,
+      "candidateP95CpuMs": 1.2549999989569187,
+      "changePercent": 8.658008455551025,
+      "baselineMedianCpuMs": 1.0850000008940697,
+      "candidateMedianCpuMs": 1.1700000017881393,
+      "medianChangePercent": 7.834101458435705
+    },
+    {
+      "mode": "normal",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.2349999994039536,
+      "candidateP95CpuMs": 1.1350000016391277,
+      "changePercent": -8.097165814824992,
+      "baselineMedianCpuMs": 1.0199999995529652,
+      "candidateMedianCpuMs": 1,
+      "medianChangePercent": -1.9607842707578982
+    },
+    {
+      "mode": "chase",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.4600000008940697,
+      "candidateP95CpuMs": 1.375,
+      "changePercent": -5.821917865891624,
+      "baselineMedianCpuMs": 1.3250000029802322,
+      "candidateMedianCpuMs": 1.2400000020861626,
+      "medianChangePercent": -6.415094392670562
+    },
+    {
+      "mode": "front",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.2450000010430813,
+      "candidateP95CpuMs": 1.155000001192093,
+      "changePercent": -7.2289156446253,
+      "baselineMedianCpuMs": 1.169999998062849,
+      "candidateMedianCpuMs": 1.1000000014901161,
+      "medianChangePercent": -5.982905699882979
+    },
+    {
+      "mode": "ground",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.3200000002980232,
+      "candidateP95CpuMs": 1.324999999254942,
+      "changePercent": 0.37878779968105736,
+      "baselineMedianCpuMs": 1.1700000017881393,
+      "candidateMedianCpuMs": 1.1150000020861626,
+      "medianChangePercent": -4.700854668198195
+    },
+    {
+      "mode": "drone",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.2650000005960464,
+      "candidateP95CpuMs": 1.119999997317791,
+      "changePercent": -11.462450846635097,
+      "baselineMedianCpuMs": 1.1349999979138374,
+      "candidateMedianCpuMs": 1.0450000017881393,
+      "medianChangePercent": -7.929515091728689
+    },
+    {
+      "mode": "mounted",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.3650000020861626,
+      "candidateP95CpuMs": 1.280000001192093,
+      "changePercent": -6.227106283088801,
+      "baselineMedianCpuMs": 1.1649999991059303,
+      "candidateMedianCpuMs": 1.1200000010430813,
+      "medianChangePercent": -3.862660780891325
+    },
+    {
+      "mode": "tripod",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.4749999977648258,
+      "candidateP95CpuMs": 1.4950000010430813,
+      "changePercent": 1.3559324276991802,
+      "baselineMedianCpuMs": 1.3599999994039536,
+      "candidateMedianCpuMs": 1.3550000004470348,
+      "medianChangePercent": -0.36764698228750614
+    },
+    {
+      "mode": "crowd",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.4950000010430813,
+      "candidateP95CpuMs": 1.5950000025331974,
+      "changePercent": 6.688963305708673,
+      "baselineMedianCpuMs": 1.3799999989569187,
+      "candidateMedianCpuMs": 1.3799999989569187,
+      "medianChangePercent": 0
+    },
+    {
+      "mode": "firstPerson",
+      "quality": "high",
+      "weather": "rain",
+      "baselineP95CpuMs": 1.2250000014901161,
+      "candidateP95CpuMs": 1.430000003427267,
+      "changePercent": 16.734694015329342,
+      "baselineMedianCpuMs": 1.1700000017881393,
+      "candidateMedianCpuMs": 1.294999998062849,
+      "medianChangePercent": 10.683760349031557
+    }
+  ],
+  "resources": [
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    },
+    {
+      "geometries": 405,
+      "textures": 91
+    }
+  ],
+  "stableResources": true
+}

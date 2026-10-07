@@ -11,16 +11,18 @@ export class Controls {
   private touchBinding: AbortController | null = null;
   constructor(public settings: Settings) {
     window.addEventListener('keydown', (e) => {
+      if (e.defaultPrevented) return;
+      const target = e.target instanceof HTMLElement ? e.target : null;
       if (this.onKey) {
         e.preventDefault();
         this.onKey(e.code);
         return;
       }
-      if ((e.target as HTMLElement)?.closest('input,select,textarea,[contenteditable="true"]'))
+      if (target?.isContentEditable || target?.closest('input,select,textarea'))
         return;
       // Let the environment buttons use native Enter/Space activation instead of starting a race.
       if (
-        (e.target as HTMLElement)?.closest('button, a') &&
+        target?.closest('button, a') &&
         (e.code === 'Enter' || e.code === 'Space')
       )
         return;

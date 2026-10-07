@@ -17,6 +17,7 @@ Funciona como sitio estático: no necesita backend, cuentas ni servicios externo
 | Enter           | Iniciar, pausar o continuar                                                          |
 | Escape          | Pausar                                                                               |
 | C               | Cambiar entre cámara normal y cinematográfica durante una repetición                 |
+| 1–9             | En cinematográfica: Mezcla, Primera persona, Seguimiento, Frontal, Rasante, Dron, Montada, Trípode y Tribuna; también con teclado numérico |
 | Rueda del mouse | Zoom de cámara                                                                       |
 
 También hay controles táctiles, gamepad y teclas reasignables. Las rampas producen los saltos y los sectores mojados con aspersores enfrían el motor.
@@ -32,6 +33,10 @@ Obtener la Motoneta habilita el **Torneo Tanque**: cinco pistas largas de 6144 u
 Ganar el campeonato desbloquea el **Tanque**, una scooter inspirada en la Yamaha Axis de la referencia, para ese perfil. Su carrocería es fija y se personaliza con un color principal y uno secundario; asiento, piso, neumáticos y metales conservan sus materiales. El piloto mantiene sus piezas y colores compartidos. El premio abre el garaje con el Tanque seleccionado y se equipa al Guardar. Los tres vehículos comparten física, sonido y récords; repeticiones y fantasmas conservan su vehículo y colores originales. Los guardados de formato 3 existentes incorporan el Tanque bloqueado sin perder datos.
 
 Las repeticiones pueden verse con cámaras cinematográficas y el tema de resultados. En Inicio, tras 60 segundos de inactividad en un equipo no móvil, se reproducen automáticamente las marcas del perfil activo; Escape vuelve al menú. Esta opción se puede desactivar en Ajustes → Interfaz.
+
+Las repeticiones manuales comienzan con cámara normal. Activá cinematográfica con C o su botón y elegí una vista con el selector o las teclas 1–9. La vista se mantiene hasta elegir otra; 1 vuelve a Mezcla. C conserva la selección durante esa repetición, mientras que abrir o reiniciar una la restablece a Mezcla. La primera persona sigue al conductor durante saltos, loops y caídas, mostrando cuerpo y moto. Movimiento reducido estabiliza su orientación. Música y cámara lenta continúan en todas las vistas; sus encuadres tienen zoom predefinido.
+
+Las vistas manuales conservan su encuadre aunque una pieza tape brevemente al conductor. Trípode y Tribuna cambian de punto cuando el conductor lo pasa o se aleja demasiado, sin reubicaciones por obstrucciones.
 
 Las caídas conservan la inercia de la moto: puede rodar hasta salir de una rampa, mientras el conductor se reincorpora y vuelve a montarla.
 

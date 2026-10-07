@@ -488,10 +488,12 @@ export class Stadium {
     const spare: Sector[] = [];
     for (const sector of this.sectors) {
       if (needed.has(sector.absolute)) {
+        if (!sector.root.parent) this.root.add(sector.root);
         sector.root.visible = true;
         active.set(sector.absolute, sector);
       } else {
         sector.root.visible = false;
+        sector.root.removeFromParent();
         spare.push(sector);
       }
     }
@@ -501,6 +503,7 @@ export class Stadium {
         sector = spare.pop() ?? this.createSector();
         this.configure(sector, absolute);
       }
+      if (!sector.root.parent) this.root.add(sector.root);
       const reaction = this.motion.reactions.get(sector.logical);
       sector.reaction.value.set(reaction?.time ?? -10, reaction?.strength ?? 0);
       sector.people.forEach((mesh) => { mesh.visible = audienceVisible; });
