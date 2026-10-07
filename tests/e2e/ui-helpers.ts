@@ -44,3 +44,19 @@ export async function ready(page: Page) {
 export async function editorTab(page: Page, tab: string) {
   await page.locator(`[data-action="editor-tab"][data-value="${tab}"]`).click();
 }
+
+/** Exercise the current music controller without depending on a retired review page. */
+export async function musicFixture(page: Page) {
+  await page.route('**/audio-test-fixture', (route) => route.fulfill({
+    contentType: 'text/html', body: '<button id="activate">Activar audio</button>',
+  }));
+  await page.goto('/audio-test-fixture');
+  await page.locator('#activate').click();
+  await page.evaluate(async () => {
+    const path = '/src/audio/music.ts';
+    const { MusicAudio } = await import(/* @vite-ignore */ path);
+    const ctx = new AudioContext();
+    await ctx.resume();
+    (window as any).__musicFixture = new MusicAudio(ctx, ctx.destination);
+  });
+}

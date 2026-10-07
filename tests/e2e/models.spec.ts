@@ -26,7 +26,7 @@ for(const vehicle of ['motocross','motoneta']) test(`loading blocks race entry a
   expect(requests).toBe(2);
 });
 
-test('both quality presets use the new model, with no extra asset requests on switching', async ({
+test('quality switches reuse all vehicle models without extra asset requests', async ({
   page,
 }) => {
   const errors: string[] = [],
@@ -38,6 +38,10 @@ test('both quality presets use the new model, with no extra asset requests on sw
   await page.goto('/');
   await nav(page, 'quick');
   await expect(page.locator('#model-status')).toBeHidden();
+  const loaded = [...requests];
+  expect(loaded.filter((url) => url.endsWith('.glb')).map((url) => new URL(url).pathname.split('/').at(-1)).sort()).toEqual([
+    'motocross-high.glb', 'motocross-low.glb', 'motoneta-high.glb', 'motoneta-low.glb', 'tanque-high.glb', 'tanque-low.glb',
+  ]);
   await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
   await page.locator('[data-action="settings-tab"][data-value="image"]').click();
   for (const quality of ['low', 'high', 'low']) {
@@ -49,6 +53,6 @@ test('both quality presets use the new model, with no extra asset requests on sw
   await page.getByRole('button', { name: /Comenzar/ }).click();
   await page.waitForFunction(() => (window as any).__motoneta.race?.phase === 'racing');
   expect(await page.evaluate(() => (window as any).__motoneta.race.riders.length)).toBe(4);
-  expect(requests.length).toBe(7);
+  expect(requests).toEqual(loaded);
   expect(errors).toEqual([]);
 });

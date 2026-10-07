@@ -20,8 +20,6 @@ export const LOOP_APPROACH = 320;
 export const LOOP_RUNOUT = 320;
 export const LOOP_SPACING = LOOP_APPROACH + LOOP_LENGTH + LOOP_RUNOUT;
 export const LOOP_FINISH_MARGIN = 24; // Full bike envelope beside the reserved structure volume.
-export const LOOP_ENTRY_LANE = 3;
-export const LOOP_EXIT_LANES = manifest.exitLanes.map(lane => lane - 1);
 export const LOOP_EXIT_CENTER_LANE = manifest.exitCenterLane - 1;
 export const LOOP_GEOMETRY_VERSION = manifest.geometryVersion;
 // Tire support uses 98% of the real ribbon width, without extending past its edges.
@@ -58,7 +56,6 @@ export const LOOP_SAMPLES: LoopSample[] = manifest.samples.map((s, i, all) => {
 export const LOOP_DISTANCE = distance;
 export const LOOP_ENTRY_X = LOOP_SAMPLES[0].position[0];
 export const LOOP_EXIT_X = LOOP_SAMPLES.at(-1)!.position[0];
-export const LOOP_EXIT_HEIGHT = LOOP_SAMPLES.at(-1)!.position[1];
 export const LOOP_HEIGHT = manifest.height / WORLD_SCALE;
 export const LOOP_MANIFEST = manifest;
 export function sampleLoop(s: number): LoopSample {

@@ -14,10 +14,6 @@ export interface EffectAnchors {
   readonly rearContact: boolean;
   readonly frontContact: boolean;
 }
-// Coordinates from the editable motocross source, in the chassis coordinate system.
-export const EXHAUST_POINT = [-0.649, 0.731, -0.174] as const;
-export const ENGINE_POINT = [0.06, 0.54, 0] as const;
-
 /** Uses the same support solver, wheel radius and rear-axle pivot as Bike.applyPose. */
 export function effectAnchors(p: Readonly<Rider>, track: Track, visual: VehicleVisual = VEHICLE_VISUALS.motocross): EffectAnchors {
   const x = p.x * SCALE,

@@ -24,7 +24,6 @@ export interface SaveState {
   motonetaSessions: Record<string, CompetitionSession>;
   tanqueSessions: Record<string, CompetitionSession>;
   draft: MapDesign;
-  terrainNoticePending?: boolean;
 }
 const initial = (): SaveState => ({
   ...FILE_HEADER,
@@ -69,8 +68,7 @@ export class GameStore {
               if (stored) {
                 data.put({ ...stored, ...FILE_HEADER,
                   maps: stored.maps.map(validateMap), draft: validateMap(stored.draft),
-                  records: [], sessions: {}, motonetaSessions: {}, tanqueSessions: {},
-                  terrainNoticePending: true }, 'state');
+                  records: [], sessions: {}, motonetaSessions: {}, tanqueSessions: {} }, 'state');
               }
               tx.objectStore('replays').clear();
             } catch { tx.abort(); }
@@ -102,13 +100,10 @@ export class GameStore {
       await this.update(() => {});
     }
   }
-  async consumeTerrainNotice() {
-    if (!this.state.terrainNoticePending) return false;
-    await this.update((state) => { state.terrainNoticePending = false; });
-    return true;
-  }
   private async invalidateObsoleteLoops(stored: SaveState) {
     const next = structuredClone(this.state);
+    // Retire the old announcement metadata in the same atomic cleanup transaction.
+    Reflect.deleteProperty(next, 'terrainNoticePending');
     const obsoleteSession = (session: CompetitionSession) =>
       session.courses.some(course => !compatibleLoopGeometry(course)) ||
       session.results.some(({ result }) => !compatibleLoopGeometry(result.config));

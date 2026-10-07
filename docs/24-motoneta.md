@@ -1,5 +1,7 @@
 # MotoNeta: identidad, contratos y refactor
 
+Este documento registra la implementación y validación del 28/09/2026. Los formatos, versiones de almacenamiento y resultados que siguen son históricos; el contrato vigente está en el [README del proyecto](../README.md).
+
 MotoNeta es el nombre del proyecto. El logo se escribe **MOTONETA**, con `MOTO` y `NETA` en los dos colores de la interfaz, y el favicon usa el monograma MN. Excitebike identifica exclusivamente al juego original de Nintendo en las fuentes y atribuciones; no se alteraron esas referencias.
 
 ## Identidad compartida
@@ -8,7 +10,7 @@ MotoNeta es el nombre del proyecto. El logo se escribe **MOTONETA**, con `MOTO` 
 
 El paquete npm se llama `motoneta`; no se actualizaron dependencias ni se cambió la carpeta local. `window.__motoneta` existe solo en desarrollo. El header, los diálogos, los carteles 3D y la página de audio consumen la identidad compartida.
 
-## Datos y archivos vigentes
+## Datos y archivos de aquella versión
 
 Los ajustes se guardan en `motoneta.settings.v2`. IndexedDB `motoneta-game`, versión 2, conserva perfiles, mapas, marcas, competiciones, borrador y repeticiones. La actualización desde versión 1 vacía los datos de carrera y creación locales; el ajuste anterior se elimina. Las escrituras mantienen atomicidad, rollback, cola e idempotencia.
 
@@ -24,7 +26,7 @@ La configuración de efectos usa `vfx.race`, `vfx.tracks`, `vfx.ambient` e inten
 
 ## Verificación y evidencias
 
-Antes de modificar la física se capturaron diez carreras completas: cinco circuitos, con cero y cinco bots, semilla 1984 y entradas fijas. `tests/fixtures/motoneta-physics.json` conserva hashes de trazas y resultados. `tests/physics-regression.test.ts` y `node scripts/check-audio-physics.mjs` comparan el motor actual con esa referencia, sin ejecutar un motor retirado.
+Antes de modificar la física se capturaron diez carreras completas: cinco circuitos, con cero y cinco bots, semilla 1984 y entradas fijas. `tests/fixtures/motoneta-physics.json` conserva hashes de trazas y resultados. En aquella versión, `tests/physics-regression.test.ts` y `node scripts/check-audio-physics.mjs` comparaban el motor con esa referencia, sin ejecutar un motor retirado.
 
 Las pruebas vigentes cubren los contratos, la persistencia, el rechazo de archivos incompatibles, los nombres de descarga y las carreras y herramientas actuales. La distribución bajo una subcarpeta se comprueba con `node scripts/check-motoneta-production.mjs` después de `npm run build`.
 

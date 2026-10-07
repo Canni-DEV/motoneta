@@ -61,13 +61,6 @@ export function isAppearance(value: unknown): value is Appearance {
   );
 }
 
-export function appearanceKey(value: Appearance): string {
-  return `${value.vehicle ?? 'motocross'}|` + SLOTS.map((slot) => {
-    const paint = value.paints[slot];
-    return `${value.parts[slot]}:${paint.primary}:${paint.accent}`;
-  }).join('|');
-}
-
 /** Compare the actual fields so callers can still edit an appearance in place. */
 export function sameAppearance(a: Appearance, b: Appearance): boolean {
   if ((a.vehicle ?? 'motocross') !== (b.vehicle ?? 'motocross')) return false;

@@ -3,7 +3,7 @@ import { AudioBank } from './audio/bank';
 import { AudioMixer } from './audio/mixer';
 import { EngineAudio } from './audio/engines';
 import { AmbienceAudio } from './audio/ambience';
-import { MusicAudio, type MusicScene } from './audio/music';
+import { MusicAudio } from './audio/music';
 import { AudioEvents } from './audio/events';
 import type { AudioCueId, AudioScene, UiCue } from './audio/catalog';
 export class GameAudio {
@@ -133,43 +133,7 @@ export class GameAudio {
     if (wasPreviewing && !includeMusic && this.ready && !this.hidden && !this.disposed)
       void this.music?.setScene(this.scene);
   }
-  async audition(id: AudioCueId) {
-    this.stopPreview(true);
-    const generation = this.previewGeneration,
-      epoch = this.epoch;
-    await this.unlock(false);
-    if (!this.ready || this.hidden || generation !== this.previewGeneration || epoch !== this.epoch)
-      return;
-    this.previewing = true;
-    this.mixer?.reset();
-    this.engines?.stop();
-    this.ambience?.stop();
-    const looping = /^(engine-|roll-|crowd$|rain$|wind$|air$)/.test(id);
-    this.mixer?.create(id, looping, id.startsWith('engine-') ? 0.145 : 0.18);
-    this.demoTimers.push(setTimeout(() => this.stopPreview(), 5000));
-  }
-  async previewMusic(scene: MusicScene, boundary = false) {
-    this.stopPreview(true);
-    const generation = this.previewGeneration,
-      epoch = this.epoch;
-    await this.unlock(false);
-    if (!this.ready || this.hidden || generation !== this.previewGeneration || epoch !== this.epoch)
-      return false;
-    this.previewing = true;
-    this.previewStage = scene;
-    this.mixer?.reset();
-    this.engines?.stop();
-    this.ambience?.stop();
-    await this.music?.setScene(scene, boundary);
-    return (
-      generation === this.previewGeneration &&
-      epoch === this.epoch &&
-      this.music?.status === 'playing'
-    );
-  }
-  async preview(
-    kind: 'mix' | 'engine' | 'land-soft' | 'land-hard' | 'crash' | 'ui' | 'signals' | 'ambience',
-  ) {
+  async preview() {
     this.stopPreview(true);
     const generation = this.previewGeneration,
       epoch = this.epoch;
@@ -182,71 +146,44 @@ export class GameAudio {
     this.ambience?.stop();
     const later = (seconds: number, fn: () => void) =>
       this.demoTimers.push(setTimeout(fn, seconds * 1000));
-    if (kind === 'mix') {
-      const stage = (scene: AudioScene) => {
-        this.previewStage = scene;
-        void this.music?.setScene(scene);
-        this.ambience?.update(scene, scene === 'race' ? 'rain' : 'clear', null);
-      };
-      await this.music?.setScene('menu');
-      if (generation !== this.previewGeneration || epoch !== this.epoch || this.hidden) return;
-      stage('menu');
-      this.playCue('ui-open', 0.1);
-      later(6, () => {
-        stage('editor');
-        this.playCue('ui-place', 0.1);
-      });
-      later(8, () => this.playCue('ui-duplicate', 0.1));
-      later(10, () => this.playCue('ui-saved', 0.1));
-      later(12, () => {
-        stage('countdown');
-        this.playCue('countdown', 0.23);
-      });
-      later(13, () => this.playCue('countdown', 0.23));
-      later(14, () => {
-        stage('race');
-        this.engines?.preview();
-        this.playCue('start', 0.23);
-      });
-      later(15.5, () => this.playCue('land-0-0', 0.11));
-      later(17, () => this.playCue('land-2-0', 0.28));
-      later(18, () => {
-        this.playCue('crash-0', 0.32);
-        this.playCue('scrape-0', 0.095, 0.05);
-      });
-      later(20, () => {
-        this.mixer?.stopWhere((v) => v.bus === 'engines');
-        stage('results');
-        this.playCue('finish', 0.25);
-      });
-      later(21, () => this.playCue('record', 0.2));
-      later(26, () => this.stopPreview());
-      return;
-    }
-    if (kind === 'engine') {
-      this.engines?.preview();
-    }
-    if (kind === 'ambience') this.ambience?.update('race', 'rain', null);
-    const sequences: Partial<Record<typeof kind, [number, AudioCueId, number][]>> = {
-      'land-soft': [[0, 'land-0-0', 0.11]],
-      'land-hard': [[0, 'land-2-0', 0.28]],
-      crash: [
-        [0, 'crash-0', 0.32],
-        [0.06, 'scrape-0', 0.095],
-      ],
-      ui: [
-        [0, 'ui-confirm', 0.1],
-        [0.6, 'ui-back', 0.1],
-        [1.2, 'ui-error', 0.12],
-      ],
-      signals: [
-        [0, 'start', 0.23],
-        [1, 'last-lap', 0.22],
-        [2.2, 'finish', 0.25],
-      ],
+    const stage = (scene: AudioScene) => {
+      this.previewStage = scene;
+      void this.music?.setScene(scene);
+      this.ambience?.update(scene, scene === 'race' ? 'rain' : 'clear', null);
     };
-    for (const [time, id, gain] of sequences[kind] ?? []) later(time, () => this.playCue(id, gain));
-    later(kind === 'engine' || kind === 'ambience' ? 6 : 4, () => this.stopPreview());
+    await this.music?.setScene('menu');
+    if (generation !== this.previewGeneration || epoch !== this.epoch || this.hidden) return;
+    stage('menu');
+    this.playCue('ui-open', 0.1);
+    later(6, () => {
+      stage('editor');
+      this.playCue('ui-place', 0.1);
+    });
+    later(8, () => this.playCue('ui-duplicate', 0.1));
+    later(10, () => this.playCue('ui-saved', 0.1));
+    later(12, () => {
+      stage('countdown');
+      this.playCue('countdown', 0.23);
+    });
+    later(13, () => this.playCue('countdown', 0.23));
+    later(14, () => {
+      stage('race');
+      this.engines?.preview();
+      this.playCue('start', 0.23);
+    });
+    later(15.5, () => this.playCue('land-0-0', 0.11));
+    later(17, () => this.playCue('land-2-0', 0.28));
+    later(18, () => {
+      this.playCue('crash-0', 0.32);
+      this.playCue('scrape-0', 0.095, 0.05);
+    });
+    later(20, () => {
+      this.mixer?.stopWhere((v) => v.bus === 'engines');
+      stage('results');
+      this.playCue('finish', 0.25);
+    });
+    later(21, () => this.playCue('record', 0.2));
+    later(26, () => this.stopPreview());
   }
   diagnostics() {
     return {
