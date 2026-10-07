@@ -445,10 +445,6 @@ export async function startApp() {
       $('#model-status').hidden = true;
       previewKey = '';
       render();
-      if (storageReady && store.state.terrainNoticePending) {
-        showModal('<h2>Nueva etapa de marcas</h2><p>Renovamos los terrenos y sus reglas. Conservamos tus mapas, perfiles, vehículos y ajustes. Las marcas, fantasmas, repeticiones y competencias anteriores se retiraron para comenzar una nueva etapa.</p>' + b('close-modal', 'Entendido', '', 'class="primary"'));
-        safely(store.consumeTerrainNotice());
-      }
     } catch (e) {
       models = 'error';
       $('#model-status').innerHTML =
@@ -1455,7 +1451,7 @@ export async function startApp() {
             showModal(settingsView(settings, settingsTab));
             break;
           case 'audio-preview':
-            await audio.preview('mix');
+            await audio.preview();
             return;
           case 'audio-stop':
             audio.stopPreview();

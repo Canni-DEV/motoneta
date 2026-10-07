@@ -8,7 +8,6 @@ export interface MusicTrack {
   beatOffset?: number;
   revision?: string;
 }
-export type MusicScene = 'menu' | 'editor' | 'results';
 export type MusicManifest = Record<'menu' | 'editor' | 'results', MusicTrack | null>;
 export class MusicAudio {
   private manifest: Promise<MusicManifest> | null = null;

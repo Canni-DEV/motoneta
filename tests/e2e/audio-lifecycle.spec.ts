@@ -1,11 +1,16 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { nav } from './ui-helpers';
+import { musicFixture, nav } from './ui-helpers';
 
 test('crowd reactions fade into the same stadium bed, including interrupted playback', async ({
   page,
 }) => {
   await requireAudio(page);
+  const timedOfflinePlayback = await page.evaluate(() =>
+    typeof OfflineAudioContext.prototype.suspend === 'function' &&
+    typeof OfflineAudioContext.prototype.resume === 'function',
+  );
+  test.skip(!timedOfflinePlayback, 'This browser lacks OfflineAudioContext suspend/resume; timed offline interruptions require those APIs.');
   await page.goto('/');
   const results = await page.evaluate(async () => {
     const load = (path: string) => import(/* @vite-ignore */ path);
@@ -110,121 +115,93 @@ async function requireAudio(page: Page) {
   );
 }
 
-test('unavailable audio is reported and never prevents starting a race', async ({ page }) => {
+test('unavailable audio never prevents starting a race', async ({ page }) => {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => {
     Object.defineProperty(window, 'AudioContext', { configurable: true, value: undefined });
     localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low' }));
   });
-  await page.goto('/?audio-review');
-  await page.getByRole('button', { name: 'Escuchar motor', exact: true }).click();
-  await expect(page.getByRole('status')).toHaveText('No se pudo activar el dispositivo de audio.');
   await page.goto('/');
-  await expect(page.locator('.home-modes')).toBeVisible();
   await expect(page.locator('#model-status')).toBeHidden();
   await nav(page, 'quick');
   await page.locator('[data-action="start"]').click();
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__motoneta.race.phase))
-    .toBe('racing');
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.race.phase)).toBe('racing');
   expect(await page.evaluate(() => (window as any).__motoneta.audio.ready)).toBe(false);
   expect(errors).toEqual([]);
 });
 
-test('pending previews cancel, hidden audio suspends, returning has no queued effects', async ({
-  page,
-}) => {
+test('pending previews cancel, hidden audio suspends, returning has no queued effects', async ({ page }) => {
   await requireAudio(page);
+  await page.addInitScript(() => localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low' })));
   let release!: () => void;
-  const pending = new Promise<void>((resolve) => {
-    release = resolve;
-  });
+  const pending = new Promise<void>((resolve) => { release = resolve; });
   await page.route('**/audio/engine-idle.wav', async (route) => {
     await pending;
     await route.continue();
   });
-  await page.goto('/?audio-review');
-  await page.getByRole('button', { name: 'Escuchar mezcla completa', exact: true }).click();
-  await page.getByRole('button', { name: 'Detener todos los sonidos' }).click();
+  await page.goto('/');
+  await expect(page.locator('#model-status')).toBeHidden();
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
+  await page.locator('[data-action="audio-preview"]').click();
+  await page.locator('[data-action="audio-stop"]').click();
   release();
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().ready))
-    .toBe(true);
-  expect(await page.evaluate(() => (window as any).__audioReview.diagnostics().voices)).toBe(0);
-  await page.getByRole('button', { name: 'Escuchar motor', exact: true }).click();
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().voices))
-    .toBe(3);
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.ready)).toBe(true);
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.voices)).toBeLessThanOrEqual(2);
+  expect(await page.evaluate(() => (window as any).__motoneta.audio.previewStage)).toBeNull();
+  expect(await page.evaluate(() => (window as any).__motoneta.audio.history.filter((event: any) =>
+    !event.id.startsWith('ui-')))).toEqual([]);
+  await page.locator('[data-action="audio-preview"]').click();
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.previewStage)).toBe('menu');
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
     document.dispatchEvent(new Event('visibilitychange'));
   });
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().state))
-    .toBe('suspended');
-  expect(await page.evaluate(() => (window as any).__audioReview.diagnostics().voices)).toBe(0);
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.state)).toBe('suspended');
+  expect(await page.evaluate(() => (window as any).__motoneta.audio.voices)).toBe(0);
+  expect(await page.evaluate(() => (window as any).__motoneta.audio.previewStage)).toBeNull();
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
     document.dispatchEvent(new Event('visibilitychange'));
   });
-  await page.getByRole('button', { name: 'Escuchar aterrizaje suave', exact: true }).click();
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().state))
-    .toBe('running');
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (window as any).__audioReview.diagnostics().history.map((e: any) => e.id),
-      ),
-    )
-    .toEqual(['land-0-0']);
+  await page.locator('[data-action="audio-preview"]').click();
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.state)).toBe('running');
+  await expect.poll(() => page.evaluate(() => (window as any).__motoneta.audio.previewStage)).toBe('menu');
+  expect(await page.evaluate(() => (window as any).__motoneta.audio.engineVoices)).toBe(0);
+  await page.locator('[data-action="audio-stop"]').click();
 });
 
-test('music loads only the current scene, fades out for racing, handles missing files', async ({
-  page,
-}) => {
+test('music loads only the current scene, fades out for racing, handles missing files', async ({ page }) => {
   await requireAudio(page);
   const wav = readFileSync('public/audio/start.wav');
   const track = { file: 'fixture.wav', loopStart: 0, loopEnd: 0.3, gain: 0.12 };
-  await page.route('**/audio/music.json', (route) =>
-    route.fulfill({
-      json: { menu: track, editor: track, results: { ...track, file: 'missing.wav' } },
-    }),
-  );
-  await page.route('**/audio/fixture.wav', (route) =>
-    route.fulfill({ contentType: 'audio/wav', body: wav }),
-  );
+  await page.route('**/audio/music.json', (route) => route.fulfill({
+    json: { menu: track, editor: track, results: { ...track, file: 'missing.wav' } },
+  }));
+  await page.route('**/audio/fixture.wav', (route) => route.fulfill({ contentType: 'audio/wav', body: wav }));
   await page.route('**/audio/missing.wav', (route) => route.fulfill({ status: 404, body: '' }));
-  await page.goto('/?audio-review');
-  await page.getByRole('button', { name: 'Escuchar música de menú', exact: true }).click();
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().music))
-    .toBe('playing');
-  await page.evaluate(() => {
-    const a = (window as any).__audioReview;
-    a.stopPreview();
-    a.setScene('editor');
+  const fetched: string[] = [];
+  page.on('request', (request) => {
+    if (/\/(?:fixture|missing)\.wav$/.test(request.url())) fetched.push(request.url().split('/').at(-1)!);
   });
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().musicVoices))
-    .toBe(1);
-  await page.evaluate(() => (window as any).__audioReview.setScene('race'));
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().musicVoices))
-    .toBe(0);
-  await page.evaluate(() => (window as any).__audioReview.setScene('results'));
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__audioReview.diagnostics().music))
-    .toBe('unavailable');
-  expect(await page.evaluate(() => (window as any).__audioReview.diagnostics().ready)).toBe(true);
+  await musicFixture(page);
+  await page.evaluate(() => (window as any).__musicFixture.setScene('menu'));
+  expect(await page.evaluate(() => (window as any).__musicFixture.status)).toBe('playing');
+  expect(fetched).toEqual(['fixture.wav']);
+  await page.evaluate(() => (window as any).__musicFixture.setScene('editor'));
+  await expect.poll(() => page.evaluate(() => (window as any).__musicFixture.voices)).toBe(1);
+  await page.evaluate(() => (window as any).__musicFixture.setScene('race'));
+  await expect.poll(() => page.evaluate(() => (window as any).__musicFixture.voices)).toBe(0);
+  await page.evaluate(() => (window as any).__musicFixture.setScene('results'));
+  expect(await page.evaluate(() => (window as any).__musicFixture.status)).toBe('unavailable');
+  expect(fetched).toEqual(['fixture.wav', 'fixture.wav', 'missing.wav']);
 });
 
 test('offline rendering of six bikes, rain and simultaneous impacts stays bounded in stereo and mono', async ({
   page,
 }, info) => {
   await requireAudio(page);
-  await page.goto('/?audio-review');
+  await page.goto('/');
   const measured = await page.evaluate(async () => {
     const load = (path: string) => import(/* @vite-ignore */ path);
     const [

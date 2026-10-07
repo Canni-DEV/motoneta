@@ -281,9 +281,6 @@ export class Editor {
     this.binding?.abort();
     this.binding = null;
   }
-  invalidate() {
-    this.refresh();
-  }
   reject(message: string) {
     this.hint = message;
     this.error(message);

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { Settings, TimeOfDay, Weather } from './core/types';
 import { ShadowCoverage } from './shadow-coverage';
 
-const colors = ['sky', 'horizon', 'fog', 'ambient', 'ground', 'sun', 'fill', 'dust'] as const;
+const colors = ['sky', 'horizon', 'fog', 'ambient', 'ground', 'sun', 'fill'] as const;
 type ColorKey = (typeof colors)[number];
 type Preset = Record<ColorKey, string> & {
   direction: [number, number, number];
@@ -23,7 +23,6 @@ export const ENVIRONMENTS: Record<TimeOfDay, Preset> = {
     ground: '#79654e',
     sun: '#ffdfab',
     fill: '#b6d8ea',
-    dust: '#d5c1a2',
     direction: [-14, 12, 10],
     ambientPower: 2.0,
     sunPower: 3.5,
@@ -41,7 +40,6 @@ export const ENVIRONMENTS: Record<TimeOfDay, Preset> = {
     ground: '#8c503c',
     sun: '#ffb25e',
     fill: '#a4b2de',
-    dust: '#e8ac6c',
     direction: [16, 8, 6],
     ambientPower: 1.5,
     sunPower: 3.9,
@@ -59,7 +57,6 @@ export const ENVIRONMENTS: Record<TimeOfDay, Preset> = {
     ground: '#273047',
     sun: '#acccff',
     fill: '#8aaee1',
-    dust: '#8caccb',
     direction: [-10, 18, 9],
     ambientPower: 0.78,
     sunPower: 0.08,
@@ -191,9 +188,6 @@ export class Environment {
   }
   get nightAmount() {
     return THREE.MathUtils.smoothstep(this.current.lamps, 0.25, 1);
-  }
-  get dustColor() {
-    return this.current.dust;
   }
   get rainAmount() {
     return this.current.rain;

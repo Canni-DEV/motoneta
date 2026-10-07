@@ -44,9 +44,7 @@ test('format-3 migration is atomic, retains progression/maps/settings and is ide
     raw.close();
     const store=new GameStore();await store.open();const migrated=await store.backup();
     const before=JSON.stringify(migrated);await store.open();const unchanged=JSON.stringify(await store.backup())===before;
-    const notices=[await store.consumeTerrainNotice(),await store.consumeTerrainNotice()];
-    await store.open();notices.push(await store.consumeTerrainNotice());
-    return {failed,versionAfterFailure,rollbackState,rollbackReplay,migrated,unchanged,notices,settings:localStorage.getItem('motoneta.settings.v3')};
+    return {failed,versionAfterFailure,rollbackState,rollbackReplay,migrated,unchanged,settings:localStorage.getItem('motoneta.settings.v3')};
   });
   expect(result.failed).toBe(true);expect(result.versionAfterFailure).toBe(4);
   expect(result.rollbackState).toEqual(original.state);expect(result.rollbackReplay.ruleset).toBe('motoneta-3');
@@ -56,15 +54,166 @@ test('format-3 migration is atomic, retains progression/maps/settings and is ide
   expect(result.migrated.state.draft.items.every((s:any)=>s.terrainShape?.version===1)).toBe(true);
   expect(result.migrated.state.records).toEqual([]);expect(result.migrated.replays).toEqual({});
   for(const key of ['sessions','motonetaSessions','tanqueSessions'] as const)expect(result.migrated.state[key]).toEqual({});
-  expect(result.unchanged).toBe(true);expect(result.notices).toEqual([true,false,false]);
+  expect(result.unchanged).toBe(true);expect(result.migrated.state).not.toHaveProperty('terrainNoticePending');
 });
-test('migration announcement appears once in the menu and leaves saved maps available',async({page})=>{
+test('migration opens the menu without an announcement and leaves saved maps available',async({page})=>{
   await legacySave(page);await page.goto('/');await expect(page.locator('#model-status')).toBeHidden();
-  await expect(page.locator('#modal h2')).toHaveText('Nueva etapa de marcas');
-  await page.locator('#modal [data-action="close-modal"]').click();
+  await expect(page.locator('#modal')).not.toBeVisible();
   await page.reload();await expect(page.locator('#model-status')).toBeHidden();await expect(page.locator('#modal')).not.toBeVisible();
   await nav(page,'editor');expect(await page.evaluate(()=>(window as any).__motoneta.design.name)).toBe('Mapa conservado');
 });
+async function currentSave(page: Page, notice: boolean | undefined) {
+  await page.goto('/loop-prototype.html');
+  return page.evaluate(async (notice) => {
+    const source = (path: string) => import(/* @vite-ignore */ path);
+    const [{ GameStore }, { emptyDesign, mapCourse, validateMap }, { newRecording },
+      { localProfile, raceProfile }, { motonetaTournament }, { tanqueTournament }] = await Promise.all([
+      source('/src/persistence.ts'), source('/src/core/maps.ts'), source('/src/core/recording.ts'),
+      source('/src/core/game.ts'), source('/src/core/motoneta-tournament.ts'), source('/src/core/tanque-tournament.ts'),
+    ]);
+    const store = new GameStore();
+    await store.open();
+    const owner = localProfile({ ...store.state.profiles[0], name: 'Piloto vigente',
+      unlockedMotoneta: true, unlockedTanque: true });
+    const second = localProfile({ ...store.state.profiles[0], id: 'second-player', name: 'Otro piloto', color: '#358aad' });
+    const map = validateMap({ ...emptyDesign(), id: 'kept-map', name: 'Mapa vigente', length: 640, laps: 1 });
+    const course = mapCourse(map);
+    const session = { id: 'kept-tournament', mode: 'tournament', players: [raceProfile(owner)], bots: [],
+      difficulty: 'normal', courses: [course], courseIndex: 0, turnIndex: 0, results: [], phase: 'ready', seed: 42 };
+    await store.update((state: any) => {
+      state.profiles = [owner, second];
+      state.activeProfile = owner.id;
+      state.maps = [map];
+      state.draft = { ...structuredClone(map), name: 'Borrador vigente' };
+      state.sessions = { tournament: session,
+        versus: { ...structuredClone(session), id: 'kept-versus', mode: 'versus', players: [raceProfile(owner), raceProfile(second)] } };
+      state.motonetaSessions = { [owner.id]: motonetaTournament(owner) };
+      state.tanqueSessions = { [owner.id]: tanqueTournament(owner, new Date('2026-10-06T12:00:00Z')) };
+      if (notice !== undefined) state.terrainNoticePending = notice;
+    });
+    const config = { ...course, mode: 'quick', player: raceProfile(owner), bots: [], difficulty: 'normal', seed: 1 };
+    const replay = newRecording(config);
+    replay.result = { config, limitTicks: 33750, finishes: [{ id: owner.id, ticks: 200, laps: [200], crashes: 0 }] };
+    await store.commit(replay);
+    localStorage.setItem('motoneta.settings.v3', JSON.stringify({ quality: 'low', volume: 0.37, weather: 'rain' }));
+    return store.backup();
+  }, notice);
+}
+
+async function persistedSave(page: Page) {
+  return page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('motoneta-game', 5);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      const tx = db.transaction(['data', 'replays']);
+      const read = <T>(request: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const [state, keys, values] = await Promise.all([
+        read(tx.objectStore('data').get('state')),
+        read(tx.objectStore('replays').getAllKeys()), read(tx.objectStore('replays').getAll()),
+      ]);
+      return { version: db.version, state, replays: Object.fromEntries(keys.map((key, i) => [String(key), values[i]])) };
+    } finally { db.close(); }
+  });
+}
+
+test('a fresh save has no announcement metadata and settings dialogs still work', async ({ page }) => {
+  await ready(page);
+  await expect(page.locator('#modal')).not.toBeVisible();
+  expect((await persistedSave(page)).state).not.toHaveProperty('terrainNoticePending');
+  await page.reload();
+  await expect(page.locator('#model-status')).toBeHidden();
+  await expect(page.locator('#modal')).not.toBeVisible();
+  await page.getByRole('button', { name: 'Ajustes', exact: true }).click();
+  await expect(page.locator('#modal h2')).toHaveText('Ajustes');
+  await page.locator('#modal [data-action="close-modal"]').click();
+  await expect(page.locator('#modal')).not.toBeVisible();
+});
+
+for (const notice of [true, false, undefined]) {
+  test(`current save retires announcement metadata ${String(notice)} without losing data`, async ({ page }) => {
+    const original = await currentSave(page, notice);
+    const expected = structuredClone(original);
+    delete expected.state.terrainNoticePending;
+    const settings = await page.evaluate(() => localStorage.getItem('motoneta.settings.v3'));
+    await page.goto('/');
+    await expect(page.locator('#model-status')).toBeHidden();
+    await expect(page.locator('#modal')).not.toBeVisible();
+    expect(await persistedSave(page)).toEqual({ version: 5, state: expected.state, replays: expected.replays });
+    await page.reload();
+    await expect(page.locator('#model-status')).toBeHidden();
+    await expect(page.locator('#modal')).not.toBeVisible();
+    expect(await persistedSave(page)).toEqual({ version: 5, state: expected.state, replays: expected.replays });
+    expect(await page.evaluate(() => localStorage.getItem('motoneta.settings.v3'))).toBe(settings);
+    const backup = await page.evaluate(async () => {
+      const path = '/src/persistence.ts';
+      const { GameStore } = await import(/* @vite-ignore */ path);
+      const store = new GameStore();
+      await store.open();
+      return store.backup();
+    });
+    expect(backup).toEqual(expected);
+    expect(backup.state).not.toHaveProperty('terrainNoticePending');
+  });
+}
+
+test('announcement metadata and obsolete replay cleanup roll back together and retry safely', async ({ page }) => {
+  const original = await currentSave(page, true);
+  const result = await page.evaluate(async (original) => {
+    const path = '/src/persistence.ts';
+    const { GameStore } = await import(/* @vite-ignore */ path);
+    const store = new GameStore();
+    await store.open();
+    // Restore the retired flag and add an incompatible loop replay to the raw database.
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('motoneta-game', 5);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const obsolete = structuredClone(Object.values(original.replays)[0]) as any;
+    obsolete.config.track.segments = [{ piece: 'T' }];
+    obsolete.config.loopGeometryVersion = 0;
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(['data', 'replays'], 'readwrite');
+      tx.objectStore('data').put(original.state, 'state');
+      tx.objectStore('replays').put(obsolete, 'obsolete-loop');
+      tx.oncomplete = () => resolve();
+      tx.onabort = () => reject(tx.error);
+    });
+    const remove = IDBCursor.prototype.delete;
+    let failed = false;
+    IDBCursor.prototype.delete = function () { throw new DOMException('Injected failure', 'QuotaExceededError'); };
+    try { await store.open(); } catch { failed = true; } finally { IDBCursor.prototype.delete = remove; }
+    const rollback = await new Promise<any>((resolve, reject) => {
+      const request = db.transaction('data').objectStore('data').get('state');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const replayPresent = await new Promise<boolean>((resolve, reject) => {
+      const request = db.transaction('replays').objectStore('replays').get('obsolete-loop');
+      request.onsuccess = () => resolve(!!request.result);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    await store.open();
+    const cleaned = await store.backup();
+    await store.open();
+    return { failed, rollback, replayPresent, cleaned, repeated: await store.backup() };
+  }, original);
+  expect(result.failed).toBe(true);
+  expect(result.rollback).toEqual(original.state);
+  expect(result.replayPresent).toBe(true);
+  const expected = structuredClone(original);
+  delete expected.state.terrainNoticePending;
+  expect(result.cleaned).toEqual(expected);
+  expect(result.repeated).toEqual(expected);
+});
+
 test('terrain variants undo/redo, duplicate and survive reload and export',async({page},info)=>{
   await ready(page);await nav(page,'editor');
   await page.locator('[data-action="piece"][data-value="U"]').click();await page.locator('[data-action="add-piece"]').click();

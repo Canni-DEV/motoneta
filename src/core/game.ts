@@ -104,7 +104,6 @@ export const DIFFICULTIES: Record<Difficulty, string> = {
   normal: 'Normal',
   hard: 'Difícil',
 };
-export const uid = () => crypto.randomUUID();
 export const ticksToTime = (ticks: number) => ticks * 0.016;
 export const makeBots = (n: number): PlayerProfile[] =>
   Array.from({ length: n }, (_, i) => ({
